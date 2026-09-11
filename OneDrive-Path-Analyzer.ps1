@@ -35,8 +35,6 @@
       - No genera CSV si no existen hallazgos
 #>
 
-Clear-Host
-
 # ============================================================
 # IDIOMA
 # ============================================================
@@ -115,6 +113,127 @@ $script:UiTranslations = @(
     @{ From = 'RESULTADO: REQUIERE REVISION'; To = 'RESULT: NEEDS REVIEW' }
     @{ From = 'RESULTADO: OK'; To = 'RESULT: OK' }
     @{ From = 'No se generó CSV porque no existen rutas con AVISO o CRITICO.'; To = 'No CSV was generated because no WARNING or CRITICAL paths exist.' }
+    @{ From = 'Gestionar selección'; To = 'Manage selection' }
+    @{ From = 'Analizar ubicaciones seleccionadas'; To = 'Analyze selected locations' }
+    @{ From = 'Configurar umbrales'; To = 'Configure thresholds' }
+    @{ From = 'Abrir carpeta de reportes'; To = 'Open reports folder' }
+    @{ From = 'Limpiar selección'; To = 'Clear selection' }
+    @{ From = 'Cerrar'; To = 'Exit' }
+    @{ From = 'Estado'; To = 'Status' }
+    @{ From = 'Selección actual'; To = 'Current selection' }
+    @{ From = 'No seleccionadas'; To = 'None selected' }
+    @{ From = 'Detectadas'; To = 'Detected' }
+    @{ From = 'Último resultado'; To = 'Last result' }
+    @{ From = 'Sin análisis'; To = 'No analysis' }
+    @{ From = 'No generado'; To = 'Not generated' }
+    @{ From = 'Selección de ubicaciones'; To = 'Location selection' }
+    @{ From = 'Selecciona números separados por coma, A para todas, M para manual o 0 para volver.'; To = 'Enter comma-separated numbers, A for all, M for manual, or 0 to go back.' }
+    @{ From = 'Regresa al menú anterior.'; To = 'Return to the previous menu.' }
+    @{ From = 'No hay ubicaciones seleccionadas.'; To = 'No locations are selected.' }
+    @{ From = 'Selecciona ubicaciones antes de iniciar el análisis.'; To = 'Select locations before starting the analysis.' }
+    @{ From = 'La selección fue limpiada.'; To = 'The selection was cleared.' }
+    @{ From = '¿Limpiar la selección actual?'; To = 'Clear the current selection?' }
+    @{ From = '¿Iniciar el análisis?'; To = 'Start the analysis?' }
+    @{ From = 'Umbrales activos'; To = 'Active thresholds' }
+    @{ From = 'Windows / Office'; To = 'Windows / Office' }
+    @{ From = 'Cloud / SharePoint'; To = 'Cloud / SharePoint' }
+    @{ From = 'OneDrive Sync'; To = 'OneDrive Sync' }
+    @{ From = 'Nombre individual'; To = 'Individual name' }
+    @{ From = 'Aviso desde'; To = 'Warning at' }
+    @{ From = 'Crítico desde'; To = 'Critical at' }
+    @{ From = 'Crítico sobre'; To = 'Critical over' }
+    @{ From = 'Valores configurables para detectar rutas cercanas o superiores a los límites.'; To = 'Configurable values used to detect paths near or over the limits.' }
+    @{ From = 'Umbrales guardados en memoria.'; To = 'Thresholds saved in memory.' }
+    @{ From = 'Diagnóstico del sistema y del analizador.'; To = 'System and analyzer diagnostics.' }
+    @{ From = 'Sistema operativo'; To = 'Operating system' }
+    @{ From = 'Versión PowerShell'; To = 'PowerShell version' }
+    @{ From = 'Ruta de reportes'; To = 'Report path' }
+    @{ From = 'Carpeta de reportes'; To = 'Reports folder' }
+    @{ From = 'No se pudo abrir la carpeta de reportes.'; To = 'The reports folder could not be opened.' }
+    @{ From = 'Análisis'; To = 'Analysis' }
+    @{ From = 'Hallazgos'; To = 'Findings' }
+    @{ From = 'El análisis no ha comenzado.'; To = 'Analysis has not started.' }
+    @{ From = 'La ruta manual fue agregada.'; To = 'The manual path was added.' }
+    @{ From = 'La ruta fue agregada.'; To = 'The path was added.' }
+    @{ From = 'Ruta manual'; To = 'Manual path' }
+    @{ From = 'Ruta local Windows/Office >= '; To = 'Local Windows/Office path >= ' }
+    @{ From = 'Ruta local cerca del limite Windows'; To = 'Local path near the Windows limit' }
+    @{ From = 'Ruta cloud > '; To = 'Cloud path > ' }
+    @{ From = 'Ruta cloud cerca de '; To = 'Cloud path near ' }
+    @{ From = 'OneDrive Sync > '; To = 'OneDrive Sync > ' }
+    @{ From = 'OneDrive Sync cerca de '; To = 'OneDrive Sync near ' }
+    @{ From = 'Nombre individual > '; To = 'Individual name > ' }
+    @{ From = 'Nombre individual cerca de '; To = 'Individual name near ' }
+    @{ From = 'Seleccionar ubicaciones'; To = 'Select locations' }
+    @{ From = 'Elige ubicaciones detectadas o introduce una ruta manual.'; To = 'Choose detected locations or enter a manual path.' }
+    @{ From = 'Escanea el contenido local y reporta rutas AVISO o CRÍTICO.'; To = 'Scans local content and reports WARNING or CRITICAL paths.' }
+    @{ From = 'Quita la selección y el resultado en memoria; no borra archivos ni CSV.'; To = 'Clears the in-memory selection and result; does not delete files or CSVs.' }
+    @{ From = 'Ajusta los umbrales de Windows, Cloud, Sync y nombres.'; To = 'Adjusts the Windows, Cloud, Sync, and name thresholds.' }
+    @{ From = 'Muestra información del sistema y actualiza detecciones.'; To = 'Shows system information and refreshes detections.' }
+    @{ From = 'Abre el escritorio o la carpeta del último CSV.'; To = 'Opens the desktop or the folder containing the last CSV.' }
+    @{ From = 'Todavía no existe un resultado.'; To = 'No result exists yet.' }
+    @{ From = 'Disponible para consultar.'; To = 'Available to view.' }
+    @{ From = 'Analiza contenido local de OneDrive y SharePoint sincronizado.'; To = 'Analyzes synchronized OneDrive and SharePoint content locally.' }
+    @{ From = 'Analiza contenido local y reporta rutas largas.'; To = 'Analyzes local content and reports long paths.' }
+    @{ From = 'Ajusta los umbrales usados para clasificar las rutas.'; To = 'Adjusts the thresholds used to classify paths.' }
+    @{ From = 'Los cambios se mantienen durante esta ejecución.'; To = 'Changes remain in effect for this run.' }
+    @{ From = 'Configura los umbrales de longitud de ruta local.'; To = 'Configures local path-length thresholds.' }
+    @{ From = 'Configura los umbrales de la ruta relativa en la nube.'; To = 'Configures cloud-relative path thresholds.' }
+    @{ From = 'Configura los umbrales de sincronización local.'; To = 'Configures local synchronization thresholds.' }
+    @{ From = 'Configura el límite del nombre de archivo o carpeta.'; To = 'Configures the file or folder name limit.' }
+    @{ From = 'Cambiar idioma'; To = 'Change language' }
+    @{ From = 'Restablecer umbrales predeterminados'; To = 'Reset default thresholds' }
+    @{ From = 'Restaura los valores recomendados para Windows, Cloud, Sync y nombres.'; To = 'Restores recommended values for Windows, Cloud, Sync, and names.' }
+    @{ From = 'Restablecer umbrales'; To = 'Reset thresholds' }
+    @{ From = 'Se restaurarán los umbrales recomendados.'; To = 'Recommended thresholds will be restored.' }
+    @{ From = '¿Restablecer los umbrales?'; To = 'Reset thresholds?' }
+    @{ From = 'Umbrales restablecidos.'; To = 'Thresholds reset.' }
+    @{ From = 'Elija 1 o 2.'; To = 'Choose 1 or 2.' }
+    @{ From = 'Responde S o N.'; To = 'Answer Y or N.' }
+    @{ From = 'Opción inválida.'; To = 'Invalid option.' }
+    @{ From = 'Sin descripción adicional.'; To = 'No additional description.' }
+    @{ From = 'Limpiar selección / contexto'; To = 'Clear selection / working context' }
+    @{ From = 'Limpiar contexto de trabajo'; To = 'Clear working context' }
+    @{ From = 'Ver último resultado'; To = 'View last result' }
+    @{ From = 'Cierra la herramienta.'; To = 'Closes the tool.' }
+    @{ From = 'Limpia las ubicaciones seleccionadas y el resultado del análisis. No elimina archivos ni reportes existentes.'; To = 'Clears selected locations and the analysis result. Does not delete existing files or reports.' }
+    @{ From = 'La selección no contiene ubicaciones válidas.'; To = 'The selection does not contain valid locations.' }
+    @{ From = 'Actualizar ubicaciones detectadas'; To = 'Refresh detected locations' }
+    @{ From = 'Resultado'; To = 'Result' }
+    @{ From = 'Listo para analizar'; To = 'Ready to analyze' }
+    @{ From = 'Analizando'; To = 'Analyzing' }
+    @{ From = 'Contexto'; To = 'Context' }
+    @{ From = 'Reportes'; To = 'Reports' }
+    @{ From = 'Ubicaciones'; To = 'Locations' }
+    @{ From = 'Último análisis'; To = 'Last analysis' }
+    @{ From = 'Análisis completado'; To = 'Analysis completed' }
+    @{ From = 'Avisos'; To = 'Warnings' }
+    @{ From = 'Criticas'; To = 'Critical' }
+    @{ From = 'Archivo'; To = 'File' }
+    @{ From = 'Carpeta'; To = 'Folder' }
+    @{ From = 'Seleccionar por número'; To = 'Select by number' }
+    @{ From = 'Elige una o varias ubicaciones separadas por coma.'; To = 'Choose one or more comma-separated locations.' }
+    @{ From = 'Incluye todas las ubicaciones detectadas.'; To = 'Includes all detected locations.' }
+    @{ From = 'Analiza una carpeta local que no fue detectada automáticamente.'; To = 'Analyzes a local folder that was not detected automatically.' }
+    @{ From = 'Selecciona las ubicaciones locales que quieres analizar.'; To = 'Select the local locations to analyze.' }
+    @{ From = 'Vuelve a consultar las ubicaciones sincronizadas del equipo.'; To = 'Re-queries synchronized locations on this computer.' }
+    @{ From = 'Abre el escritorio o la carpeta del último CSV generado.'; To = 'Opens the desktop or the folder containing the last generated CSV.' }
+    @{ From = 'El analizador es local y no requiere tenant, aplicación ni autenticación.'; To = 'The analyzer is local and does not require a tenant, application, or authentication.' }
+    @{ From = 'Rutas analizadas'; To = 'Paths analyzed' }
+    @{ From = 'Rutas CRÍTICAS'; To = 'CRITICAL paths' }
+    @{ From = 'Ruta más larga'; To = 'Longest path' }
+    @{ From = 'Ubicación'; To = 'Location' }
+    @{ From = 'Modo'; To = 'Mode' }
+    @{ From = 'LECTURA LOCAL'; To = 'LOCAL READ-ONLY' }
+    @{ From = 'DISPONIBLE'; To = 'AVAILABLE' }
+    @{ From = 'NO DISPONIBLE'; To = 'NOT AVAILABLE' }
+    @{ From = 'Reporte'; To = 'Report' }
+    @{ From = 'Rutas que requieren atención'; To = 'Paths requiring attention' }
+    @{ From = 'Aviso desde caracteres'; To = 'Warning at characters' }
+    @{ From = 'Crítico desde caracteres'; To = 'Critical at characters' }
+    @{ From = 'Crítico sobre caracteres'; To = 'Critical over characters' }
+    @{ From = 'No modifica archivos; solo analiza longitudes y exporta hallazgos.'; To = 'Does not modify files; only analyzes lengths and exports findings.' }
+    @{ From = 'Reporte generado'; To = 'Report generated' }
 )
 
 function Get-LocalizedText {
@@ -196,10 +315,11 @@ function Read-Host {
 }
 
 function Write-Progress {
-    [CmdletBinding()] param([int]$Id = 0,[string]$Activity,[string]$Status,[int]$PercentComplete,[int]$SecondsRemaining,[switch]$Completed)
+    [CmdletBinding()] param([int]$Id = 0,[string]$Activity,[string]$Status,[string]$CurrentOperation,[int]$PercentComplete,[int]$SecondsRemaining,[switch]$Completed)
     $parameters = @{ Id = $Id }
     if ($PSBoundParameters.ContainsKey('Activity')) { $parameters.Activity = Get-LocalizedText $Activity }
     if ($PSBoundParameters.ContainsKey('Status')) { $parameters.Status = Get-LocalizedText $Status }
+    if ($PSBoundParameters.ContainsKey('CurrentOperation')) { $parameters.CurrentOperation = Get-LocalizedText $CurrentOperation }
     if ($PSBoundParameters.ContainsKey('PercentComplete')) { $parameters.PercentComplete = $PercentComplete }
     if ($PSBoundParameters.ContainsKey('SecondsRemaining')) { $parameters.SecondsRemaining = $SecondsRemaining }
     if ($Completed) { $parameters.Completed = $true }
@@ -208,39 +328,41 @@ function Write-Progress {
 
 function Initialize-AppLanguage {
     while ($true) {
-        Microsoft.PowerShell.Utility\Write-Host ''
-        Microsoft.PowerShell.Utility\Write-Host 'Select language / Seleccione idioma:'
-        Microsoft.PowerShell.Utility\Write-Host '1. English'
-        Microsoft.PowerShell.Utility\Write-Host '2. Español'
+        Clear-AppScreen
+        Show-AppHeader -Section 'Idioma / Language'
+        Write-Host ''
+        Write-AppStyled -Text 'Select language / Seleccione idioma:' -Style Primary
+        Write-Host ''
+        Write-AppStyled -Text '  1  English' -Style Primary
+        Write-Host ''
+        Write-AppStyled -Text '  2  Español' -Style Primary
+        Write-Host ''
         $choice = (Microsoft.PowerShell.Utility\Read-Host 'Choice / Opción').Trim()
         if ($choice -eq '1') { $script:Language = 'en'; return }
         if ($choice -eq '2') { $script:Language = 'es'; return }
-        Microsoft.PowerShell.Utility\Write-Host 'Please choose 1 or 2 / Elija 1 o 2.'
+        Write-AppWarning -Message 'Elija 1 o 2.'
     }
 }
-
-Initialize-AppLanguage
-
 
 # ============================================================
 # CONFIGURACIÓN
 # ============================================================
 
 # Windows / Office
-$WARN_WINDOWS      = 240
-$CRITICAL_WINDOWS  = 256
+$script:WARN_WINDOWS      = 240
+$script:CRITICAL_WINDOWS  = 256
 
 # OneDrive / SharePoint Cloud
-$WARN_CLOUD        = 360
-$LIMIT_CLOUD       = 400
+$script:WARN_CLOUD        = 360
+$script:LIMIT_CLOUD       = 400
 
 # OneDrive Sync
-$WARN_SYNC         = 480
-$LIMIT_SYNC        = 520
+$script:WARN_SYNC         = 480
+$script:LIMIT_SYNC        = 520
 
 # Nombre individual
-$WARN_NAME         = 240
-$LIMIT_NAME        = 255
+$script:WARN_NAME         = 240
+$script:LIMIT_NAME        = 255
 
 
 # ============================================================
@@ -262,40 +384,303 @@ $ExcludedExactNames = @(
 # ============================================================
 
 function Write-Banner {
-
-    Clear-Host
-
-    Write-Host ""
-    Write-Host "====================================================================" -ForegroundColor Cyan
-    Write-Host "       ONEDRIVE / SHAREPOINT PATH ANALYZER - WINDOWS" -ForegroundColor White
-    Write-Host "====================================================================" -ForegroundColor Cyan
-    Write-Host ""
-    Write-Host " Diagnóstico de rutas largas para troubleshooting de sincronización."
-    Write-Host ""
+    Clear-AppScreen
+    Show-AppHeader -Section 'Inicio'
+    Write-AppMuted -Message 'Diagnóstico de rutas largas para troubleshooting de sincronización.'
 }
 
 
 function Write-Section {
-
     param([string]$Title)
-
-    Write-Host ""
-    Write-Host "--------------------------------------------------------------------" -ForegroundColor DarkCyan
-    Write-Host " $Title" -ForegroundColor Cyan
-    Write-Host "--------------------------------------------------------------------" -ForegroundColor DarkCyan
+    Write-Host ''
+    Write-AppStyled -Text $Title -Style Primary
+    Write-AppStyled -Text ('─' * 72) -Style Muted
 }
 
 
 function Write-StatusLine {
-
     param(
         [string]$Label,
-        [string]$Value,
-        [ConsoleColor]$Color = [ConsoleColor]::Gray
+        [AllowNull()]$Value,
+        [ValidateSet('Normal','Muted','Primary','Success','Warning','Danger','Accent')]
+        [string]$Style = 'Normal'
     )
 
-    Write-Host (" {0,-30}: " -f $Label) -NoNewline
-    Write-Host $Value -ForegroundColor $Color
+    Write-AppField -Name $Label -Value $Value -Style $Style
+}
+
+function Initialize-AppTerminal {
+    $script:Ansi = $false
+
+    try {
+        if ($Host.UI -and $Host.UI.SupportsVirtualTerminal) {
+            $script:Ansi = $true
+        }
+        elseif ($env:WT_SESSION -or $env:TERM_PROGRAM -or $env:TERM) {
+            $script:Ansi = $true
+        }
+    }
+    catch {
+        $script:Ansi = $false
+    }
+}
+
+function Get-AppAnsi {
+    param(
+        [ValidateSet('Reset','Bold','Dim','Cyan','Green','Yellow','Red','Magenta')]
+        [string]$Name
+    )
+
+    if (-not $script:Ansi) { return '' }
+
+    $esc = [char]27
+    switch ($Name) {
+        'Reset' { "$esc[0m" }
+        'Bold' { "$esc[1m" }
+        'Dim' { "$esc[2m" }
+        'Cyan' { "$esc[36m" }
+        'Green' { "$esc[92m" }
+        'Yellow' { "$esc[93m" }
+        'Red' { "$esc[91m" }
+        'Magenta' { "$esc[95m" }
+    }
+}
+
+function Clear-AppScreen {
+    Clear-Host
+}
+
+function Write-AppStyled {
+    param(
+        [Parameter(Mandatory = $true)][string]$Text,
+        [ValidateSet('Normal','Muted','Primary','Success','Warning','Danger','Accent')]
+        [string]$Style = 'Normal',
+        [switch]$NoNewline
+    )
+
+    $Text = Get-LocalizedText $Text
+    $prefix = ''
+    $fallback = 'Gray'
+
+    switch ($Style) {
+        'Muted' { $prefix = Get-AppAnsi Dim; $fallback = 'DarkGray' }
+        'Primary' { $prefix = (Get-AppAnsi Bold) + (Get-AppAnsi Cyan); $fallback = 'Cyan' }
+        'Success' { $prefix = Get-AppAnsi Green; $fallback = 'Green' }
+        'Warning' { $prefix = Get-AppAnsi Yellow; $fallback = 'Yellow' }
+        'Danger' { $prefix = Get-AppAnsi Red; $fallback = 'Red' }
+        'Accent' { $prefix = Get-AppAnsi Magenta; $fallback = 'Magenta' }
+    }
+
+    if ($script:Ansi) {
+        $suffix = Get-AppAnsi Reset
+        if ($NoNewline) { Write-Host "$prefix$Text$suffix" -NoNewline }
+        else { Write-Host "$prefix$Text$suffix" }
+    }
+    elseif ($NoNewline) {
+        Write-Host $Text -ForegroundColor $fallback -NoNewline
+    }
+    else {
+        Write-Host $Text -ForegroundColor $fallback
+    }
+}
+
+function Show-AppHeader {
+    param([string]$Section = 'Inicio')
+
+    $width = 72
+    try {
+        $width = [Math]::Min(84, [Math]::Max(36, $Host.UI.RawUI.WindowSize.Width - 2))
+    }
+    catch { $width = 72 }
+
+    Clear-AppScreen
+    Write-AppStyled -Text ('═' * $width) -Style Accent
+    Write-AppStyled -Text 'OneDrive / SharePoint Path Analyzer  v2.0' -Style Primary
+    if (-not [string]::IsNullOrWhiteSpace($Section)) {
+        Write-AppStyled -Text "[$Section]" -Style Muted
+    }
+    Write-AppStyled -Text ('─' * $width) -Style Muted
+}
+
+function Write-AppSection {
+    param([Parameter(Mandatory = $true)][string]$Title)
+    Write-Host ''
+    Write-AppStyled -Text $Title -Style Primary
+}
+
+function Write-AppField {
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [AllowNull()]$Value,
+        [ValidateSet('Normal','Muted','Primary','Success','Warning','Danger','Accent')]
+        [string]$Style = 'Normal'
+    )
+
+    if ($null -eq $Value -or [string]::IsNullOrWhiteSpace([string]$Value)) {
+        $Value = '—'
+    }
+
+    Write-AppStyled -Text ('{0,-24}' -f $Name) -Style Muted -NoNewline
+    Write-AppStyled -Text ([string]$Value) -Style $Style
+}
+
+function Write-AppOk {
+    param([Parameter(Mandatory = $true)][string]$Message)
+    Write-AppStyled -Text "✓ $Message" -Style Success
+}
+
+function Write-AppInfo {
+    param([Parameter(Mandatory = $true)][string]$Message)
+    Write-AppStyled -Text "● $Message" -Style Primary
+}
+
+function Write-AppWarning {
+    param([Parameter(Mandatory = $true)][string]$Message)
+    Write-AppStyled -Text "! $Message" -Style Warning
+}
+
+function Write-AppError {
+    param([Parameter(Mandatory = $true)][string]$Message)
+    Write-AppStyled -Text "× $Message" -Style Danger
+}
+
+function Write-AppMuted {
+    param([Parameter(Mandatory = $true)][string]$Message)
+    Write-AppStyled -Text $Message -Style Muted
+}
+
+function Wait-App {
+    param([string]$Message = 'Enter para continuar')
+    Write-Host ''
+    [void](Read-Host $Message)
+}
+
+function Show-AppErrorScreen {
+    param(
+        [Parameter(Mandatory = $true)][string]$Title,
+        [Parameter(Mandatory = $true)][string]$Message
+    )
+
+    Show-AppHeader -Section $Title
+    Write-Host ''
+    Write-AppError -Message $Message
+    Wait-App
+}
+
+function Read-AppYesNo {
+    param(
+        [Parameter(Mandatory = $true)][string]$Prompt,
+        [bool]$DefaultYes = $false
+    )
+
+    $yesToken = if ($script:Language -eq 'en') { 'Y' } else { 'S' }
+    $noToken = 'N'
+    $hint = if ($DefaultYes) { "$yesToken/n" } else { "$($yesToken.ToLowerInvariant())/$noToken" }
+
+    while ($true) {
+        $localizedPrompt = Get-LocalizedText $Prompt
+        $answer = (Microsoft.PowerShell.Utility\Read-Host -Prompt "$localizedPrompt [$hint]").Trim()
+
+        if ([string]::IsNullOrWhiteSpace($answer)) { return $DefaultYes }
+        if ($answer -match '^(s|si|sí|y|yes)$') { return $true }
+        if ($answer -match '^(n|no)$') { return $false }
+
+        Write-AppWarning -Message 'Responde S o N.'
+    }
+}
+
+function Read-AppInteger {
+    param(
+        [Parameter(Mandatory = $true)][string]$Prompt,
+        [Parameter(Mandatory = $true)][int]$Minimum,
+        [Parameter(Mandatory = $true)][int]$Maximum,
+        [Parameter(Mandatory = $true)][int]$DefaultValue
+    )
+
+    while ($true) {
+        $raw = (Read-Host "$Prompt [$DefaultValue]").Trim()
+        if ([string]::IsNullOrWhiteSpace($raw)) { return $DefaultValue }
+
+        $number = 0
+        if ([int]::TryParse($raw, [ref]$number) -and $number -ge $Minimum -and $number -le $Maximum) {
+            return $number
+        }
+
+        $message = if ($script:Language -eq 'en') {
+            "Enter a number between $Minimum and $Maximum."
+        }
+        else {
+            "Introduce un número entre $Minimum y $Maximum."
+        }
+        Write-AppWarning -Message $message
+    }
+}
+
+function Show-NumberMenu {
+    param(
+        [Parameter(Mandatory = $true)][string]$Title,
+        [Parameter(Mandatory = $true)][array]$Items,
+        [string[]]$Description = @(),
+        [scriptblock]$RenderBody
+    )
+
+    while ($true) {
+        Show-AppHeader -Section $Title
+
+        if ($Description.Count -gt 0) {
+            Write-Host ''
+            foreach ($line in $Description) { Write-AppMuted -Message $line }
+        }
+
+        if ($null -ne $RenderBody) {
+            & $RenderBody
+        }
+
+        Write-Host ''
+        $normalItems = @($Items | Where-Object { [string]$_.Value -notin @('Back','Exit') })
+        $zeroItems = @($Items | Where-Object { [string]$_.Value -in @('Back','Exit') })
+        $map = @{}
+
+        for ($i = 0; $i -lt $normalItems.Count; $i++) {
+            $key = [string]($i + 1)
+            $item = $normalItems[$i]
+            $map[$key] = $item
+
+            Write-AppStyled -Text ('  {0,2}  ' -f $key) -Style Primary -NoNewline
+            Write-AppStyled -Text ([string]$item.Label) -Style Normal
+            $hintProp = $item.PSObject.Properties['Hint']
+            $hint = if ($null -ne $hintProp -and -not [string]::IsNullOrWhiteSpace([string]$hintProp.Value)) {
+                [string]$hintProp.Value
+            }
+            else {
+                'Sin descripción adicional.'
+            }
+            Write-AppMuted -Message "      $hint"
+            Write-Host ''
+        }
+
+        if ($zeroItems.Count -gt 0) {
+            $item = $zeroItems[0]
+            $map['0'] = $item
+            Write-AppStyled -Text '   0  ' -Style Primary -NoNewline
+            Write-AppStyled -Text ([string]$item.Label) -Style Normal
+            $hintProp = $item.PSObject.Properties['Hint']
+            $hint = if ($null -ne $hintProp -and -not [string]::IsNullOrWhiteSpace([string]$hintProp.Value)) {
+                [string]$hintProp.Value
+            }
+        else {
+            if ($script:Language -eq 'en') { 'Return to the previous menu.' } else { 'Regresa al menú anterior.' }
+        }
+            Write-AppMuted -Message "      $hint"
+            Write-Host ''
+        }
+
+        $raw = (Read-Host 'Selecciona una opción').Trim()
+        if ($map.ContainsKey($raw)) { return $map[$raw] }
+
+        Write-AppError -Message 'Opción inválida.'
+        Start-Sleep -Milliseconds 650
+    }
 }
 
 
@@ -1183,6 +1568,659 @@ function Scan-DirectoryRecursive {
     }
 }
 
+function Write-AppThresholdSummary {
+    $windowsValue = if ($script:Language -eq 'en') {
+        "warning >= $script:WARN_WINDOWS | critical >= $script:CRITICAL_WINDOWS"
+    }
+    else {
+        "aviso >= $script:WARN_WINDOWS | crítico >= $script:CRITICAL_WINDOWS"
+    }
+    $cloudValue = if ($script:Language -eq 'en') {
+        "warning >= $script:WARN_CLOUD | critical > $script:LIMIT_CLOUD"
+    }
+    else {
+        "aviso >= $script:WARN_CLOUD | crítico > $script:LIMIT_CLOUD"
+    }
+    $syncValue = if ($script:Language -eq 'en') {
+        "warning >= $script:WARN_SYNC | critical > $script:LIMIT_SYNC"
+    }
+    else {
+        "aviso >= $script:WARN_SYNC | crítico > $script:LIMIT_SYNC"
+    }
+    $nameValue = if ($script:Language -eq 'en') {
+        "warning >= $script:WARN_NAME | critical > $script:LIMIT_NAME"
+    }
+    else {
+        "aviso >= $script:WARN_NAME | crítico > $script:LIMIT_NAME"
+    }
+
+    Write-AppSection -Title 'Umbrales activos'
+    Write-AppField -Name 'Windows / Office' -Value $windowsValue -Style Primary
+    Write-AppField -Name 'Cloud / SharePoint' -Value $cloudValue -Style Primary
+    Write-AppField -Name 'OneDrive Sync' -Value $syncValue -Style Primary
+    Write-AppField -Name 'Nombre individual' -Value $nameValue -Style Primary
+}
+
+function Write-AppDetectedLocations {
+    param([AllowEmptyCollection()][object[]]$Locations)
+
+    Write-AppSection -Title 'Ubicaciones detectadas'
+    if ($Locations.Count -eq 0) {
+        Write-AppWarning -Message 'No se detectaron ubicaciones automáticamente.'
+        Write-AppMuted -Message 'Puede introducir una ruta manual.'
+        return
+    }
+
+    Write-AppField -Name 'Detectadas' -Value $Locations.Count -Style Success
+    Write-Host ''
+
+    for ($i = 0; $i -lt $Locations.Count; $i++) {
+        $location = $Locations[$i]
+        Write-AppStyled -Text ('  {0,2}  ' -f ($i + 1)) -Style Primary -NoNewline
+        Write-AppStyled -Text ([string]$location.Tipo) -Style Normal
+        Write-AppField -Name 'Nombre' -Value $location.Nombre -Style Primary
+        Write-AppField -Name 'Ruta' -Value $location.Ruta -Style Muted
+
+        if ($location.EsAnidada) {
+            Write-AppWarning -Message 'Shortcut / ubicación anidada'
+        }
+        Write-Host ''
+    }
+}
+
+function New-AppManualLocation {
+    $path = (Read-Host 'Ruta a analizar').Trim().Trim('"')
+
+    if (-not (Test-Path -LiteralPath $path -PathType Container)) {
+        Write-AppError -Message 'La ruta indicada no existe.'
+        return $null
+    }
+
+    $resolved = Normalize-LocalPath $path
+    if ([string]::IsNullOrWhiteSpace($resolved)) {
+        Write-AppError -Message 'La ruta indicada no existe.'
+        return $null
+    }
+
+    if (Test-IsExcludedSyncPath $resolved) {
+        Write-AppError -Message 'Esta ubicación corresponde a contenido auxiliar y no será analizada.'
+        return $null
+    }
+
+    return [PSCustomObject]@{
+        Tipo = 'Manual'
+        Nombre = Split-Path -Leaf $resolved
+        Ruta = $resolved
+        URL = ''
+        Fuente = 'Manual'
+        Rol = 'Ruta manual'
+        EsAnidada = $false
+        RaizFisica = $resolved
+    }
+}
+
+function Read-AppLocationNumbers {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$Locations)
+
+    $prompt = if ($script:Language -eq 'en') {
+        'Enter comma-separated location numbers'
+    }
+    else {
+        'Introducir números de ubicaciones separados por coma'
+    }
+
+    $raw = (Read-Host $prompt).Trim()
+    if ([string]::IsNullOrWhiteSpace($raw)) {
+        return $null
+    }
+
+    $selected = @()
+    foreach ($token in ($raw -split ',')) {
+        $number = 0
+        $value = $token.Trim()
+
+        if (-not [int]::TryParse($value, [ref]$number) -or
+            $number -lt 1 -or
+            $number -gt $Locations.Count) {
+            $message = if ($script:Language -eq 'en') {
+                "Invalid selection: $value"
+            }
+            else {
+                "Selección no válida: $value"
+            }
+            Write-AppError -Message $message
+            return $null
+        }
+
+        $selected += $Locations[$number - 1]
+    }
+
+    return @($selected | Sort-Object Ruta -Unique)
+}
+
+function Select-AppLocations {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$Locations)
+
+    while ($true) {
+        $items = @()
+        if ($Locations.Count -gt 0) {
+            $items += [PSCustomObject]@{
+                Label = 'Seleccionar por número'
+                Value = 'Numbers'
+                Hint = 'Elige una o varias ubicaciones separadas por coma.'
+            }
+            $items += [PSCustomObject]@{
+                Label = 'Analizar todas'
+                Value = 'All'
+                Hint = 'Incluye todas las ubicaciones detectadas.'
+            }
+        }
+        $items += [PSCustomObject]@{
+            Label = 'Introducir ruta manual'
+            Value = 'Manual'
+            Hint = 'Analiza una carpeta local que no fue detectada automáticamente.'
+        }
+        $items += [PSCustomObject]@{
+            Label = 'Volver'
+            Value = 'Back'
+            Hint = 'Regresa al menú anterior.'
+        }
+
+        $choice = Show-NumberMenu -Title 'Selección de ubicaciones' -Items $items -Description @(
+            'Selecciona las ubicaciones locales que quieres analizar.'
+        ) -RenderBody {
+            Write-AppDetectedLocations -Locations $Locations
+        }
+
+        switch ($choice.Value) {
+            'Numbers' {
+                $selected = Read-AppLocationNumbers -Locations $Locations
+                if ($null -ne $selected -and $selected.Count -gt 0) {
+                    return @($selected)
+                }
+                Write-AppWarning -Message 'La selección no contiene ubicaciones válidas.'
+                Start-Sleep -Milliseconds 700
+            }
+            'All' {
+                return @($Locations)
+            }
+            'Manual' {
+                Show-AppHeader -Section 'Ruta manual'
+                $manual = New-AppManualLocation
+                if ($null -ne $manual) {
+                    Write-AppOk -Message 'La ruta fue agregada.'
+                    Wait-App
+                    return @($manual)
+                }
+                Start-Sleep -Milliseconds 700
+            }
+            'Back' {
+                return $null
+            }
+        }
+    }
+}
+
+function Clear-AppWorkingContext {
+    Show-AppHeader -Section 'Limpiar contexto de trabajo'
+
+    Write-AppField -Name 'Ubicaciones' -Value $script:SelectedLocations.Count -Style $(if ($script:SelectedLocations.Count -gt 0) { 'Success' } else { 'Muted' })
+    Write-AppField -Name 'Último resultado' -Value $(if ($null -ne $script:LastScan) { 'DISPONIBLE' } else { 'NO DISPONIBLE' }) -Style $(if ($null -ne $script:LastScan) { 'Success' } else { 'Muted' })
+    Write-AppField -Name 'Reporte' -Value $(if ($script:LastReportPath) { $script:LastReportPath } else { 'No generado' }) -Style Muted
+    Write-Host ''
+    Write-AppMuted -Message 'Limpia las ubicaciones seleccionadas y el resultado del análisis. No elimina archivos ni reportes existentes.'
+    Write-Host ''
+
+    if (-not (Read-AppYesNo -Prompt '¿Limpiar la selección actual?' -DefaultYes $false)) {
+        return
+    }
+
+    $script:SelectedLocations = @()
+    $script:LastScan = $null
+    $script:LastReportPath = ''
+    Write-AppOk -Message 'La selección fue limpiada.'
+    Wait-App
+}
+
+function Show-AppSettings {
+    while ($true) {
+        $items = @(
+            [PSCustomObject]@{
+                Label = 'Windows / Office'
+                Value = 'Windows'
+                Hint = 'Configura los umbrales de longitud de ruta local.'
+            },
+            [PSCustomObject]@{
+                Label = 'Cloud / SharePoint'
+                Value = 'Cloud'
+                Hint = 'Configura los umbrales de la ruta relativa en la nube.'
+            },
+            [PSCustomObject]@{
+                Label = 'OneDrive Sync'
+                Value = 'Sync'
+                Hint = 'Configura los umbrales de sincronización local.'
+            },
+            [PSCustomObject]@{
+                Label = 'Nombre individual'
+                Value = 'Name'
+                Hint = 'Configura el límite del nombre de archivo o carpeta.'
+            },
+            [PSCustomObject]@{
+                Label = 'Cambiar idioma'
+                Value = 'Language'
+                Hint = if ($script:Language -eq 'en') { 'English' } else { 'Español' }
+            },
+            [PSCustomObject]@{
+                Label = 'Restablecer umbrales predeterminados'
+                Value = 'Reset'
+                Hint = 'Restaura los valores recomendados para Windows, Cloud, Sync y nombres.'
+            },
+            [PSCustomObject]@{
+                Label = 'Volver'
+                Value = 'Back'
+                Hint = 'Regresa al menú anterior.'
+            }
+        )
+
+        $choice = Show-NumberMenu -Title 'Configuración' -Items $items -Description @(
+            'Ajusta los umbrales usados para clasificar las rutas.'
+        ) -RenderBody {
+            Write-AppThresholdSummary
+            Write-AppMuted -Message 'Los cambios se mantienen durante esta ejecución.'
+        }
+
+        switch ($choice.Value) {
+            'Windows' {
+                Show-AppHeader -Section 'Windows / Office'
+                $script:WARN_WINDOWS = Read-AppInteger -Prompt 'Aviso desde caracteres' -Minimum 1 -Maximum 10000 -DefaultValue $script:WARN_WINDOWS
+                $script:CRITICAL_WINDOWS = Read-AppInteger -Prompt 'Crítico desde caracteres' -Minimum $script:WARN_WINDOWS -Maximum 10000 -DefaultValue ([Math]::Max($script:WARN_WINDOWS, $script:CRITICAL_WINDOWS))
+                Write-AppOk -Message 'Umbrales guardados en memoria.'
+                Wait-App
+            }
+            'Cloud' {
+                Show-AppHeader -Section 'Cloud / SharePoint'
+                $script:WARN_CLOUD = Read-AppInteger -Prompt 'Aviso desde caracteres' -Minimum 1 -Maximum 10000 -DefaultValue $script:WARN_CLOUD
+                $script:LIMIT_CLOUD = Read-AppInteger -Prompt 'Crítico sobre caracteres' -Minimum $script:WARN_CLOUD -Maximum 10000 -DefaultValue ([Math]::Max($script:WARN_CLOUD, $script:LIMIT_CLOUD))
+                Write-AppOk -Message 'Umbrales guardados en memoria.'
+                Wait-App
+            }
+            'Sync' {
+                Show-AppHeader -Section 'OneDrive Sync'
+                $script:WARN_SYNC = Read-AppInteger -Prompt 'Aviso desde caracteres' -Minimum 1 -Maximum 10000 -DefaultValue $script:WARN_SYNC
+                $script:LIMIT_SYNC = Read-AppInteger -Prompt 'Crítico sobre caracteres' -Minimum $script:WARN_SYNC -Maximum 10000 -DefaultValue ([Math]::Max($script:WARN_SYNC, $script:LIMIT_SYNC))
+                Write-AppOk -Message 'Umbrales guardados en memoria.'
+                Wait-App
+            }
+            'Name' {
+                Show-AppHeader -Section 'Nombre individual'
+                $script:WARN_NAME = Read-AppInteger -Prompt 'Aviso desde caracteres' -Minimum 1 -Maximum 10000 -DefaultValue $script:WARN_NAME
+                $script:LIMIT_NAME = Read-AppInteger -Prompt 'Crítico sobre caracteres' -Minimum $script:WARN_NAME -Maximum 10000 -DefaultValue ([Math]::Max($script:WARN_NAME, $script:LIMIT_NAME))
+                Write-AppOk -Message 'Umbrales guardados en memoria.'
+                Wait-App
+            }
+            'Language' {
+                Initialize-AppLanguage
+            }
+            'Reset' {
+                Show-AppHeader -Section 'Restablecer umbrales'
+                Write-AppWarning -Message 'Se restaurarán los umbrales recomendados.'
+                if (Read-AppYesNo -Prompt '¿Restablecer los umbrales?' -DefaultYes $false) {
+                    $script:WARN_WINDOWS = 240
+                    $script:CRITICAL_WINDOWS = 256
+                    $script:WARN_CLOUD = 360
+                    $script:LIMIT_CLOUD = 400
+                    $script:WARN_SYNC = 480
+                    $script:LIMIT_SYNC = 520
+                    $script:WARN_NAME = 240
+                    $script:LIMIT_NAME = 255
+                    Write-AppOk -Message 'Umbrales restablecidos.'
+                    Wait-App
+                }
+            }
+            'Back' {
+                return
+            }
+        }
+    }
+}
+
+function Open-AppReports {
+    $folder = [Environment]::GetFolderPath('Desktop')
+    if ([string]::IsNullOrWhiteSpace($folder)) {
+        $folder = (Get-Location).Path
+    }
+
+    if ($script:LastReportPath -and (Test-Path -LiteralPath $script:LastReportPath)) {
+        $folder = Split-Path -Parent $script:LastReportPath
+    }
+
+    try {
+        Start-Process -FilePath 'explorer.exe' -ArgumentList $folder
+        Write-AppInfo -Message $folder
+    }
+    catch {
+        Show-AppErrorScreen -Title 'Reportes' -Message 'No se pudo abrir la carpeta de reportes.'
+    }
+}
+
+function Show-AppDiagnostics {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$Locations)
+
+    $items = @(
+        [PSCustomObject]@{
+            Label = 'Actualizar ubicaciones detectadas'
+            Value = 'Refresh'
+            Hint = 'Vuelve a consultar las ubicaciones sincronizadas del equipo.'
+        },
+        [PSCustomObject]@{
+            Label = 'Abrir carpeta de reportes'
+            Value = 'Reports'
+            Hint = 'Abre el escritorio o la carpeta del último CSV generado.'
+        },
+        [PSCustomObject]@{
+            Label = 'Volver'
+            Value = 'Back'
+            Hint = 'Regresa al menú anterior.'
+        }
+    )
+
+    $choice = Show-NumberMenu -Title 'Diagnóstico' -Items $items -Description @(
+        'Diagnóstico del sistema y del analizador.'
+    ) -RenderBody {
+        Write-AppField -Name 'Sistema operativo' -Value $env:OS -Style Muted
+        Write-AppField -Name 'PowerShell' -Value $PSVersionTable.PSVersion -Style Success
+        Write-AppField -Name 'Ubicaciones detectadas' -Value $Locations.Count -Style Primary
+        Write-AppField -Name 'Ubicaciones seleccionadas' -Value $script:SelectedLocations.Count -Style Primary
+        Write-AppField -Name 'Último análisis' -Value $(if ($null -ne $script:LastScan) { 'DISPONIBLE' } else { 'NO DISPONIBLE' }) -Style $(if ($null -ne $script:LastScan) { 'Success' } else { 'Muted' })
+        Write-AppField -Name 'Reporte' -Value $(if ($script:LastReportPath) { $script:LastReportPath } else { 'No generado' }) -Style Muted
+        Write-AppMuted -Message 'El analizador es local y no requiere tenant, aplicación ni autenticación.'
+    }
+
+    switch ($choice.Value) {
+        'Refresh' { return }
+        'Reports' { Open-AppReports }
+        'Back' { return }
+    }
+}
+
+function Show-AppContext {
+    param([Parameter(Mandatory = $true)][int]$DetectedCount)
+
+    Write-AppSection -Title 'Contexto'
+    Write-AppField -Name 'Ubicaciones detectadas' -Value $DetectedCount -Style Primary
+    Write-AppField -Name 'Ubicaciones seleccionadas' -Value $script:SelectedLocations.Count -Style $(if ($script:SelectedLocations.Count -gt 0) { 'Success' } else { 'Warning' })
+    Write-AppField -Name 'Análisis' -Value $(if ($null -ne $script:LastScan) { 'DISPONIBLE' } else { 'NO DISPONIBLE' }) -Style $(if ($null -ne $script:LastScan) { 'Success' } else { 'Muted' })
+    Write-AppField -Name 'Reporte' -Value $(if ($script:LastReportPath) { $script:LastReportPath } else { 'No generado' }) -Style Muted
+    Write-AppField -Name 'Modo' -Value 'LECTURA LOCAL' -Style Primary
+    Write-Host ''
+    Write-AppMuted -Message 'No modifica archivos; solo analiza longitudes y exporta hallazgos.'
+}
+
+function Export-AppScanReport {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$Results)
+
+    if ($Results.Count -eq 0) {
+        return ''
+    }
+
+    $desktop = [Environment]::GetFolderPath('Desktop')
+    if ([string]::IsNullOrWhiteSpace($desktop)) {
+        $desktop = (Get-Location).Path
+    }
+
+    $timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
+    $outputFile = Join-Path -Path $desktop -ChildPath "OneDrive_Path_Issues_$timestamp.csv"
+
+    if ($script:Language -eq 'en') {
+        $Results |
+            Select-Object `
+                @{Name='Status';Expression={Get-LocalizedText $_.Estado}},
+                @{Name='Reason';Expression={Get-LocalizedText $_.Motivo}},
+                @{Name='SyncType';Expression={Get-LocalizedText $_.TipoSync}},
+                @{Name='ItemType';Expression={Get-LocalizedText $_.Tipo}},
+                @{Name='LocalPathLength';Expression={$_.CaracteresLocal}},
+                @{Name='CloudPathLength';Expression={$_.CaracteresCloud}},
+                @{Name='NameLength';Expression={$_.CaracteresNombre}},
+                @{Name='Name';Expression={$_.Nombre}},
+                @{Name='FullPath';Expression={$_.RutaCompleta}} |
+            Export-Csv -LiteralPath $outputFile -NoTypeInformation -Encoding UTF8 -UseCulture
+    }
+    else {
+        $Results |
+            Select-Object Estado,Motivo,
+                @{Name='TipoSincronizacion';Expression={$_.TipoSync}},
+                @{Name='TipoElemento';Expression={$_.Tipo}},
+                @{Name='LongitudRutaLocal';Expression={$_.CaracteresLocal}},
+                @{Name='LongitudRutaCloud';Expression={$_.CaracteresCloud}},
+                @{Name='LongitudNombre';Expression={$_.CaracteresNombre}},
+                Nombre,RutaCompleta |
+            Export-Csv -LiteralPath $outputFile -NoTypeInformation -Encoding UTF8 -UseCulture
+    }
+
+    return $outputFile
+}
+
+function Show-AppScanResult {
+    param([Parameter(Mandatory = $true)][object]$Scan)
+
+    Show-AppHeader -Section 'Resultado'
+    Write-AppField -Name 'Rutas analizadas' -Value $Scan.TotalScanned -Style Primary
+    Write-AppField -Name 'Rutas en AVISO' -Value $Scan.WarningCount -Style $(if ($Scan.WarningCount -gt 0) { 'Warning' } else { 'Success' })
+    Write-AppField -Name 'Rutas CRÍTICAS' -Value $Scan.CriticalCount -Style $(if ($Scan.CriticalCount -gt 0) { 'Danger' } else { 'Success' })
+    Write-AppField -Name 'Errores de lectura' -Value $Scan.EnumerationErrors -Style $(if ($Scan.EnumerationErrors -gt 0) { 'Warning' } else { 'Success' })
+
+    if ($Scan.LongestLength -gt 0) {
+        Write-AppField -Name 'Ruta más larga' -Value "$($Scan.LongestLength) caracteres" -Style Primary
+        Write-AppField -Name 'Ubicación' -Value $Scan.LongestPath -Style Muted
+    }
+
+    Write-Host ''
+    if ($Scan.CriticalCount -gt 0) {
+        Write-AppError -Message 'Se encontraron rutas que deberían corregirse.'
+    }
+    elseif ($Scan.WarningCount -gt 0) {
+        Write-AppWarning -Message 'Se encontraron rutas cercanas a los límites.'
+    }
+    else {
+        Write-AppOk -Message 'No se encontraron rutas cercanas o superiores a los límites.'
+    }
+
+    if ($Scan.Results.Count -gt 0) {
+        Write-AppSection -Title 'Rutas que requieren atención'
+        $rows = @($Scan.Results | Select-Object -First 20 Estado,CaracteresLocal,CaracteresCloud,CaracteresNombre,Motivo,RutaCompleta)
+        if ($script:Language -eq 'en') {
+            $rows | Format-Table `
+                @{Label='Status';Expression={Get-LocalizedText $_.Estado}},
+                @{Label='Local';Expression={$_.CaracteresLocal}},
+                @{Label='Cloud';Expression={$_.CaracteresCloud}},
+                @{Label='Name';Expression={$_.CaracteresNombre}},
+                @{Label='Reason';Expression={Get-LocalizedText $_.Motivo}},
+                @{Label='Full path';Expression={$_.RutaCompleta}} -Wrap -AutoSize
+        }
+        else {
+            $rows | Format-Table -Wrap -AutoSize
+        }
+    }
+
+    if ($Scan.ReportPath) {
+        Write-Host ''
+        Write-AppInfo -Message 'CSV generado:'
+        Write-AppStyled -Text $Scan.ReportPath -Style Primary
+    }
+    else {
+        Write-AppMuted -Message 'No se generó CSV porque no existen rutas con AVISO o CRITICO.'
+    }
+
+    if ($Scan.EnumerationErrors -gt 0) {
+        Write-AppWarning -Message 'Algunas carpetas no pudieron enumerarse.'
+        Write-AppMuted -Message 'El resultado podría no cubrir el 100 % del contenido.'
+    }
+
+    Wait-App
+}
+
+function Invoke-AppScan {
+    param(
+        [Parameter(Mandatory = $true)][object[]]$SelectedLocations,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$AllLocations
+    )
+
+    $scanRoots = @(Get-MinimalScanRoots $SelectedLocations)
+    $analysisLocations = @(Get-AnalysisLocations -SelectedLocations $SelectedLocations -AllLocations $AllLocations -ScanRoots $scanRoots)
+
+    Show-AppHeader -Section 'Listo para analizar'
+    Write-AppField -Name 'Ubicaciones seleccionadas' -Value $SelectedLocations.Count -Style Primary
+    Write-AppField -Name 'Raíces físicas a recorrer' -Value $scanRoots.Count -Style Primary
+    Write-AppThresholdSummary
+    Write-Host ''
+
+    if (-not (Read-AppYesNo -Prompt '¿Iniciar el análisis?' -DefaultYes $true)) {
+        return $null
+    }
+
+    $script:TotalScanned = 0
+    $script:WarningCount = 0
+    $script:CriticalCount = 0
+    $script:EnumerationErrors = 0
+    $script:LongestLength = 0
+    $script:LongestPath = ''
+    $script:Results = New-Object System.Collections.Generic.List[object]
+
+    Show-AppHeader -Section 'Analizando'
+    for ($i = 0; $i -lt $scanRoots.Count; $i++) {
+        Write-AppInfo -Message "[$($i + 1)/$($scanRoots.Count)] $($scanRoots[$i].Ruta)"
+        Scan-DirectoryRecursive -DirectoryPath $scanRoots[$i].Ruta -AnalysisLocations $analysisLocations
+    }
+
+    Write-Progress -Activity 'Analizando rutas de OneDrive / SharePoint' -Completed
+
+    $sortedResults = @(
+        $script:Results |
+            Sort-Object `
+                @{Expression={if ($_.Estado -eq 'CRITICO') { 0 } else { 1 }}},
+                @{Expression='CaracteresLocal';Descending=$true}
+    )
+    $reportPath = Export-AppScanReport -Results $sortedResults
+
+    $scan = [PSCustomObject]@{
+        TotalScanned = $script:TotalScanned
+        WarningCount = $script:WarningCount
+        CriticalCount = $script:CriticalCount
+        EnumerationErrors = $script:EnumerationErrors
+        LongestLength = $script:LongestLength
+        LongestPath = $script:LongestPath
+        Results = @($sortedResults)
+        ReportPath = $reportPath
+    }
+
+    $script:LastScan = $scan
+    $script:LastReportPath = $reportPath
+    Show-AppScanResult -Scan $scan
+    return $scan
+}
+
+function Show-AppMainMenu {
+    while ($true) {
+        $locations = @(Get-SyncLocations)
+        $lastResultHint = if ($null -ne $script:LastScan) { 'Disponible para consultar.' } else { 'Todavía no existe un resultado.' }
+
+        $items = @(
+            [PSCustomObject]@{
+                Label = 'Seleccionar ubicaciones'
+                Value = 'Select'
+                Hint = 'Elige ubicaciones detectadas o introduce una ruta manual.'
+            },
+            [PSCustomObject]@{
+                Label = 'Analizar ubicaciones seleccionadas'
+                Value = 'Analyze'
+                Hint = 'Escanea el contenido local y reporta rutas AVISO o CRÍTICO.'
+            },
+            [PSCustomObject]@{
+                Label = 'Limpiar selección / contexto'
+                Value = 'Clear'
+                Hint = 'Quita la selección y el resultado en memoria; no borra archivos ni CSV.'
+            },
+            [PSCustomObject]@{
+                Label = 'Ver último resultado'
+                Value = 'Result'
+                Hint = $lastResultHint
+            },
+            [PSCustomObject]@{
+                Label = 'Configuración'
+                Value = 'Settings'
+                Hint = 'Ajusta los umbrales de Windows, Cloud, Sync y nombres.'
+            },
+            [PSCustomObject]@{
+                Label = 'Diagnóstico'
+                Value = 'Diagnostics'
+                Hint = 'Muestra información del sistema y actualiza detecciones.'
+            },
+            [PSCustomObject]@{
+                Label = 'Abrir carpeta de reportes'
+                Value = 'Reports'
+                Hint = 'Abre el escritorio o la carpeta del último CSV.'
+            },
+            [PSCustomObject]@{
+                Label = 'Salir'
+                Value = 'Exit'
+                Hint = 'Cierra la herramienta.'
+            }
+        )
+
+        $choice = Show-NumberMenu -Title 'Inicio' -Items $items -Description @(
+            'Diagnóstico de rutas largas para troubleshooting de sincronización.',
+            'Analiza contenido local de OneDrive y SharePoint sincronizado.'
+        ) -RenderBody {
+            Show-AppContext -DetectedCount $locations.Count
+        }
+
+        switch ($choice.Value) {
+            'Select' {
+                $selection = Select-AppLocations -Locations $locations
+                if ($null -ne $selection) {
+                    $script:SelectedLocations = @($selection)
+                }
+            }
+            'Analyze' {
+                if ($script:SelectedLocations.Count -eq 0) {
+                    Write-AppWarning -Message 'Selecciona ubicaciones antes de iniciar el análisis.'
+                    Wait-App
+                    continue
+                }
+                [void](Invoke-AppScan -SelectedLocations $script:SelectedLocations -AllLocations $locations)
+            }
+            'Clear' {
+                Clear-AppWorkingContext
+            }
+            'Result' {
+                if ($null -eq $script:LastScan) {
+                    Write-AppWarning -Message 'El análisis no ha comenzado.'
+                    Wait-App
+                }
+                else {
+                    Show-AppScanResult -Scan $script:LastScan
+                }
+            }
+            'Settings' {
+                Show-AppSettings
+            }
+            'Diagnostics' {
+                Show-AppDiagnostics -Locations $locations
+            }
+            'Reports' {
+                Open-AppReports
+            }
+            'Exit' {
+                return
+            }
+        }
+    }
+}
+
+if ($false) {
+# ============================================================
+# INICIO
+# ============================================================
 
 # ============================================================
 # INICIO
@@ -1654,3 +2692,35 @@ Write-Host "====================================================================
 Write-Host " Análisis completado." -ForegroundColor White
 Write-Host "====================================================================" -ForegroundColor Cyan
 Write-Host ""
+}
+
+try {
+    Initialize-AppTerminal
+    Initialize-AppLanguage
+
+    try {
+        $Host.UI.RawUI.WindowTitle = 'OneDrive / SharePoint Path Analyzer'
+    }
+    catch {
+    }
+
+    $script:SelectedLocations = @()
+    $script:LastScan = $null
+    $script:LastReportPath = ''
+    Show-AppMainMenu
+}
+catch {
+    Show-AppHeader -Section 'Error inesperado'
+    Write-AppError -Message $_.Exception.Message
+
+    if (-not [string]::IsNullOrWhiteSpace($_.ScriptStackTrace)) {
+        Write-Host ''
+        Write-AppMuted -Message 'Detalles técnicos:'
+        Write-AppMuted -Message $_.ScriptStackTrace
+    }
+
+    Wait-App
+}
+
+Show-AppHeader -Section 'Finalizado'
+Write-AppMuted -Message 'Análisis finalizado.'

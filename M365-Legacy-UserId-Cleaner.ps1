@@ -68,6 +68,7 @@ $script:ReportsFolder = Join-Path $script:ConfigRoot 'reports'
 $script:Settings = $null
 $script:Ansi = $false
 $script:AdminConnection = $null
+$script:AuthRecoveryUsed = $false
 $script:AffectedUser = $null
 $script:LastInventory = @()
 $script:LastResults = @()
@@ -79,6 +80,11 @@ $script:LastResults = @()
 $script:Language = 'es'
 $script:UiTranslations = @(
     @{ From = 'Contexto'; To = 'Context' }; @{ From = 'Inicio'; To = 'Home' }; @{ From = 'Finalizado'; To = 'Finished' }
+    @{ From = 'ACTIVO'; To = 'ACTIVE' }; @{ From = 'VACÍO'; To = 'EMPTY' }
+    @{ From = 'Reportes'; To = 'Reports' }; @{ From = 'Administrador'; To = 'Administrator' }
+    @{ From = 'Contexto de conexión'; To = 'Connection context' }
+    @{ From = 'La sesión autenticada no pudo reutilizarse; se solicitará autenticación nuevamente una sola vez.'; To = 'The authenticated session could not be reused; authentication will be requested once.' }
+    @{ From = 'PnP no devolvió un token de SharePoint reutilizable.'; To = 'PnP did not return a reusable SharePoint token.' }
     @{ From = 'Error inesperado'; To = 'Unexpected error' }; @{ From = 'Detalles técnicos:'; To = 'Technical details:' }
     @{ From = 'Configuración'; To = 'Settings' }; @{ From = 'Salir'; To = 'Exit' }; @{ From = 'Volver'; To = 'Back' }
     @{ From = 'Cancelar'; To = 'Cancel' }; @{ From = 'Diagnóstico'; To = 'Diagnostics' }; @{ From = 'Autenticación'; To = 'Authentication' }
@@ -96,6 +102,44 @@ function Get-LocalizedText {
         $phrases = @(
             @{ From = 'Selecciona una opción'; To = 'Select an option' }; @{ From = 'Seleccionar / validar usuario afectado'; To = 'Select / validate affected user' }
             @{ From = 'Idioma'; To = 'Language' }; @{ From = 'Cambiar idioma'; To = 'Change language' }
+            @{ From = 'Restablecer configuración local'; To = 'Reset local settings' }
+            @{ From = 'Se restablecerán tenant, Client ID, app, usuario afectado, alcance y demás preferencias.'; To = 'Tenant, Client ID, app, affected user, scope, and other preferences will be reset.' }
+            @{ From = 'Los reportes existentes no se eliminarán.'; To = 'Existing reports will not be deleted.' }
+            @{ From = 'La App Registration en Entra tampoco se eliminará.'; To = 'The Entra App Registration will not be deleted either.' }
+            @{ From = 'El idioma seleccionado se conservará.'; To = 'The selected language will be preserved.' }
+            @{ From = 'No se puede restablecer mientras exista un estado de grants administrativos pendiente.'; To = 'Settings cannot be reset while pending administrative-grant state exists.' }
+            @{ From = 'Recupéralos o retíralos primero desde el menú principal.'; To = 'Recover or remove them first from the main menu.' }
+            @{ From = '¿Restablecer la configuración local?'; To = 'Reset local settings?' }
+            @{ From = 'Configuración local restablecida.'; To = 'Local settings reset.' }
+            @{ From = 'Sin descripción adicional.'; To = 'No additional details.' }
+            @{ From = 'Borra los valores guardados; conserva reportes y el idioma; exige limpiar grants pendientes antes.'; To = 'Clears saved values; keeps reports and language, and requires pending grants to be cleared first.' }
+            @{ From = 'Cierra la herramienta.'; To = 'Closes the tool.' }
+            @{ From = 'Regresa al menú anterior.'; To = 'Returns to the previous menu.' }
+            @{ From = 'Abrir carpeta de reportes'; To = 'Open reports folder' }
+            @{ From = 'Abre la carpeta donde se guardan los reportes y CSV.'; To = 'Opens the folder where reports and CSV files are saved.' }
+            @{ From = 'Carpeta de reportes abierta.'; To = 'Reports folder opened.' }
+            @{ From = 'No se pudo abrir la carpeta de reportes.'; To = 'Could not open reports folder.' }
+            @{ From = 'Limpiar contexto de trabajo'; To = 'Clear working context' }
+            @{ From = 'Gestionar contexto de trabajo'; To = 'Manage working context' }
+            @{ From = 'Gestión del contexto'; To = 'Context management' }
+            @{ From = 'Cambiar tenant o aplicación conectada'; To = 'Change tenant or connected application' }
+            @{ From = 'Abre la configuración para cambiar el tenant o la aplicación conectada.'; To = 'Opens settings to change the tenant or connected application.' }
+            @{ From = 'Limpia la selección y los resultados de esta sesión.'; To = "Clears this session's selection and results." }
+            @{ From = 'Gestiona selecciones de esta sesión o cambia tenant/aplicación conectada.'; To = "Manages this session's selections or changes the connected tenant/application." }
+            @{ From = 'Hay contexto de trabajo activo. Limpia selecciones o cambia tenant/aplicación conectada.'; To = 'Active working context exists. Clear selections or change the connected tenant/application.' }
+            @{ From = 'No hay contexto activo. Puedes cambiar tenant/aplicación o iniciar una selección.'; To = 'No active context. You can change the tenant/application or start a selection.' }
+            @{ From = 'Aplicación Entra / autenticación PnP'; To = 'Entra application / PnP authentication' }
+            @{ From = 'Validar, cambiar o registrar la aplicación usada por PnP.PowerShell.'; To = 'Validate, change, or register the application used by PnP.PowerShell.' }
+            @{ From = 'Restablece usuario afectado, inventario y resultados de esta sesión. Conserva tenant, app, preferencias y reportes.'; To = 'Clears the affected user, inventory, and results from this session. Preserves the tenant, app, preferences, and reports.' }
+            @{ From = 'No hay contexto de trabajo activo. Se conservarán tenant, app y reportes.'; To = 'No active working context. The tenant, app, and reports will be preserved.' }
+            @{ From = 'Hay contexto de trabajo activo. Se conservarán tenant, app y reportes.'; To = 'Active working context exists. The tenant, app, and reports will be preserved.' }
+            @{ From = 'No se puede limpiar el contexto mientras haya grants administrativos pendientes.'; To = 'The context cannot be cleared while pending administrative grants exist.' }
+            @{ From = 'Recupéralos o retíralos primero desde el menú principal.'; To = 'Recover or remove them first from the main menu.' }
+            @{ From = '¿Limpiar el contexto de trabajo?'; To = 'Clear working context?' }
+            @{ From = 'Contexto de trabajo limpiado.'; To = 'Working context cleared.' }
+            @{ From = 'Usuario activo'; To = 'Active user' }
+            @{ From = 'Inventario en memoria'; To = 'In-memory inventory' }
+            @{ From = 'Resultados en memoria'; To = 'In-memory results' }
             @{ From = 'No seleccionado'; To = 'Not selected' }; @{ From = 'No configurado'; To = 'Not configured' }; @{ From = 'No instalado'; To = 'Not installed' }
             @{ From = 'Destino'; To = 'Target' }; @{ From = 'CONFIGURADA'; To = 'CONFIGURED' }; @{ From = 'NO CONFIGURADA'; To = 'NOT CONFIGURED' }
             @{ From = 'Activado'; To = 'Enabled' }; @{ From = 'Desactivado'; To = 'Disabled' }; @{ From = 'Sí'; To = 'Yes' }; @{ From = 'SÍ'; To = 'YES' }
@@ -163,6 +207,15 @@ function Get-LocalizedText {
             @{ From = 'Fast path / propagación'; To = 'Fast path / propagation' }
             @{ From = 'Validación de App Registration'; To = 'App Registration validation' }
             @{ From = 'Sesión persistente'; To = 'Persisted session' }
+            @{ From = 'Sesión de autenticación'; To = 'Authentication session' }
+            @{ From = 'La sesión en memoria se reutiliza mientras la herramienta permanezca abierta.'; To = 'The in-memory session is reused while the tool remains open.' }
+            @{ From = 'Sesión persistente: si la activas, PnP puede reutilizar el inicio de sesión cuando abras el script nuevamente.'; To = 'Persisted session: when enabled, PnP can reuse the sign-in when you open the script again.' }
+            @{ From = 'Sesión persistente activada: PnP puede reutilizar el login cuando abras el script nuevamente.'; To = 'Persisted session enabled: PnP can reuse the login when you open the script again.' }
+            @{ From = 'Sesión persistente desactivada: el login se usa solo durante esta ejecución.'; To = 'Persisted session disabled: the login is used only during this run.' }
+            @{ From = 'Si la desactivas, solo se usa la sesión actual y podrás iniciar sesión de nuevo en la siguiente ejecución.'; To = 'When disabled, the login is used only for the current execution and you can sign in again on the next run.' }
+            @{ From = '¿Guardar la sesión para futuras ejecuciones?'; To = 'Save the session for future runs?' }
+            @{ From = 'Activada · PnP puede reutilizar login en futuras ejecuciones'; To = 'Enabled · PnP can reuse the login in future runs' }
+            @{ From = 'Desactivada · login solo para esta ejecución'; To = 'Disabled · login is used only for this run' }
             @{ From = 'Solo SharePoint'; To = 'SharePoint only' }
             @{ From = 'Solo OneDrive'; To = 'OneDrive only' }
             @{ From = 'SharePoint + OneDrive'; To = 'SharePoint + OneDrive' }
@@ -391,6 +444,8 @@ function Write-Styled {
         [switch]$NoNewline
     )
 
+    $Text = Get-LocalizedText $Text
+
     $prefix = ''
     $suffix = ''
     $fallback = 'Gray'
@@ -512,12 +567,17 @@ function Read-MenuChoice {
             if (-not [string]::IsNullOrWhiteSpace($hint)) {
                 Write-Styled "      $hint" Muted
             }
+            else {
+                Write-Styled '      Sin descripción adicional.' Muted
+            }
 
             Write-Host ''
         }
 
         Write-Styled '   0  ' Muted -NoNewline
         Write-Host $ZeroLabel
+        $zeroHint = if ($ZeroLabel -eq 'Salir') { '      Cierra la herramienta.' } else { '      Regresa al menú anterior.' }
+        Write-Styled $zeroHint Muted
         Write-Styled ('─' * 32) Muted
         Write-Host ''
 
@@ -621,6 +681,7 @@ function New-DefaultSettings {
         ClientId                       = ''
         AppRegistrationName            = 'Microsoft 365 Legacy UserId Cleaner'
         PersistLogin                    = $false
+        PersistLoginConfigured           = $false
         Language                        = 'es'
         AdminUpn                        = ''
         AffectedUserUpn                 = ''
@@ -680,6 +741,31 @@ function Ensure-AppFolders {
     }
 }
 
+function Open-ReportsFolder {
+    try {
+        Ensure-AppFolders
+        $folder = [System.IO.Path]::GetFullPath($script:ReportsFolder)
+
+        if ($IsWindows) {
+            Start-Process -FilePath 'explorer.exe' -ArgumentList @($folder) | Out-Null
+        }
+        elseif (Get-Command xdg-open -ErrorAction SilentlyContinue) {
+            Start-Process -FilePath 'xdg-open' -ArgumentList @($folder) | Out-Null
+        }
+        else {
+            Invoke-Item -LiteralPath $folder
+        }
+
+        Write-Status Ok 'Carpeta de reportes abierta.'
+    }
+    catch {
+        Write-Status Error 'No se pudo abrir la carpeta de reportes.'
+        Write-Styled $_.Exception.Message Danger
+    }
+
+    Pause-Tui
+}
+
 function Load-Settings {
     Ensure-AppFolders
 
@@ -733,6 +819,116 @@ function Load-ActiveGrantState {
 function Clear-ActiveGrantState {
     if (Test-Path -LiteralPath $script:StatePath) {
         Remove-Item -LiteralPath $script:StatePath -Force
+    }
+}
+
+function Reset-LocalSettings {
+    Write-AppHeader 'Restablecer configuración local'
+    Write-Status Warn 'Se restablecerán tenant, Client ID, app, usuario afectado, alcance y demás preferencias.'
+    Write-Styled 'Los reportes existentes no se eliminarán.' Muted
+    Write-Styled 'La App Registration en Entra tampoco se eliminará.' Muted
+    Write-Styled 'El idioma seleccionado se conservará.' Muted
+
+    if (Test-Path -LiteralPath $script:StatePath) {
+        Write-Status Error 'No se puede restablecer mientras exista un estado de grants administrativos pendiente.'
+        Write-Styled 'Recupéralos o retíralos primero desde el menú principal.' Muted
+        Pause-Tui
+        return
+    }
+
+    if (-not (Read-YesNo '¿Restablecer la configuración local?' $false)) {
+        return
+    }
+
+    $resetLanguage = $script:Language
+    Release-AdminConnection
+    $script:Settings = New-DefaultSettings
+    $script:Settings.Language = $resetLanguage
+    $script:Language = $resetLanguage
+    $script:AffectedUser = $null
+    $script:LastInventory = @()
+    $script:LastResults = @()
+    Save-Settings
+
+    Write-Status Ok 'Configuración local restablecida.'
+    Pause-Tui
+}
+
+function Clear-WorkingContext {
+    Write-AppHeader 'Limpiar contexto de trabajo'
+    Write-Field 'Usuario activo' (Get-AffectedUserStatusText)
+    Write-Field 'Inventario en memoria' @($script:LastInventory).Count
+    Write-Field 'Resultados en memoria' @($script:LastResults).Count
+    Write-Host ''
+    Write-Styled 'Restablece usuario afectado, inventario y resultados de esta sesión. Conserva tenant, app, preferencias y reportes.' Muted
+    Write-Styled 'La sesión de autenticación actual se conserva; cambiar tenant o aplicación la renovará.' Muted
+
+    if (Test-Path -LiteralPath $script:StatePath) {
+        Write-Status Error 'No se puede limpiar el contexto mientras haya grants administrativos pendientes.'
+        Write-Styled 'Recupéralos o retíralos primero desde el menú principal.' Muted
+        Pause-Tui
+        return
+    }
+
+    if (-not (Read-YesNo '¿Limpiar el contexto de trabajo?' $false)) {
+        return
+    }
+
+    $script:Settings.AffectedUserUpn = ''
+    $script:AffectedUser = $null
+    $script:LastInventory = @()
+    $script:LastResults = @()
+    Save-Settings
+
+    Write-Status Ok 'Contexto de trabajo limpiado.'
+    Pause-Tui
+}
+
+function Show-WorkingContextMenu {
+    while ($true) {
+        $tenantConfigured = Test-TenantFormat $script:Settings.Tenant
+        $appConfigured = $tenantConfigured -and (Test-ClientIdFormat $script:Settings.ClientId)
+        $appLabel = if ([string]::IsNullOrWhiteSpace($script:Settings.AppRegistrationName)) {
+            if ($appConfigured) { $script:Settings.ClientId } else { 'No configurada' }
+        }
+        else {
+            $script:Settings.AppRegistrationName
+        }
+
+        $contextActive = ($null -ne $script:AffectedUser) -or
+            (-not [string]::IsNullOrWhiteSpace($script:Settings.AffectedUserUpn)) -or
+            (@($script:LastInventory).Count -gt 0) -or
+            (@($script:LastResults).Count -gt 0)
+
+        $items = @(
+            [pscustomobject]@{
+                Label = 'Limpiar contexto de trabajo'
+                Value = 'Clear'
+                Hint = 'Limpia la selección y los resultados de esta sesión.'
+            },
+            [pscustomobject]@{
+                Label = 'Cambiar tenant o aplicación conectada'
+                Value = 'Connection'
+                Hint = 'Abre la configuración para cambiar el tenant o la aplicación conectada.'
+            }
+        )
+
+        $choice = Read-MenuChoice `
+            -Title 'Gestión del contexto' `
+            -Items $items `
+            -RenderBody {
+                Write-Field 'Contexto' $(if ($contextActive) { 'ACTIVO' } else { 'VACÍO' }) $(if ($contextActive) { 'Success' } else { 'Muted' })
+                Write-Field 'Tenant' $(if ($tenantConfigured) { $script:Settings.Tenant } else { 'No configurado' }) $(if ($tenantConfigured) { 'Success' } else { 'Warning' })
+                Write-Field 'Aplicación' $appLabel $(if ($appConfigured) { 'Success' } else { 'Warning' })
+                Write-Field 'Reportes' $script:ReportsFolder Muted
+            }
+
+        if ($null -eq $choice) { return }
+
+        switch ($choice.Value) {
+            'Clear' { Clear-WorkingContext }
+            'Connection' { Show-SettingsMenu }
+        }
     }
 }
 
@@ -829,7 +1025,12 @@ function Ensure-TenantConfigured {
         return $false
     }
 
-    $script:Settings.Tenant = $tenant.Trim().ToLowerInvariant()
+    $normalizedTenant = $tenant.Trim().ToLowerInvariant()
+    if ($normalizedTenant -ne [string]$script:Settings.Tenant) {
+        Release-AdminConnection
+    }
+
+    $script:Settings.Tenant = $normalizedTenant
     Save-Settings
     return $true
 }
@@ -850,7 +1051,9 @@ function Connect-M365SiteWithClientId {
         [Parameter(Mandatory)][string]$Url,
         [Parameter(Mandatory)][string]$ClientId,
         [string]$Tenant = $script:Settings.Tenant,
-        [switch]$NoPersist
+        [switch]$NoPersist,
+        [AllowNull()][object]$ReuseConnection,
+        [switch]$ForceAuthentication
     )
 
     if (-not (Test-ClientIdFormat $ClientId)) {
@@ -861,6 +1064,27 @@ function Connect-M365SiteWithClientId {
         throw 'Tenant no válido.'
     }
 
+    if ($null -ne $ReuseConnection) {
+        # Build the site context from a SharePoint token obtained through the
+        # already authenticated base connection. This keeps the in-memory
+        # session usable even when PersistLogin is disabled, and prevents
+        # Connect-PnPOnline from entering Interactive mode for every URL.
+        $accessToken = Get-PnPAccessToken `
+            -ResourceTypeName SharePoint `
+            -Connection $ReuseConnection `
+            -ErrorAction Stop
+
+        if ([string]::IsNullOrWhiteSpace([string]$accessToken)) {
+            throw 'PnP no devolvió un token de SharePoint reutilizable.'
+        }
+
+        return Connect-PnPOnline `
+            -Url $Url `
+            -AccessToken ([string]$accessToken) `
+            -ReturnConnection `
+            -ErrorAction Stop
+    }
+
     $params = @{
         Url                = $Url
         ClientId           = $ClientId
@@ -869,6 +1093,10 @@ function Connect-M365SiteWithClientId {
         ReturnConnection   = $true
         ValidateConnection = $true
         ErrorAction        = 'Stop'
+    }
+
+    if ($ForceAuthentication) {
+        $params.ForceAuthentication = $true
     }
 
     if (-not $NoPersist -and [bool]$script:Settings.PersistLogin) {
@@ -1096,9 +1324,15 @@ function Set-ExistingPnPClientId {
         ([bool]$script:Settings.PersistLogin)
 
     # Commit únicamente después de una validación satisfactoria.
+    if ($tenant -ne [string]$script:Settings.Tenant -or
+        $clientId -ne [string]$script:Settings.ClientId) {
+        Release-AdminConnection
+    }
+
     $script:Settings.Tenant = $tenant
     $script:Settings.ClientId = $clientId
     $script:Settings.PersistLogin = $persist
+    $script:Settings.PersistLoginConfigured = $true
     Save-Settings
 
     Write-Host ''
@@ -1207,11 +1441,16 @@ function Register-NewPnPApp {
             return
         }
 
+        if ($clientId -ne [string]$oldClientId) {
+            Release-AdminConnection
+        }
+
         $script:Settings.ClientId = $clientId
         $script:Settings.AppRegistrationName = $name
         $script:Settings.PersistLogin = Read-YesNo `
             '¿Mantener la sesión autenticada?' `
             ([bool]$script:Settings.PersistLogin)
+        $script:Settings.PersistLoginConfigured = $true
 
         Save-Settings
 
@@ -1302,7 +1541,7 @@ function Show-AppRegistrationMenu {
             -Title 'Aplicación Entra / autenticación PnP' `
             -Items $items `
             -Description @(
-                "Estado: $($state.Label)",
+                "Contexto: $($state.Label)",
                 "Tenant: $(if (Test-TenantFormat $script:Settings.Tenant) { $script:Settings.Tenant } else { 'No configurado' })",
                 "Aplicación: $(if ([string]::IsNullOrWhiteSpace($script:Settings.AppRegistrationName)) { '—' } else { $script:Settings.AppRegistrationName })",
                 "Client ID: $(if (Test-ClientIdFormat $script:Settings.ClientId) { $script:Settings.ClientId } else { 'No configurado' })"
@@ -1347,6 +1586,7 @@ function Show-AppRegistrationMenu {
                 Write-Host ''
 
                 if (Read-YesNo '¿Quitar el Client ID de esta herramienta?' $false) {
+                    Release-AdminConnection
                     $script:Settings.ClientId = ''
                     Save-Settings
                     Write-Status Ok 'Client ID local eliminado.'
@@ -1358,6 +1598,7 @@ function Show-AppRegistrationMenu {
             'ClearLogin' {
                 Write-AppHeader 'Sesión persistente'
                 try {
+                    Release-AdminConnection
                     Disconnect-PnPOnline -ClearPersistedLogin -ErrorAction Stop
                     Write-Status Ok 'Sesión persistente eliminada.'
                 }
@@ -1456,7 +1697,30 @@ function Invoke-WithRetry {
     }
 }
 
+function Test-AuthenticationRecoveryError {
+    param([Parameter(Mandatory)][System.Exception]$Exception)
+
+    $text = $Exception.ToString()
+    return $text -match '(?i)AADSTS|access token|token|jwt|authentication|interactive|login|no connection|current connection'
+}
+
 function Connect-AdminCenter {
+    param([switch]$ForceAuthentication)
+
+    if (-not $ForceAuthentication -and $null -ne $script:AdminConnection) {
+        return $script:AdminConnection
+    }
+
+    if ($ForceAuthentication) {
+        Release-AdminConnection
+
+        try {
+            Disconnect-PnPOnline -ClearPersistedLogin -ErrorAction SilentlyContinue
+        }
+        catch {
+        }
+    }
+
     if (-not (Ensure-ClientId)) {
         throw 'No hay Client ID configurado.'
     }
@@ -1465,8 +1729,13 @@ function Connect-AdminCenter {
         throw 'No hay tenant configurado.'
     }
 
+    Ensure-PersistLoginPreference
+
     $url = Get-AdminUrl
-    $script:AdminConnection = Connect-M365SiteWithClientId -Url $url -ClientId $script:Settings.ClientId
+    $script:AdminConnection = Connect-M365SiteWithClientId `
+        -Url $url `
+        -ClientId $script:Settings.ClientId `
+        -ForceAuthentication:$ForceAuthentication
     return $script:AdminConnection
 }
 
@@ -1475,10 +1744,64 @@ function Disconnect-Safe {
     Close-PnPConnection $Connection
 }
 
-function Connect-Site {
-    param([Parameter(Mandatory)][string]$Url)
+function Release-AdminConnection {
+    if ($null -ne $script:AdminConnection) {
+        Disconnect-Safe $script:AdminConnection
+    }
 
-    return Connect-M365SiteWithClientId -Url $Url -ClientId $script:Settings.ClientId
+    $script:AdminConnection = $null
+}
+
+function Ensure-PersistLoginPreference {
+    if ([bool]$script:Settings.PersistLoginConfigured) {
+        return
+    }
+
+    Write-AppHeader 'Sesión de autenticación'
+    Write-Styled 'La sesión en memoria se reutiliza mientras la herramienta permanezca abierta.' Muted
+    Write-Styled 'Sesión persistente: si la activas, PnP puede reutilizar el inicio de sesión cuando abras el script nuevamente.' Muted
+    Write-Styled 'Si la desactivas, solo se usa la sesión actual y podrás iniciar sesión de nuevo en la siguiente ejecución.' Muted
+    Write-Host ''
+
+    $script:Settings.PersistLogin = Read-YesNo `
+        '¿Guardar la sesión para futuras ejecuciones?' `
+        ([bool]$script:Settings.PersistLogin)
+    $script:Settings.PersistLoginConfigured = $true
+    Save-Settings
+}
+
+function Connect-Site {
+    param(
+        [Parameter(Mandatory)][string]$Url,
+        [AllowNull()][object]$BaseConnection = $script:AdminConnection
+    )
+
+    if ($null -eq $BaseConnection) {
+        # Never start an interactive connection for a site in the bulk flow.
+        # If no base exists, authenticate once against the Admin Center first.
+        $BaseConnection = Connect-AdminCenter
+    }
+
+    try {
+        return Connect-M365SiteWithClientId `
+            -Url $Url `
+            -ClientId $script:Settings.ClientId `
+            -ReuseConnection $BaseConnection
+    }
+    catch {
+        if ($script:AuthRecoveryUsed -or -not (Test-AuthenticationRecoveryError -Exception $_.Exception)) {
+            throw
+        }
+
+        $script:AuthRecoveryUsed = $true
+        Write-Status Warn 'La sesión autenticada no pudo reutilizarse; se solicitará autenticación nuevamente una sola vez.'
+        $newBase = Connect-AdminCenter -ForceAuthentication
+
+        return Connect-M365SiteWithClientId `
+            -Url $Url `
+            -ClientId $script:Settings.ClientId `
+            -ReuseConnection $newBase
+    }
 }
 
 # =============================================================================
@@ -1957,10 +2280,6 @@ function Select-AffectedUser {
     }
     catch {
         Write-Status Error $_.Exception.Message
-    }
-    finally {
-        Disconnect-Safe $script:AdminConnection
-        $script:AdminConnection = $null
     }
 
     Pause-Tui
@@ -2848,10 +3167,6 @@ function Add-ProtectedSpoSite {
     catch {
         Write-Status Error $_.Exception.Message
     }
-    finally {
-        Disconnect-Safe $script:AdminConnection
-        $script:AdminConnection = $null
-    }
 
     Pause-Tui
 }
@@ -2942,6 +3257,11 @@ function Show-SettingsMenu {
                 Hint = $script:Settings.AdminUpn
             },
             [pscustomobject]@{
+                Label = 'Aplicación Entra / autenticación PnP'
+                Value = 'Auth'
+                Hint = 'Validar, cambiar o registrar la aplicación usada por PnP.PowerShell.'
+            },
+            [pscustomobject]@{
                 Label = 'Alcance predeterminado'
                 Value = 'Scope'
                 Hint = $scopeLabel
@@ -2950,6 +3270,11 @@ function Show-SettingsMenu {
                 Label = 'Sitios SPO protegidos'
                 Value = 'Protected'
                 Hint = "$(@($script:Settings.ProtectedSpoSites).Count) sitio(s)"
+            },
+            [pscustomobject]@{
+                Label = 'Abrir carpeta de reportes'
+                Value = 'OpenReports'
+                Hint = 'Abre la carpeta donde se guardan los reportes y CSV.'
             },
             [pscustomobject]@{
                 Label = 'Timeout de propagación'
@@ -2974,8 +3299,18 @@ function Show-SettingsMenu {
             [pscustomobject]@{
                 Label = 'Sesión persistente'
                 Value = 'Persist'
-                Hint = if ($script:Settings.PersistLogin) { 'Activada' } else { 'Desactivada' }
-            }
+                Hint = if ($script:Settings.PersistLogin) {
+                    'Activada · PnP puede reutilizar login en futuras ejecuciones'
+                }
+                else {
+                    'Desactivada · login solo para esta ejecución'
+                }
+            },
+            [pscustomobject]@{
+                Label = 'Restablecer configuración local'
+                Value = 'Reset'
+                Hint = 'Borra los valores guardados; conserva reportes y el idioma; exige limpiar grants pendientes antes.'
+            },
             [pscustomobject]@{
                 Label = 'Cambiar idioma'
                 Value = 'Language'
@@ -2983,7 +3318,14 @@ function Show-SettingsMenu {
             }
         )
 
-        $choice = Read-MenuChoice -Title 'Configuración' -Items $items
+        $choice = Read-MenuChoice `
+            -Title 'Configuración' `
+            -Items $items `
+            -Description @(
+                'La sesión en memoria se reutiliza mientras la herramienta permanezca abierta.',
+                'Sesión persistente activada: PnP puede reutilizar el login cuando abras el script nuevamente.',
+                'Sesión persistente desactivada: el login se usa solo durante esta ejecución.'
+            )
         if ($null -eq $choice) { return }
 
         switch ($choice.Value) {
@@ -2993,11 +3335,17 @@ function Show-SettingsMenu {
                 Save-Settings
             }
 
+            'Reset' { Reset-LocalSettings }
+
             'Tenant' {
                 Write-AppHeader 'Tenant'
                 $value = Read-TextValue 'Tenant' -Default $script:Settings.Tenant -Required
                 if ($value -match '^[a-zA-Z0-9][a-zA-Z0-9.-]*\.onmicrosoft\.com$') {
-                    $script:Settings.Tenant = $value
+                    $normalizedTenant = $value.Trim().ToLowerInvariant()
+                    if ($normalizedTenant -ne [string]$script:Settings.Tenant) {
+                        Release-AdminConnection
+                    }
+                    $script:Settings.Tenant = $normalizedTenant
                     Save-Settings
                 }
                 else {
@@ -3019,6 +3367,12 @@ function Show-SettingsMenu {
                 }
             }
 
+            'Auth' {
+                if (Ensure-PnPModule) {
+                    Show-AppRegistrationMenu
+                }
+            }
+
             'Scope' {
                 $scopeItems = @(
                     [pscustomobject]@{ Label='SharePoint Online'; Value='SharePoint'; Hint='Solo sitios SPO.' },
@@ -3034,6 +3388,8 @@ function Show-SettingsMenu {
             }
 
             'Protected' { Show-ProtectedSpoMenu }
+
+            'OpenReports' { Open-ReportsFolder }
 
             'Propagation' {
                 Write-AppHeader 'Propagación'
@@ -3146,6 +3502,7 @@ function Show-SettingsMenu {
 
             'Persist' {
                 $script:Settings.PersistLogin = -not [bool]$script:Settings.PersistLogin
+                $script:Settings.PersistLoginConfigured = $true
                 Save-Settings
             }
         }
@@ -3211,6 +3568,8 @@ function Start-FullRepair {
     if (-not (Ensure-ClientId)) { return }
     if (-not (Ensure-AdminUpn)) { return }
 
+    $validationSucceeded = $false
+
     try {
         Write-AppHeader 'Validación previa'
         Write-Status Info 'Validando la identidad ACTUAL del usuario...'
@@ -3233,6 +3592,7 @@ function Start-FullRepair {
         Write-Field 'UPN' $script:AffectedUser.Upn Primary
         Write-Field 'SID actual' $script:AffectedUser.CurrentSid Success
         Write-Field 'OneDrive propio' $script:AffectedUser.PersonalUrl Muted
+        $validationSucceeded = $true
     }
     catch {
         Write-Status Error $_.Exception.Message
@@ -3240,8 +3600,9 @@ function Start-FullRepair {
         return
     }
     finally {
-        Disconnect-Safe $script:AdminConnection
-        $script:AdminConnection = $null
+        if (-not $validationSucceeded) {
+            Release-AdminConnection
+        }
     }
 
     $scopeItems = @(
@@ -3267,7 +3628,9 @@ function Start-FullRepair {
         -Items $scopeItems `
         -Description @("Predeterminado: $($script:Settings.Scope)")
 
-    if ($null -eq $scopeChoice) { return }
+    if ($null -eq $scopeChoice) {
+        return
+    }
 
     $scope = $scopeChoice.Value
     $script:Settings.Scope = $scope
@@ -3284,15 +3647,15 @@ function Start-FullRepair {
     $fatal = $null
 
     try {
+        $script:AuthRecoveryUsed = $false
+
         # FASE 1: grants masivos / rápidos desde Admin Center.
         $null = Connect-AdminCenter
         $inventory = @(Invoke-PrepareAdminAccess -Scope $scope)
         $script:LastInventory = $inventory
 
-        Disconnect-Safe $script:AdminConnection
-        $script:AdminConnection = $null
-
-        # FASE 2: el propio intento de leer UserInfoList valida el acceso.
+        # FASE 2: reutiliza la sesión base para cada sitio; no vuelve a abrir
+        # autenticación interactiva por cada URL.
         $results = @(Invoke-ProcessAndRepairSites -Inventory $inventory)
         $script:LastResults = $results
     }
@@ -3300,9 +3663,6 @@ function Start-FullRepair {
         $fatal = $_
     }
     finally {
-        Disconnect-Safe $script:AdminConnection
-        $script:AdminConnection = $null
-
         # FASE 3: intentar siempre la restauración.
         if (@($inventory).Count -gt 0) {
             try {
@@ -3315,6 +3675,7 @@ function Start-FullRepair {
                 Pause-Tui
             }
         }
+
     }
 
     try {
@@ -3368,7 +3729,7 @@ function Run-Diagnostics {
     Write-Field 'PnP.PowerShell' $(if ($null -eq $module) { 'No instalado' } else { $module.Version }) $(if ($null -ne $module -and $module.Version -ge $script:MinimumPnPVersion) { 'Success' } else { 'Danger' })
 
     Write-Section 'Autenticación'
-    Write-Field 'Estado' $auth.Label $auth.Style
+    Write-Field 'Contexto de conexión' $auth.Label $auth.Style
     Write-Field 'Tenant' $script:Settings.Tenant
     Write-Field 'Aplicación' $script:Settings.AppRegistrationName
     Write-Field 'Client ID' $(if (Test-ClientIdFormat $script:Settings.ClientId) { $script:Settings.ClientId } else { 'No configurado' })
@@ -3417,6 +3778,9 @@ function Get-AffectedUserStatusText {
 function Write-MainDashboard {
     $module = Get-InstalledPnPModule
     $auth = Get-AppAuthState
+    $tenantConfigured = Test-TenantFormat $script:Settings.Tenant
+    $adminConfigured = -not [string]::IsNullOrWhiteSpace($script:Settings.AdminUpn)
+    $userStyle = if ($null -ne $script:AffectedUser) { 'Success' } elseif (-not [string]::IsNullOrWhiteSpace($script:Settings.AffectedUserUpn)) { 'Warning' } else { 'Muted' }
     $mode = if ($script:Settings.DryRun) { 'SIMULACIÓN' } else { 'REAL' }
     $modeStyle = if ($script:Settings.DryRun) { 'Warning' } else { 'Danger' }
     $pending = Test-Path -LiteralPath $script:StatePath
@@ -3426,13 +3790,14 @@ function Write-MainDashboard {
         default { 'SharePoint + OneDrive' }
     }
 
-    Write-Section 'Estado'
-    Write-Field 'Tenant' $(if (Test-TenantFormat $script:Settings.Tenant) { $script:Settings.Tenant } else { 'No configurado' })
+    Write-Section 'Contexto'
+    Write-Field 'Tenant' $(if ($tenantConfigured) { $script:Settings.Tenant } else { 'No configurado' }) $(if ($tenantConfigured) { 'Success' } else { 'Warning' })
+    Write-Field 'Reportes' $script:ReportsFolder Muted
     Write-Field 'PnP.PowerShell' $(if ($null -eq $module) { 'No instalado' } else { $module.Version }) $(if ($null -ne $module -and $module.Version -ge $script:MinimumPnPVersion) { 'Success' } else { 'Warning' })
     Write-Field 'Autenticación' $auth.Label $auth.Style
-    Write-Field 'Administrador' $(if ([string]::IsNullOrWhiteSpace($script:Settings.AdminUpn)) { 'No configurado' } else { $script:Settings.AdminUpn })
-    Write-Field 'Usuario' (Get-AffectedUserStatusText)
-    Write-Field 'Alcance' $scopeLabel
+    Write-Field 'Administrador' $(if ($adminConfigured) { $script:Settings.AdminUpn } else { 'No configurado' }) $(if ($adminConfigured) { 'Success' } else { 'Warning' })
+    Write-Field 'Usuario' (Get-AffectedUserStatusText) $userStyle
+    Write-Field 'Alcance' $scopeLabel Primary
     Write-Field 'Modo' $mode $modeStyle
     Write-Field 'Sitios protegidos' @($script:Settings.ProtectedSpoSites).Count
 
@@ -3450,6 +3815,16 @@ function Show-MainMenu {
     while ($true) {
         $auth = Get-AppAuthState
         $pending = Test-Path -LiteralPath $script:StatePath
+        $contextActive = ($null -ne $script:AffectedUser) -or
+            (-not [string]::IsNullOrWhiteSpace($script:Settings.AffectedUserUpn)) -or
+            (@($script:LastInventory).Count -gt 0) -or
+            (@($script:LastResults).Count -gt 0)
+        $contextDescription = if ($contextActive) {
+            'Hay contexto de trabajo activo. Limpia selecciones o cambia tenant/aplicación conectada.'
+        }
+        else {
+            'No hay contexto activo. Puedes cambiar tenant/aplicación o iniciar una selección.'
+        }
 
         $items = @(
             [pscustomobject]@{
@@ -3496,6 +3871,11 @@ function Show-MainMenu {
                 else {
                     'No hay grants pendientes registrados.'
                 }
+            },
+            [pscustomobject]@{
+                Label = 'Gestionar contexto de trabajo'
+                Value = 'Context'
+                Hint = $contextDescription
             },
             [pscustomobject]@{
                 Label = 'Configuración'
@@ -3568,6 +3948,10 @@ function Show-MainMenu {
                 }
             }
 
+            'Context' {
+                Show-WorkingContextMenu
+            }
+
             'Settings' {
                 Show-SettingsMenu
             }
@@ -3615,8 +3999,7 @@ catch {
     Pause-Tui
 }
 finally {
-    Disconnect-Safe $script:AdminConnection
-    $script:AdminConnection = $null
+    Release-AdminConnection
 }
 
 Clear-Host

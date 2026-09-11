@@ -41,7 +41,7 @@ $ErrorActionPreference = 'Stop'
 # =============================================================================
 
 $script:AppName           = 'Microsoft 365 Recycle Bin and Hold Cleaner'
-$script:AppVersion        = '2.1.0'
+$script:AppVersion        = '2.2.0'
 $script:MinimumPnPVersion = [version]'3.2.0'
 
 if ($env:LOCALAPPDATA) {
@@ -57,6 +57,8 @@ $script:ReportsPath = Join-Path $script:AppRoot 'Reportes'
 $script:Settings       = $null
 $script:Target         = $null
 $script:PnPConnection  = $null
+$script:AdminConnection = $null
+$script:AuthRecoveryUsed = $false
 $script:TemporarySiteAdmin = $null
 $script:Ansi           = $false
 $script:ThrottleEvents = [System.Collections.Generic.List[object]]::new()
@@ -147,6 +149,7 @@ function Get-LocalizedText {
             @{ From = 'Buscar sitios del tenant.'; To = 'Search for sites in the tenant.' }
             @{ From = 'Buscar OneDrive reales del tenant.'; To = 'Search for real OneDrive sites in the tenant.' }
             @{ From = 'Detecta automáticamente SharePoint u OneDrive.'; To = 'Automatically detects SharePoint or OneDrive.' }
+            @{ From = 'Validar aplicación configurada'; To = 'Validate configured application' }
             @{ From = 'Validar aplicación'; To = 'Validate application' }
             @{ From = 'Autenticación requerida'; To = 'Authentication required' }
             @{ From = 'Configuración'; To = 'Settings' }
@@ -229,6 +232,126 @@ function Get-LocalizedText {
             @{ From = 'Esperando propagación del acceso administrativo...'; To = 'Waiting for administrative access propagation...' }
             @{ From = 'Reintentando validación de acceso...'; To = 'Retrying access validation...' }
             @{ From = 'No se pudo confirmar el acceso administrativo después de agregar el usuario.'; To = 'Administrative access could not be confirmed after adding the user.' }
+            @{ From = 'PnP no devolvió un token de SharePoint reutilizable.'; To = 'PnP did not return a reusable SharePoint token.' }
+            @{ From = 'Sesión de autenticación'; To = 'Authentication session' }
+            @{ From = 'Reportes'; To = 'Reports' }
+            @{ From = 'La sesión en memoria se reutiliza mientras la herramienta permanezca abierta.'; To = 'The in-memory session is reused while the tool remains open.' }
+            @{ From = 'Sesión persistente: si la activas, PnP puede reutilizar el inicio de sesión cuando abras el script nuevamente.'; To = 'Persisted session: when enabled, PnP can reuse the sign-in when you open the script again.' }
+            @{ From = 'Si la desactivas, solo se usa la sesión actual y podrás iniciar sesión de nuevo en la siguiente ejecución.'; To = 'When disabled, the login is used only for the current execution and you can sign in again on the next run.' }
+            @{ From = '¿Guardar la sesión para futuras ejecuciones?'; To = 'Save the session for future runs?' }
+            @{ From = 'Persist login controla si PnP puede reutilizar el login al abrir el script nuevamente.'; To = 'Persist login controls whether PnP can reuse the login when you open the script again.' }
+            @{ From = 'Cambiar tenant o aplicación conectada'; To = 'Change tenant or connected application' }
+            @{ From = 'Cambiar tenant'; To = 'Change tenant' }
+            @{ From = 'Actualiza el tenant conectado y libera la sesión anterior.'; To = 'Updates the connected tenant and releases the previous session.' }
+            @{ From = 'Cambia el idioma de la interfaz.'; To = 'Changes the interface language.' }
+            @{ From = 'Controla si PnP puede reutilizar el login cuando abras el script nuevamente.'; To = 'Controls whether PnP can reuse the login when you open the script again.' }
+            @{ From = 'Cantidad inicial de elementos a procesar por operación.'; To = 'Initial number of items to process per operation.' }
+            @{ From = 'Ajusta pausas, backoff y cantidad de reintentos.'; To = 'Adjusts pacing, backoff, and retry count.' }
+            @{ From = 'Abre la carpeta donde se guardan los CSV de auditoría.'; To = 'Opens the folder where audit CSV files are saved.' }
+            @{ From = 'Borra valores guardados; conserva idioma y reportes.'; To = 'Clears saved values; preserves language and reports.' }
+            @{ From = 'Limpia el destino y la conexión de sitio, pero conserva tenant, aplicación y reportes.'; To = 'Clears the target and site connection, but preserves the tenant, application, and reports.' }
+            @{ From = 'Abre la configuración y libera la conexión anterior cuando cambies estos valores.'; To = 'Opens settings and releases the previous connection when you change these values.' }
+            @{ From = 'Cierra la herramienta.'; To = 'Closes the tool.' }
+            @{ From = 'Regresa al menú anterior.'; To = 'Returns to the previous menu.' }
+            @{ From = 'Sin descripción adicional.'; To = 'No additional details.' }
+            @{ From = 'Gestión del contexto'; To = 'Context management' }
+            @{ From = 'Limpiar contexto de trabajo'; To = 'Clear working context' }
+            @{ From = 'Limpia el destino y la conexión de sitio. Conserva tenant, aplicación, preferencias y reportes.'; To = 'Clears the target and site connection. Preserves the tenant, application, preferences, and reports.' }
+            @{ From = 'La sesión de autenticación base se conserva; cambiar tenant o aplicación la renovará.'; To = 'The base authentication session is preserved; changing the tenant or application will renew it.' }
+            @{ From = 'No se puede limpiar el contexto mientras exista un acceso temporal activo.'; To = 'The context cannot be cleared while temporary access is active.' }
+            @{ From = 'Retíralo primero desde el menú principal.'; To = 'Remove it first from the main menu.' }
+            @{ From = 'Retira primero el acceso temporal antes de cambiar tenant o aplicación.'; To = 'Remove temporary access before changing the tenant or application.' }
+            @{ From = 'Conexión de sitio'; To = 'Site connection' }
+            @{ From = 'VACÍO'; To = 'EMPTY' }
+            @{ From = 'App guardada'; To = 'Saved app' }
+            @{ From = 'Cambia el idioma de la interfaz.'; To = 'Changes the interface language.' }
+            @{ From = 'Introduce y valida un Client ID ya registrado.'; To = 'Enter and validate an already registered Client ID.' }
+            @{ From = 'Crea una nueva aplicación PnP para esta herramienta.'; To = 'Creates a new PnP application for this tool.' }
+            @{ From = 'Sesión en memoria'; To = 'In-memory session' }
+            @{ From = 'ACTIVA'; To = 'ACTIVE' }
+            @{ From = 'INACTIVA'; To = 'INACTIVE' }
+            @{ From = 'VACÍA'; To = 'EMPTY' }
+            @{ From = 'Contexto activo · limpia el destino o cambia tenant/aplicación conectada.'; To = 'Active context · clear the target or change the connected tenant/application.' }
+            @{ From = 'No hay contexto activo · limpia selecciones o cambia tenant/aplicación conectada.'; To = 'No active context · clear selections or change the connected tenant/application.' }
+            @{ From = 'Limpia el sitio seleccionado y la conexión de sitio. Conserva tenant, aplicación, preferencias y reportes.'; To = 'Clears the selected site and site connection. Preserves the tenant, application, preferences, and reports.' }
+            @{ From = 'CONFIGURADA · valida, cambia o registra otra aplicación.'; To = 'CONFIGURED · validate, change, or register another application.' }
+            @{ From = 'NO CONFIGURADA · usa una aplicación existente o registra una nueva.'; To = 'NOT CONFIGURED · use an existing application or register a new one.' }
+            @{ From = 'Tenant, límites, throttling, persistencia, idioma y reportes.'; To = 'Tenant, limits, throttling, persistence, language, and reports.' }
+            @{ From = 'Valida PowerShell, PnP, autenticación y acceso al sitio actual.'; To = 'Validates PowerShell, PnP, authentication, and access to the current site.' }
+            @{ From = 'SIMULACIÓN es el modo seguro.'; To = 'SIMULATION is the safe mode.' }
+            @{ From = 'REAL elimina o modifica elementos según la operación elegida.'; To = 'LIVE removes or modifies items according to the selected operation.' }
+            @{ From = 'La sesión autenticada no pudo reutilizarse; se solicitará autenticación nuevamente una sola vez.'; To = 'The authenticated session could not be reused; authentication will be requested once.' }
+            @{ From = 'Gestionar contexto de trabajo'; To = 'Manage working context' }
+            @{ From = 'Abrir carpeta de reportes'; To = 'Open reports folder' }
+            @{ From = 'Admin temporal'; To = 'Temporary admin' }
+            @{ From = 'Estado config'; To = 'Configuration status' }
+            @{ From = 'Contexto'; To = 'Context' }
+            @{ From = 'Tipo'; To = 'Type' }
+            @{ From = 'Validar aplicación configurada'; To = 'Validate configured application' }
+            @{ From = 'Cierra la sesión actual y elimina el login persistido por PnP.PowerShell.'; To = 'Closes the current session and removes the login persisted by PnP.PowerShell.' }
+            @{ From = 'Consultando sitios del tenant...'; To = 'Querying sites in the tenant...' }
+            @{ From = 'Disponibles'; To = 'Available' }
+            @{ From = 'Hay '; To = 'There are ' }
+            @{ From = ' coincidencias. Refina el filtro a 50 o menos.'; To = ' matches. Refine the filter to 50 or fewer.' }
+            @{ From = 'URL completa de SharePoint / OneDrive'; To = 'Full SharePoint / OneDrive URL' }
+            @{ From = 'Papelera · '; To = 'Recycle bin · ' }
+            @{ From = 'Primer nivel'; To = 'First stage' }
+            @{ From = 'Segundo nivel'; To = 'Second stage' }
+            @{ From = 'Mover al segundo nivel'; To = 'Move to second stage' }
+            @{ From = 'Eliminar permanentemente'; To = 'Permanently delete' }
+            @{ From = 'Leyendo elementos...'; To = 'Reading items...' }
+            @{ From = 'elemento(s) encontrados.'; To = 'item(s) found.' }
+            @{ From = 'Escribe '; To = 'Type ' }
+            @{ From = 'Simulado: mover a segundo nivel'; To = 'Simulated: move to second stage' }
+            @{ From = 'Movido a segundo nivel'; To = 'Moved to second stage' }
+            @{ From = 'Simulado: eliminar permanentemente'; To = 'Simulated: permanently delete' }
+            @{ From = 'Eliminado permanentemente'; To = 'Permanently deleted' }
+            @{ From = 'Procesando Preservation Hold Library'; To = 'Processing Preservation Hold Library' }
+            @{ From = 'Buscando Preservation Hold Library...'; To = 'Searching for Preservation Hold Library...' }
+            @{ From = 'Biblioteca detectada: '; To = 'Library detected: ' }
+            @{ From = 'Confirmar Preservation Hold Library'; To = 'Confirm Preservation Hold Library' }
+            @{ From = 'Valores conservadores para trabajo secuencial.'; To = 'Conservative values for sequential work.' }
+            @{ From = 'Pausa entre solicitudes (ms)'; To = 'Delay between requests (ms)' }
+            @{ From = 'Máximo de reintentos'; To = 'Maximum retries' }
+            @{ From = 'Espera base de retry (segundos)'; To = 'Base retry wait (seconds)' }
+            @{ From = 'Restablecer configuración'; To = 'Reset settings' }
+            @{ From = 'Responde S o N.'; To = 'Answer Y or N.' }
+            @{ From = 'Introduce un número entre '; To = 'Enter a number between ' }
+            @{ From = 'Usa el dominio inicial, por ejemplo empresa.onmicrosoft.com.'; To = 'Use the initial domain, for example company.onmicrosoft.com.' }
+            @{ From = 'Debe ser un GUID válido.'; To = 'Must be a valid GUID.' }
+            @{ From = 'URL directa'; To = 'Direct URL' }
+            @{ From = 'Confirmar · '; To = 'Confirm · ' }
+            @{ From = 'Nivel'; To = 'Stage' }
+            @{ From = 'Movidos'; To = 'Moved' }
+            @{ From = 'Eliminados'; To = 'Deleted' }
+            @{ From = 'Simulados'; To = 'Simulated' }
+            @{ From = '¿Instalar/actualizar ahora?'; To = 'Install/update now?' }
+            @{ From = 'Dominio inicial del tenant'; To = 'Initial tenant domain' }
+            @{ From = '¿Validar antes de guardar?'; To = 'Validate before saving?' }
+            @{ From = '¿Continuar con el registro?'; To = 'Continue with registration?' }
+            @{ From = 'Client ID creado'; To = 'Created Client ID' }
+            @{ From = '¿Probarla ahora?'; To = 'Test it now?' }
+            @{ From = '¿Limpiar el contexto de trabajo?'; To = 'Clear the working context?' }
+            @{ From = '¿Retirar el acceso temporal antes de cambiar de sitio?'; To = 'Remove temporary access before changing sites?' }
+            @{ From = 'Retira primero el acceso temporal antes de cambiar tenant o aplicación.'; To = 'Remove temporary access before changing the tenant or application.' }
+            @{ From = 'Aplicación, tenant y acceso PnP validados correctamente.'; To = 'Application, tenant, and PnP access validated successfully.' }
+            @{ From = 'Aplicación configurada.'; To = 'Application configured.' }
+            @{ From = 'Solo elimina el Client ID guardado por esta herramienta.'; To = 'Only removes the Client ID saved by this tool.' }
+            @{ From = 'Límite de procesamiento'; To = 'Processing limit' }
+            @{ From = 'Primer nivel: mover al segundo. Segundo nivel: eliminación permanente.'; To = 'First stage: move to the second. Second stage: permanent deletion.' }
+            @{ From = 'En "ambos niveles", el límite se aplica por separado a cada nivel.'; To = 'For "both stages", the limit applies separately to each stage.' }
+            @{ From = 'Se moverán hasta '; To = 'Up to ' }
+            @{ From = ' elemento(s) del primer nivel al segundo nivel. No es una eliminación permanente.'; To = ' item(s) will be moved from the first stage to the second stage. This is not a permanent deletion.' }
+            @{ From = 'Se eliminarán permanentemente hasta '; To = 'Up to ' }
+            @{ From = ' elemento(s) del segundo nivel.'; To = ' item(s) will be permanently deleted from the second stage.' }
+            @{ From = 'Se intentará eliminar permanentemente hasta '; To = 'Up to ' }
+            @{ From = ' elemento(s) de la biblioteca detectada.'; To = ' item(s) from the detected library.' }
+            @{ From = ' detectado. '; To = ' detected. ' }
+            @{ From = 'Se requiere PowerShell '; To = 'PowerShell ' }
+            @{ From = ' o superior.'; To = ' or later.' }
+            @{ From = 'Límite defecto'; To = 'Default limit' }
+            @{ From = ' de '; To = ' of ' }
+            @{ From = 'reintento'; To = 'retry' }
         )
         foreach ($translation in $phrases) { $result = $result.Replace($translation.From, $translation.To) }
         foreach ($translation in $script:UiTranslations) { $result = $result.Replace($translation.From, $translation.To) }
@@ -291,10 +414,19 @@ function Write-Progress {
 }
 function Initialize-AppLanguage {
     while ($true) {
-        Microsoft.PowerShell.Utility\Write-Host ''; Microsoft.PowerShell.Utility\Write-Host 'Select language / Seleccione idioma:'; Microsoft.PowerShell.Utility\Write-Host '1. English'; Microsoft.PowerShell.Utility\Write-Host '2. Español'
+        Clear-AppScreen
+        Write-Host ''
+        Write-AppStyled -Text $script:AppName -Style Primary
+        Write-AppStyled -Text "v$script:AppVersion" -Style Muted
+        Write-AppStyled -Text ('─' * 72) -Style Muted
+        Write-Host ''
+        Write-AppStyled -Text 'Select language / Seleccione idioma' -Style Primary
+        Write-AppStyled -Text '  1  English' -Style Primary
+        Write-AppStyled -Text '  2  Español' -Style Primary
+        Write-Host ''
         $choice = (Microsoft.PowerShell.Utility\Read-Host 'Choice / Opción').Trim()
         if ($choice -eq '1') { $script:Language = 'en'; return }; if ($choice -eq '2') { $script:Language = 'es'; return }
-        Microsoft.PowerShell.Utility\Write-Host 'Please choose 1 or 2 / Elija 1 o 2.'
+        Write-AppWarning -Message 'Please choose 1 or 2 / Elija 1 o 2.'
     }
 }
 
@@ -354,6 +486,7 @@ function Write-AppStyled {
         [switch]$NoNewline
     )
 
+    $Text = Get-LocalizedText $Text
     $prefix   = ''
     $fallback = 'Gray'
 
@@ -398,10 +531,7 @@ function Show-AppHeader {
     $width = 72
 
     try {
-        $width = [Math]::Min(
-            76,
-            [Math]::Max(30, $Host.UI.RawUI.WindowSize.Width - 2)
-        )
+        $width = [Math]::Min(84, [Math]::Max(36, $Host.UI.RawUI.WindowSize.Width - 2))
     }
     catch {
         $width = 72
@@ -409,13 +539,14 @@ function Show-AppHeader {
 
     Clear-AppScreen
 
+    Write-AppStyled -Text ('═' * $width) -Style Accent
     Write-AppStyled -Text "$script:AppName  v$script:AppVersion" -Style Primary
 
-    if (-not [string]::IsNullOrWhiteSpace($Section) -and $Section -ne 'Inicio') {
-        Write-AppStyled -Text $Section -Style Muted
+    if (-not [string]::IsNullOrWhiteSpace($Section)) {
+        Write-AppStyled -Text "[$Section]" -Style Muted
     }
 
-    Write-AppStyled -Text ('━' * $width) -Style Muted
+    Write-AppStyled -Text ('─' * $width) -Style Muted
 }
 
 function Write-AppOk {
@@ -453,15 +584,17 @@ function Write-AppSection {
 function Write-AppField {
     param(
         [Parameter(Mandatory)][string]$Name,
-        [AllowNull()]$Value
+        [AllowNull()]$Value,
+        [ValidateSet('Normal','Muted','Primary','Success','Warning','Danger','Accent')]
+        [string]$Style = 'Normal'
     )
 
     if ($null -eq $Value -or [string]::IsNullOrWhiteSpace([string]$Value)) {
         $Value = '—'
     }
 
-    Write-AppStyled -Text ('{0,-16}' -f $Name) -Style Muted -NoNewline
-    Write-Host $Value
+    Write-AppStyled -Text ('{0,-18}' -f $Name) -Style Muted -NoNewline
+    Write-AppStyled -Text ([string]$Value) -Style $Style
 }
 
 function Wait-App {
@@ -578,10 +711,13 @@ function Read-AppYesNo {
         [bool]$DefaultYes = $false
     )
 
-    $hint = if ($DefaultYes) { 'S/n' } else { 's/N' }
+    $yesToken = if ($script:Language -eq 'en') { 'Y' } else { 'S' }
+    $noToken = 'N'
+    $hint = if ($DefaultYes) { "$yesToken/n" } else { "$($yesToken.ToLowerInvariant())/$noToken" }
 
     while ($true) {
-        $answer = (Read-Host "$Prompt [$hint]").Trim()
+        $localizedPrompt = Get-LocalizedText $Prompt
+        $answer = (Microsoft.PowerShell.Utility\Read-Host -Prompt "$localizedPrompt [$hint]").Trim()
 
         if ([string]::IsNullOrWhiteSpace($answer)) {
             return $DefaultYes
@@ -678,19 +814,29 @@ function Read-AppMenuChoice {
     )
 
     foreach ($item in $normalized) {
-        Write-AppStyled -Text ('{0,3}' -f $item.Key) -Style Accent -NoNewline
-        Write-Host "  $($item.Label)"
+        Write-AppStyled -Text ('  {0,2}  ' -f $item.Key) -Style Primary -NoNewline
+        Write-Host $item.Label
 
-        if (-not [string]::IsNullOrWhiteSpace($item.Description)) {
+        if ($item.Key -eq '0' -and [string]::IsNullOrWhiteSpace($item.Description)) {
+            Write-AppMuted -Message '     Regresa al menú anterior.'
+        }
+        elseif (-not [string]::IsNullOrWhiteSpace($item.Description)) {
             Write-AppMuted -Message "     $($item.Description)"
         }
+        else {
+            Write-AppMuted -Message '     Sin descripción adicional.'
+        }
+
+        Write-Host ''
     }
 
     $valid = @($normalized | ForEach-Object { $_.Key })
 
     if ($AllowBack -and -not ($valid -contains '0')) {
-        Write-AppStyled -Text '  0' -Style Accent -NoNewline
-        Write-Host '  Volver'
+        Write-AppStyled -Text '  0  ' -Style Primary -NoNewline
+        Write-Host 'Volver'
+        Write-AppMuted -Message '     Regresa al menú anterior.'
+        Write-Host ''
         $valid += '0'
     }
 
@@ -732,12 +878,14 @@ function Select-AppSingleByNumber {
     Write-AppSection -Title $Title
 
     for ($i = 0; $i -lt $list.Count; $i++) {
-        Write-AppStyled -Text ('{0,3}' -f ($i + 1)) -Style Accent -NoNewline
-        Write-Host ('  ' + (& $Label $list[$i]))
+        Write-AppStyled -Text ('  {0,2}  ' -f ($i + 1)) -Style Primary -NoNewline
+        Write-Host (& $Label $list[$i])
+        Write-Host ''
     }
 
-    Write-AppStyled -Text '  0' -Style Accent -NoNewline
-    Write-Host '  Cancelar'
+    Write-AppStyled -Text '  0  ' -Style Primary -NoNewline
+    Write-Host 'Cancelar'
+    Write-AppMuted -Message '     Regresa al menú anterior.'
 
     while ($true) {
         Write-Host ''
@@ -787,7 +935,8 @@ function Get-DefaultAppSettings {
         Tenant              = ''
         ClientId            = $clientId
         AppRegistrationName = 'Microsoft 365 Recycle Bin and Hold Cleaner'
-        PersistLogin        = $true
+        PersistLogin        = $false
+        PersistLoginConfigured = $false
         Language            = 'es'
         Simulation          = $true
         DefaultLimit        = 1000
@@ -838,6 +987,66 @@ function Save-AppSettings {
     $script:Settings |
         ConvertTo-Json -Depth 8 |
         Set-Content -LiteralPath $script:ConfigPath -Encoding UTF8
+}
+
+function Close-AppConnection {
+    param([AllowNull()]$Connection)
+
+    if ($null -eq $Connection) {
+        return
+    }
+
+    try {
+        $contextProperty = $Connection.PSObject.Properties['Context']
+
+        if ($null -ne $contextProperty -and $null -ne $contextProperty.Value) {
+            $contextProperty.Value.Dispose()
+        }
+    }
+    catch {
+    }
+}
+
+function Release-AppConnections {
+    param([switch]$PreserveRecoveryState)
+
+    $adminConnection = $script:AdminConnection
+    $siteConnection = $script:PnPConnection
+
+    if ($null -ne $adminConnection) {
+        Close-AppConnection -Connection $adminConnection
+    }
+
+    if ($null -ne $siteConnection -and
+        -not [object]::ReferenceEquals($siteConnection, $adminConnection)) {
+        Close-AppConnection -Connection $siteConnection
+    }
+
+    $script:AdminConnection = $null
+    $script:PnPConnection = $null
+
+    if (-not $PreserveRecoveryState) {
+        $script:AuthRecoveryUsed = $false
+    }
+}
+
+function Release-AppSiteConnection {
+    if ($null -ne $script:PnPConnection -and
+        -not [object]::ReferenceEquals($script:PnPConnection, $script:AdminConnection)) {
+        Close-AppConnection -Connection $script:PnPConnection
+    }
+
+    $script:PnPConnection = $null
+}
+
+function Test-AppConnectionChangeAllowed {
+    if ($null -eq $script:TemporarySiteAdmin) {
+        return $true
+    }
+
+    Write-AppWarning -Message 'Retira primero el acceso temporal antes de cambiar tenant o aplicación.'
+    Wait-App
+    return $false
 }
 
 
@@ -946,16 +1155,66 @@ function Get-AppAdminUrl {
 function Connect-AppUrl {
     param(
         [Parameter(Mandatory)][string]$Url,
-        [switch]$SkipEnsureAuth
+        [switch]$SkipEnsureAuth,
+        [AllowNull()]$ReuseConnection,
+        [switch]$ForceAuthentication
     )
 
     if (-not (Confirm-AppPnP)) {
         throw 'PnP.PowerShell no está disponible.'
     }
 
+    if ($ForceAuthentication) {
+        Release-AppConnections -PreserveRecoveryState
+
+        try {
+            Disconnect-PnPOnline -ClearPersistedLogin -ErrorAction SilentlyContinue
+        }
+        catch {
+        }
+    }
+
     if (-not $SkipEnsureAuth) {
         if (-not (Ensure-AppAuthentication)) {
             throw 'No existe una autenticación válida configurada.'
+        }
+    }
+
+    if ($null -eq $ReuseConnection -and $null -ne $script:AdminConnection) {
+        $ReuseConnection = $script:AdminConnection
+    }
+
+    if ($null -ne $ReuseConnection) {
+        try {
+            $accessToken = Get-PnPAccessToken `
+                -ResourceTypeName SharePoint `
+                -Connection $ReuseConnection `
+                -ErrorAction Stop
+
+            if ([string]::IsNullOrWhiteSpace([string]$accessToken)) {
+                throw 'PnP no devolvió un token de SharePoint reutilizable.'
+            }
+
+            return Connect-PnPOnline `
+                -Url $Url `
+                -AccessToken ([string]$accessToken) `
+                -ReturnConnection `
+                -ErrorAction Stop
+        }
+        catch {
+            if ($ForceAuthentication -or
+                $script:AuthRecoveryUsed -or
+                -not (Test-AppAuthenticationRecoveryError -Exception $_.Exception)) {
+                throw
+            }
+
+            $script:AuthRecoveryUsed = $true
+            Write-AppWarning -Message 'La sesión autenticada no pudo reutilizarse; se solicitará autenticación nuevamente una sola vez.'
+
+            return Connect-AppUrl `
+                -Url $Url `
+                -SkipEnsureAuth:$SkipEnsureAuth `
+                -ForceAuthentication
         }
     }
 
@@ -965,17 +1224,32 @@ function Connect-AppUrl {
         Tenant           = $script:Settings.Tenant
         Interactive      = $true
         ReturnConnection = $true
+        ValidateConnection = $true
         ErrorAction      = 'Stop'
+    }
+
+    Ensure-AppPersistLoginPreference
+
+    if ($ForceAuthentication) {
+        $params.ForceAuthentication = $true
     }
 
     if ([bool]$script:Settings.PersistLogin) {
         $params.PersistLogin = $true
     }
 
-    return Connect-PnPOnline @params
+    $connection = Connect-PnPOnline @params
+
+    if ($null -eq $script:AdminConnection) {
+        $script:AdminConnection = $connection
+    }
+
+    return $connection
 }
 
 function Disconnect-AppM365 {
+    Release-AppConnections
+
     try {
         Disconnect-PnPOnline -ErrorAction SilentlyContinue
     }
@@ -983,6 +1257,31 @@ function Disconnect-AppM365 {
     }
 
     $script:PnPConnection = $null
+}
+
+function Ensure-AppPersistLoginPreference {
+    if ([bool]$script:Settings.PersistLoginConfigured) {
+        return
+    }
+
+    Show-AppHeader -Section 'Sesión de autenticación'
+    Write-AppMuted -Message 'La sesión en memoria se reutiliza mientras la herramienta permanezca abierta.'
+    Write-AppMuted -Message 'Sesión persistente: si la activas, PnP puede reutilizar el inicio de sesión cuando abras el script nuevamente.'
+    Write-AppMuted -Message 'Si la desactivas, solo se usa la sesión actual y podrás iniciar sesión de nuevo en la siguiente ejecución.'
+    Write-Host ''
+
+    $script:Settings.PersistLogin = Read-AppYesNo `
+        -Prompt '¿Guardar la sesión para futuras ejecuciones?' `
+        -DefaultYes ([bool]$script:Settings.PersistLogin)
+    $script:Settings.PersistLoginConfigured = $true
+    Save-AppSettings
+}
+
+function Test-AppAuthenticationRecoveryError {
+    param([Parameter(Mandatory)][System.Exception]$Exception)
+
+    $text = $Exception.ToString()
+    return $text -match '(?i)AADSTS|access token|token|jwt|authentication|interactive|login|no connection|current connection'
 }
 
 
@@ -1131,10 +1430,18 @@ function Ensure-AppTenant {
 
     Show-AppHeader -Section 'Tenant'
 
-    $script:Settings.Tenant = Read-AppText `
+    $tenant = Read-AppText `
         -Prompt 'Dominio inicial del tenant' `
         -Validator { param($v) Test-AppTenant -Value $v } `
         -ValidationMessage 'Usa el dominio inicial, por ejemplo empresa.onmicrosoft.com.'
+
+    $tenant = $tenant.Trim().ToLowerInvariant()
+
+    if ($tenant -ne [string]$script:Settings.Tenant) {
+        Release-AppConnections
+    }
+
+    $script:Settings.Tenant = $tenant
 
     Save-AppSettings
     return $true
@@ -1200,6 +1507,10 @@ function Test-AppConfiguredApplication {
 function Set-AppExistingApplication {
     Show-AppHeader -Section 'Usar aplicación existente'
 
+    if (-not (Test-AppConnectionChangeAllowed)) {
+        return
+    }
+
     if (-not (Ensure-AppTenant)) {
         return
     }
@@ -1210,6 +1521,11 @@ function Set-AppExistingApplication {
         -Prompt 'Client ID de la aplicación existente' `
         -Validator { param($v) Test-AppGuid -Value $v } `
         -ValidationMessage 'Debe ser un GUID válido.'
+
+    if ($clientId -ne $oldClientId) {
+        Release-AppConnections
+        $script:Target = $null
+    }
 
     $script:Settings.ClientId = $clientId
 
@@ -1233,6 +1549,10 @@ function Set-AppExistingApplication {
 
 function New-AppEntraRegistration {
     Show-AppHeader -Section 'Registrar nueva aplicación Entra'
+
+    if (-not (Test-AppConnectionChangeAllowed)) {
+        return
+    }
 
     if (-not (Ensure-AppTenant)) {
         return
@@ -1275,6 +1595,11 @@ function New-AppEntraRegistration {
                 -ValidationMessage 'Debe ser un GUID válido.'
         }
 
+        if ($clientId -ne [string]$script:Settings.ClientId) {
+            Release-AppConnections
+            $script:Target = $null
+        }
+
         $script:Settings.ClientId = $clientId
         $script:Settings.AppRegistrationName = $name
         Save-AppSettings
@@ -1297,12 +1622,18 @@ function New-AppEntraRegistration {
 function Remove-AppLocalClientId {
     Show-AppHeader -Section 'Quitar Client ID local'
 
+    if (-not (Test-AppConnectionChangeAllowed)) {
+        return
+    }
+
     Write-AppWarning -Message 'Esto no elimina la aplicación de Microsoft Entra ID.'
     Write-AppMuted -Message 'Solo elimina el Client ID guardado por esta herramienta.'
     Write-Host ''
 
     if (Read-AppYesNo -Prompt '¿Continuar?' -DefaultYes $false) {
+        Release-AppConnections
         $script:Settings.ClientId = ''
+        $script:Target = $null
         Save-AppSettings
         Write-AppOk -Message 'Client ID eliminado de la configuración local.'
     }
@@ -1313,7 +1644,12 @@ function Remove-AppLocalClientId {
 function Clear-AppPersistedLogin {
     Show-AppHeader -Section 'Sesión persistente'
 
+    if (-not (Test-AppConnectionChangeAllowed)) {
+        return
+    }
+
     try {
+        Release-AppConnections
         Disconnect-PnPOnline -ClearPersistedLogin -ErrorAction Stop
         Write-AppOk -Message 'Sesión persistente eliminada.'
     }
@@ -1333,10 +1669,14 @@ function Show-AppAuthenticationMenu {
             (Test-AppGuid -Value $script:Settings.ClientId)
         )
 
-        Write-AppField -Name 'Tenant' -Value $script:Settings.Tenant
-        Write-AppField -Name 'App guardada' -Value $script:Settings.AppRegistrationName
-        Write-AppField -Name 'Client ID' -Value $script:Settings.ClientId
-        Write-AppField -Name 'Estado config' -Value $(if ($configured) { 'CONFIGURADA' } else { 'NO CONFIGURADA' })
+        Write-AppField -Name 'Tenant' -Value $(if ($configured) { $script:Settings.Tenant } else { 'No configurado' }) -Style $(if ($configured) { 'Success' } else { 'Warning' })
+        Write-AppField -Name 'App guardada' -Value $script:Settings.AppRegistrationName -Style Muted
+        Write-AppField -Name 'Client ID' -Value $(if (Test-AppGuid -Value $script:Settings.ClientId) { $script:Settings.ClientId } else { 'No configurado' }) -Style $(if (Test-AppGuid -Value $script:Settings.ClientId) { 'Success' } else { 'Warning' })
+        Write-AppField -Name 'Estado config' -Value $(if ($configured) { 'CONFIGURADA' } else { 'NO CONFIGURADA' }) -Style $(if ($configured) { 'Success' } else { 'Warning' })
+        Write-AppField -Name 'Sesión en memoria' -Value $(if ($null -ne $script:AdminConnection) { 'ACTIVA' } else { 'INACTIVA' }) -Style $(if ($null -ne $script:AdminConnection) { 'Success' } else { 'Muted' })
+        Write-AppField -Name 'Persist login' -Value $(if ($script:Settings.PersistLogin) { 'Activado' } else { 'Desactivado' }) -Style $(if ($script:Settings.PersistLogin) { 'Success' } else { 'Muted' })
+        Write-AppMuted -Message 'La sesión en memoria se reutiliza mientras la herramienta permanezca abierta.'
+        Write-AppMuted -Message 'Persist login controla si PnP puede reutilizar el login al abrir el script nuevamente.'
         Write-Host ''
 
         if ($configured) {
@@ -1345,16 +1685,16 @@ function Show-AppAuthenticationMenu {
                 @{ Key='2'; Value='Existing'; Label='Usar otra aplicación existente'; Description='Introduce y opcionalmente valida otro Client ID.' }
                 @{ Key='3'; Value='Register'; Label='Registrar una nueva aplicación Entra'; Description='Crea otra app PnP y la configura en esta herramienta.' }
                 @{ Key='4'; Value='Remove'; Label='Quitar Client ID de la configuración local'; Description='No elimina la aplicación en Entra.' }
-                @{ Key='5'; Value='Clear'; Label='Eliminar sesión persistente' }
-                @{ Key='0'; Value='Back'; Label='Volver' }
+                @{ Key='5'; Value='Clear'; Label='Eliminar sesión persistente'; Description='Cierra la sesión actual y elimina el login persistido por PnP.PowerShell.' }
+                @{ Key='0'; Value='Back'; Label='Volver'; Description='Regresa al menú anterior.' }
             )
         }
         else {
             $choice = Read-AppMenuChoice -Items @(
                 @{ Key='1'; Value='Existing'; Label='Usar una aplicación existente'; Description='Introduce y opcionalmente valida un Client ID ya registrado.' }
                 @{ Key='2'; Value='Register'; Label='Registrar una nueva aplicación Entra'; Description='Crea una nueva app PnP para esta herramienta.' }
-                @{ Key='3'; Value='Clear'; Label='Eliminar sesión persistente' }
-                @{ Key='0'; Value='Back'; Label='Volver' }
+                @{ Key='3'; Value='Clear'; Label='Eliminar sesión persistente'; Description='Cierra la sesión actual y elimina el login persistido por PnP.PowerShell.' }
+                @{ Key='0'; Value='Back'; Label='Volver'; Description='Regresa al menú anterior.' }
             )
         }
 
@@ -1406,9 +1746,9 @@ function Ensure-AppAuthentication {
     Write-Host ''
 
     $choice = Read-AppMenuChoice -Items @(
-        @{ Key='1'; Value='Existing'; Label='Usar una aplicación existente' }
-        @{ Key='2'; Value='Register'; Label='Registrar una nueva aplicación Entra' }
-        @{ Key='0'; Value='Back'; Label='Cancelar' }
+        @{ Key='1'; Value='Existing'; Label='Usar una aplicación existente'; Description='Introduce y valida un Client ID ya registrado.' }
+        @{ Key='2'; Value='Register'; Label='Registrar una nueva aplicación Entra'; Description='Crea una nueva aplicación PnP para esta herramienta.' }
+        @{ Key='0'; Value='Back'; Label='Cancelar'; Description='Regresa al menú anterior.' }
     )
 
     switch ($choice.Value) {
@@ -1705,7 +2045,20 @@ function Add-AppTemporarySiteCollectionAdmin {
     }
 
     Write-AppInfo -Message "Conectando al centro de administración: $adminUrl"
-    $adminConnection = Connect-AppUrl -Url $adminUrl -SkipEnsureAuth
+    $adminConnection = Connect-AppUrl `
+        -Url $adminUrl `
+        -SkipEnsureAuth `
+        -ReuseConnection $SiteConnection
+
+    # Si la conexión inicial al sitio no llegó a crearse, la conexión al
+    # Admin Center se convierte en la conexión base para la validación. Así
+    # tampoco se abre una autenticación interactiva en cada reintento.
+    $authenticationConnection = if ($null -ne $SiteConnection) {
+        $SiteConnection
+    }
+    else {
+        $adminConnection
+    }
 
     Write-AppInfo -Message "Se agregará $upn al sitio como Site Collection Administrator."
 
@@ -1728,7 +2081,10 @@ function Add-AppTemporarySiteCollectionAdmin {
         Start-Sleep -Seconds 3
 
         try {
-            $refreshedConnection = Connect-AppUrl -Url $SiteUrl -SkipEnsureAuth
+            $refreshedConnection = Connect-AppUrl `
+                -Url $SiteUrl `
+                -SkipEnsureAuth `
+                -ReuseConnection $authenticationConnection
             $access = Test-AppRecycleBinAccess -Connection $refreshedConnection
 
             if ($access.Success) {
@@ -1810,7 +2166,10 @@ function Remove-AppTemporarySiteCollectionAdmin {
     }
 
     try {
-        $connection = Connect-AppUrl -Url $temporaryAdmin.SiteUrl -SkipEnsureAuth
+        $connection = Connect-AppUrl `
+            -Url $temporaryAdmin.SiteUrl `
+            -SkipEnsureAuth `
+            -ReuseConnection $temporaryAdmin.Connection
 
         Remove-PnPSiteCollectionAdmin `
             -Owners @($temporaryAdmin.Upn) `
@@ -1905,6 +2264,7 @@ function Set-AppTarget {
     Show-AppHeader -Section 'Validando destino'
     Write-AppInfo -Message $url
 
+    Release-AppSiteConnection
     $connection = $null
     $temporaryAdmin = $null
     $loadTarget = {
@@ -2202,11 +2562,11 @@ function Invoke-AppRecycleBinCleanup {
 
     Show-AppHeader -Section "Papelera · $stageLabel"
 
-    Write-AppField -Name 'Sitio' -Value $script:Target.Url
-    Write-AppField -Name 'Nivel' -Value $stageLabel
-    Write-AppField -Name 'Acción' -Value $operationLabel
-    Write-AppField -Name 'Límite' -Value $Limit
-    Write-AppField -Name 'Modo' -Value $(if ($script:Settings.Simulation) { 'SIMULACIÓN' } else { 'REAL' })
+    Write-AppField -Name 'Sitio' -Value $script:Target.Url -Style Primary
+    Write-AppField -Name 'Nivel' -Value $stageLabel -Style Primary
+    Write-AppField -Name 'Acción' -Value $operationLabel -Style $(if ($isFirstStage) { 'Warning' } else { 'Danger' })
+    Write-AppField -Name 'Límite' -Value $Limit -Style Primary
+    Write-AppField -Name 'Modo' -Value $(if ($script:Settings.Simulation) { 'SIMULACIÓN' } else { 'REAL' }) -Style $(if ($script:Settings.Simulation) { 'Warning' } else { 'Danger' })
     Write-Host ''
 
     if ($isFirstStage) {
@@ -2352,19 +2712,19 @@ function Invoke-AppRecycleBinCleanup {
 
     Show-AppHeader -Section "Resultado · $stageLabel"
 
-    Write-AppField -Name 'Encontrados' -Value $items.Count
-    Write-AppField -Name 'Procesados' -Value $log.Count
+    Write-AppField -Name 'Encontrados' -Value $items.Count -Style Primary
+    Write-AppField -Name 'Procesados' -Value $log.Count -Style Primary
 
     if ($isFirstStage) {
-        Write-AppField -Name 'Movidos' -Value $moved
+        Write-AppField -Name 'Movidos' -Value $moved -Style Success
     }
     else {
-        Write-AppField -Name 'Eliminados' -Value $removed
+        Write-AppField -Name 'Eliminados' -Value $removed -Style Danger
     }
 
-    Write-AppField -Name 'Simulados' -Value $simulated
-    Write-AppField -Name 'Errores' -Value $errors
-    Write-AppField -Name 'Reporte' -Value $report
+    Write-AppField -Name 'Simulados' -Value $simulated -Style Warning
+    Write-AppField -Name 'Errores' -Value $errors -Style $(if ($errors -gt 0) { 'Danger' } else { 'Success' })
+    Write-AppField -Name 'Reporte' -Value $report -Style Muted
 
     Write-Host ''
 
@@ -2516,9 +2876,9 @@ function Invoke-AppPreservationHoldCleanup {
 
     Show-AppHeader -Section 'Preservation Hold Library'
 
-    Write-AppField -Name 'Sitio' -Value $script:Target.Url
-    Write-AppField -Name 'Límite' -Value $Limit
-    Write-AppField -Name 'Modo' -Value $(if ($script:Settings.Simulation) { 'SIMULACIÓN' } else { 'REAL' })
+    Write-AppField -Name 'Sitio' -Value $script:Target.Url -Style Primary
+    Write-AppField -Name 'Límite' -Value $Limit -Style Primary
+    Write-AppField -Name 'Modo' -Value $(if ($script:Settings.Simulation) { 'SIMULACIÓN' } else { 'REAL' }) -Style $(if ($script:Settings.Simulation) { 'Warning' } else { 'Danger' })
     Write-Host ''
 
     Write-AppInfo -Message 'Buscando Preservation Hold Library...'
@@ -2641,12 +3001,12 @@ function Invoke-AppPreservationHoldCleanup {
 
     Show-AppHeader -Section 'Resultado · Preservation Hold Library'
 
-    Write-AppField -Name 'Encontrados' -Value $items.Count
-    Write-AppField -Name 'Procesados' -Value $log.Count
-    Write-AppField -Name 'Eliminados' -Value $removed
-    Write-AppField -Name 'Simulados' -Value $simulated
-    Write-AppField -Name 'Errores' -Value $errors
-    Write-AppField -Name 'Reporte' -Value $report
+    Write-AppField -Name 'Encontrados' -Value $items.Count -Style Primary
+    Write-AppField -Name 'Procesados' -Value $log.Count -Style Primary
+    Write-AppField -Name 'Eliminados' -Value $removed -Style Danger
+    Write-AppField -Name 'Simulados' -Value $simulated -Style Warning
+    Write-AppField -Name 'Errores' -Value $errors -Style $(if ($errors -gt 0) { 'Danger' } else { 'Success' })
+    Write-AppField -Name 'Reporte' -Value $report -Style Muted
     Write-Host ''
 
     if ($errors -gt 0) {
@@ -2730,6 +3090,72 @@ function Start-AppStageCleanup {
 # CONFIGURACION / DIAGNOSTICO
 # =============================================================================
 
+function Clear-AppWorkingContext {
+    Show-AppHeader -Section 'Limpiar contexto de trabajo'
+
+    Write-AppField -Name 'Destino' -Value $(if ($null -ne $script:Target) { $script:Target.Title } else { 'No seleccionado' }) -Style $(if ($null -ne $script:Target) { 'Success' } else { 'Muted' })
+    Write-AppField -Name 'Conexión de sitio' -Value $(if ($null -ne $script:PnPConnection) { 'ACTIVA' } else { 'VACÍA' }) -Style $(if ($null -ne $script:PnPConnection) { 'Success' } else { 'Muted' })
+    Write-Host ''
+    Write-AppMuted -Message 'Limpia el sitio seleccionado y la conexión de sitio. Conserva tenant, aplicación, preferencias y reportes.'
+    Write-AppMuted -Message 'La sesión de autenticación base se conserva; cambiar tenant o aplicación la renovará.'
+
+    if ($null -ne $script:TemporarySiteAdmin) {
+        Write-AppWarning -Message 'No se puede limpiar el contexto mientras exista un acceso temporal activo.'
+        Write-AppMuted -Message 'Retíralo primero desde el menú principal.'
+        Wait-App
+        return
+    }
+
+    if (-not (Read-AppYesNo -Prompt '¿Limpiar el contexto de trabajo?' -DefaultYes $false)) {
+        return
+    }
+
+    Release-AppSiteConnection
+    $script:Target = $null
+
+    Write-AppOk -Message 'Contexto de trabajo limpiado.'
+    Wait-App
+}
+
+function Show-AppContextMenu {
+    while ($true) {
+        Show-AppHeader -Section 'Gestión del contexto'
+
+        $contextActive = ($null -ne $script:Target) -or ($null -ne $script:PnPConnection)
+        $tenantConfigured = Test-AppTenant -Value $script:Settings.Tenant
+        $appConfigured = $tenantConfigured -and (Test-AppGuid -Value $script:Settings.ClientId)
+        $targetLabel = if ($null -ne $script:Target) { $script:Target.Title } else { 'No seleccionado' }
+        $appLabel = if (-not [string]::IsNullOrWhiteSpace([string]$script:Settings.AppRegistrationName)) {
+            $script:Settings.AppRegistrationName
+        }
+        elseif ($appConfigured) {
+            $script:Settings.ClientId
+        }
+        else {
+            'No configurado'
+        }
+
+        Write-AppField -Name 'Contexto' -Value $(if ($contextActive) { 'ACTIVO' } else { 'VACÍO' }) -Style $(if ($contextActive) { 'Success' } else { 'Muted' })
+        Write-AppField -Name 'Destino' -Value $targetLabel -Style $(if ($null -ne $script:Target) { 'Success' } else { 'Muted' })
+        Write-AppField -Name 'Tenant' -Value $(if ($tenantConfigured) { $script:Settings.Tenant } else { 'No configurado' }) -Style $(if ($tenantConfigured) { 'Success' } else { 'Warning' })
+        Write-AppField -Name 'Aplicación' -Value $appLabel -Style $(if ($appConfigured) { 'Success' } else { 'Warning' })
+        Write-AppField -Name 'Reportes' -Value $script:ReportsPath -Style Muted
+        Write-Host ''
+
+        $choice = Read-AppMenuChoice -Items @(
+            @{ Key='1'; Value='Clear'; Label='Limpiar contexto de trabajo'; Description='Limpia el destino y la conexión de sitio, pero conserva tenant, aplicación y reportes.' }
+            @{ Key='2'; Value='Connection'; Label='Cambiar tenant o aplicación conectada'; Description='Abre la configuración y libera la conexión anterior cuando cambies estos valores.' }
+            @{ Key='0'; Value='Back'; Label='Volver'; Description='Regresa al menú anterior.' }
+        )
+
+        switch ($choice.Value) {
+            'Clear' { Clear-AppWorkingContext }
+            'Connection' { Show-AppSettingsMenu }
+            'Back' { return }
+        }
+    }
+}
+
 function Open-AppReports {
     Initialize-AppFolders
 
@@ -2788,29 +3214,59 @@ function Show-AppSettingsMenu {
     while ($true) {
         Show-AppHeader -Section 'Configuración'
 
-        Write-AppField -Name 'Tenant' -Value $script:Settings.Tenant
-        Write-AppField -Name 'Client ID' -Value $script:Settings.ClientId
-        Write-AppField -Name 'Idioma' -Value $(if ($script:Language -eq 'en') { 'English' } else { 'Español' })
-        Write-AppField -Name 'Persist login' -Value $(if ($script:Settings.PersistLogin) { 'Sí' } else { 'No' })
-        Write-AppField -Name 'Modo inicial' -Value $(if ($script:Settings.Simulation) { 'SIMULACIÓN' } else { 'REAL' })
-        Write-AppField -Name 'Límite defecto' -Value $script:Settings.DefaultLimit
-        Write-AppField -Name 'Límite máximo' -Value $script:Settings.MaximumLimit
-        Write-AppField -Name 'Reportes' -Value $script:ReportsPath
+        $tenantConfigured = Test-AppTenant -Value $script:Settings.Tenant
+        $appConfigured = $tenantConfigured -and (Test-AppGuid -Value $script:Settings.ClientId)
+
+        Write-AppField -Name 'Tenant' -Value $(if ($tenantConfigured) { $script:Settings.Tenant } else { 'No configurado' }) -Style $(if ($tenantConfigured) { 'Success' } else { 'Warning' })
+        Write-AppField -Name 'Client ID' -Value $(if ($appConfigured) { $script:Settings.ClientId } else { 'No configurado' }) -Style $(if ($appConfigured) { 'Success' } else { 'Warning' })
+        Write-AppField -Name 'Idioma' -Value $(if ($script:Language -eq 'en') { 'English' } else { 'Español' }) -Style Primary
+        Write-AppField -Name 'Persist login' -Value $(if ($script:Settings.PersistLogin) { 'Activado' } else { 'Desactivado' }) -Style $(if ($script:Settings.PersistLogin) { 'Success' } else { 'Muted' })
+        Write-AppField -Name 'Sesión en memoria' -Value $(if ($null -ne $script:AdminConnection) { 'ACTIVA' } else { 'INACTIVA' }) -Style $(if ($null -ne $script:AdminConnection) { 'Success' } else { 'Muted' })
+        Write-AppField -Name 'Modo inicial' -Value $(if ($script:Settings.Simulation) { 'SIMULACIÓN' } else { 'REAL' }) -Style $(if ($script:Settings.Simulation) { 'Warning' } else { 'Danger' })
+        Write-AppField -Name 'Límite defecto' -Value $script:Settings.DefaultLimit -Style Primary
+        Write-AppField -Name 'Límite máximo' -Value $script:Settings.MaximumLimit -Style Primary
+        Write-AppField -Name 'Reportes' -Value $script:ReportsPath -Style Muted
+        Write-AppMuted -Message 'La sesión en memoria se reutiliza mientras la herramienta permanezca abierta.'
+        Write-AppMuted -Message 'Persist login controla si PnP puede reutilizar el login al abrir el script nuevamente.'
         Write-Host ''
 
         $choice = Read-AppMenuChoice -Items @(
-            @{ Key='1'; Value='Auth'; Label='Aplicación Entra / autenticación' }
-            @{ Key='2'; Value='Language'; Label='Cambiar idioma' }
-            @{ Key='3'; Value='Persist'; Label='Alternar persistencia de login' }
-            @{ Key='4'; Value='DefaultLimit'; Label='Cambiar límite predeterminado' }
-            @{ Key='5'; Value='MaxLimit'; Label='Cambiar límite máximo permitido'; Description='Rango permitido por la herramienta: 1 a 10000.' }
-            @{ Key='6'; Value='Throttle'; Label='Throttling y reintentos' }
-            @{ Key='7'; Value='Reports'; Label='Abrir reportes' }
-            @{ Key='8'; Value='Reset'; Label='Restablecer configuración local' }
-            @{ Key='0'; Value='Back'; Label='Volver' }
+            @{ Key='1'; Value='Tenant'; Label='Cambiar tenant'; Description='Actualiza el tenant conectado y libera la sesión anterior.' }
+            @{ Key='2'; Value='Auth'; Label='Aplicación Entra / autenticación PnP'; Description='Valida, cambia o registra la aplicación usada por PnP.PowerShell.' }
+            @{ Key='3'; Value='Language'; Label='Cambiar idioma'; Description='Cambia el idioma de la interfaz.' }
+            @{ Key='4'; Value='Persist'; Label='Alternar persistencia de login'; Description='Controla si PnP puede reutilizar el login cuando abras el script nuevamente.' }
+            @{ Key='5'; Value='DefaultLimit'; Label='Cambiar límite predeterminado'; Description='Cantidad inicial de elementos a procesar por operación.' }
+            @{ Key='6'; Value='MaxLimit'; Label='Cambiar límite máximo permitido'; Description='Rango permitido por la herramienta: 1 a 10000.' }
+            @{ Key='7'; Value='Throttle'; Label='Throttling y reintentos'; Description='Ajusta pausas, backoff y cantidad de reintentos.' }
+            @{ Key='8'; Value='Reports'; Label='Abrir carpeta de reportes'; Description='Abre la carpeta donde se guardan los CSV de auditoría.' }
+            @{ Key='9'; Value='Reset'; Label='Restablecer configuración local'; Description='Borra valores guardados; conserva idioma y reportes.' }
+            @{ Key='0'; Value='Back'; Label='Volver'; Description='Regresa al menú anterior.' }
         )
 
         switch ($choice.Value) {
+            'Tenant' {
+                Show-AppHeader -Section 'Tenant'
+
+                if (-not (Test-AppConnectionChangeAllowed)) {
+                    continue
+                }
+
+                $tenant = Read-AppText `
+                    -Prompt 'Dominio inicial del tenant' `
+                    -Default $script:Settings.Tenant `
+                    -Validator { param($value) Test-AppTenant -Value $value } `
+                    -ValidationMessage 'Usa el dominio inicial, por ejemplo empresa.onmicrosoft.com.'
+
+                $tenant = $tenant.Trim().ToLowerInvariant()
+                if ($tenant -ne [string]$script:Settings.Tenant) {
+                    Release-AppConnections
+                    $script:Target = $null
+                }
+
+                $script:Settings.Tenant = $tenant
+                Save-AppSettings
+            }
+
             'Auth' {
                 Show-AppAuthenticationMenu
             }
@@ -2823,6 +3279,7 @@ function Show-AppSettingsMenu {
 
             'Persist' {
                 $script:Settings.PersistLogin = -not [bool]$script:Settings.PersistLogin
+                $script:Settings.PersistLoginConfigured = $true
                 Save-AppSettings
             }
 
@@ -2874,13 +3331,17 @@ function Show-AppSettingsMenu {
                     }
 
                     if ($canReset) {
+                        $language = $script:Language
+                        Release-AppConnections
+
                         if (Test-Path -LiteralPath $script:ConfigPath) {
                             Remove-Item -LiteralPath $script:ConfigPath -Force
                         }
 
                         $script:Settings = Get-DefaultAppSettings
+                        $script:Settings.Language = $language
                         $script:Target = $null
-                        $script:PnPConnection = $null
+                        $script:Language = $language
 
                         Write-AppOk -Message 'Configuración restablecida.'
                         Wait-App
@@ -2904,21 +3365,25 @@ function Show-AppDiagnostics {
 
     $pnpVersion = Get-AppPnPInstalledVersion
 
-    Write-AppField -Name 'PowerShell' -Value $PSVersionTable.PSVersion
-    Write-AppField -Name 'PnP.PowerShell' -Value $(if ($null -ne $pnpVersion) { $pnpVersion } else { 'No instalado' })
-    Write-AppField -Name 'Tenant' -Value $script:Settings.Tenant
-    Write-AppField -Name 'Client ID' -Value $script:Settings.ClientId
-    Write-AppField -Name 'Persist login' -Value $(if ($script:Settings.PersistLogin) { 'Sí' } else { 'No' })
-    Write-AppField -Name 'Config' -Value $script:ConfigPath
-    Write-AppField -Name 'Reportes' -Value $script:ReportsPath
-    Write-AppField -Name 'Throttling' -Value $script:ThrottleEvents.Count
+    $tenantConfigured = Test-AppTenant -Value $script:Settings.Tenant
+    $appConfigured = $tenantConfigured -and (Test-AppGuid -Value $script:Settings.ClientId)
+
+    Write-AppField -Name 'PowerShell' -Value $PSVersionTable.PSVersion -Style $(if ($PSVersionTable.PSVersion -ge [version]'7.4') { 'Success' } else { 'Danger' })
+    Write-AppField -Name 'PnP.PowerShell' -Value $(if ($null -ne $pnpVersion) { $pnpVersion } else { 'No instalado' }) -Style $(if ($null -ne $pnpVersion -and $pnpVersion -ge $script:MinimumPnPVersion) { 'Success' } else { 'Warning' })
+    Write-AppField -Name 'Tenant' -Value $(if ($tenantConfigured) { $script:Settings.Tenant } else { 'No configurado' }) -Style $(if ($tenantConfigured) { 'Success' } else { 'Warning' })
+    Write-AppField -Name 'Client ID' -Value $(if ($appConfigured) { $script:Settings.ClientId } else { 'No configurado' }) -Style $(if ($appConfigured) { 'Success' } else { 'Warning' })
+    Write-AppField -Name 'Persist login' -Value $(if ($script:Settings.PersistLogin) { 'Activado' } else { 'Desactivado' }) -Style $(if ($script:Settings.PersistLogin) { 'Success' } else { 'Muted' })
+    Write-AppField -Name 'Sesión en memoria' -Value $(if ($null -ne $script:AdminConnection) { 'ACTIVA' } else { 'INACTIVA' }) -Style $(if ($null -ne $script:AdminConnection) { 'Success' } else { 'Muted' })
+    Write-AppField -Name 'Config' -Value $script:ConfigPath -Style Muted
+    Write-AppField -Name 'Reportes' -Value $script:ReportsPath -Style Muted
+    Write-AppField -Name 'Throttling' -Value $script:ThrottleEvents.Count -Style $(if ($script:ThrottleEvents.Count -eq 0) { 'Success' } else { 'Warning' })
     Write-Host ''
 
     $choice = Read-AppMenuChoice -Items @(
-        @{ Key='1'; Value='Validate'; Label='Validar aplicación configurada' }
-        @{ Key='2'; Value='PnP'; Label='Instalar / actualizar PnP.PowerShell' }
-        @{ Key='3'; Value='Target'; Label='Probar nuevamente el sitio actual' }
-        @{ Key='0'; Value='Back'; Label='Volver' }
+        @{ Key='1'; Value='Validate'; Label='Validar aplicación configurada'; Description='Comprueba tenant, Client ID, autenticación y acceso a búsqueda de sitios.' }
+        @{ Key='2'; Value='PnP'; Label='Instalar / actualizar PnP.PowerShell'; Description='Verifica el requisito local y ofrece instalar o actualizar el módulo.' }
+        @{ Key='3'; Value='Target'; Label='Probar nuevamente el sitio actual'; Description='Valida conexión y permisos de la papelera para el destino seleccionado.' }
+        @{ Key='0'; Value='Back'; Label='Volver'; Description='Regresa al menú anterior.' }
     )
 
     switch ($choice.Value) {
@@ -2968,18 +3433,25 @@ function Show-AppDiagnostics {
 function Show-AppContext {
     Write-AppSection -Title 'Contexto'
 
-    Write-AppField -Name 'Tenant' -Value $script:Settings.Tenant
+    $tenantConfigured = Test-AppTenant -Value $script:Settings.Tenant
+    $appConfigured = $tenantConfigured -and (Test-AppGuid -Value $script:Settings.ClientId)
+
+    Write-AppField -Name 'Tenant' -Value $(if ($tenantConfigured) { $script:Settings.Tenant } else { 'No configurado' }) -Style $(if ($tenantConfigured) { 'Success' } else { 'Warning' })
 
     if ($null -ne $script:Target) {
-        Write-AppField -Name 'Tipo' -Value $script:Target.Type
-        Write-AppField -Name 'Sitio' -Value $script:Target.Title
-        Write-AppField -Name 'URL' -Value $script:Target.Url
+        Write-AppField -Name 'Tipo' -Value $script:Target.Type -Style Muted
+        Write-AppField -Name 'Sitio' -Value $script:Target.Title -Style Primary
+        Write-AppField -Name 'URL' -Value $script:Target.Url -Style Muted
     }
     else {
-        Write-AppField -Name 'Destino' -Value 'No seleccionado'
+        Write-AppField -Name 'Destino' -Value 'No seleccionado' -Style Muted
     }
 
-    Write-AppField -Name 'Modo' -Value $(if ($script:Settings.Simulation) { 'SIMULACIÓN' } else { 'REAL' })
+    Write-AppField -Name 'Autenticación' -Value $(if ($appConfigured) { 'CONFIGURADA' } else { 'NO CONFIGURADA' }) -Style $(if ($appConfigured) { 'Success' } else { 'Warning' })
+    Write-AppField -Name 'Sesión en memoria' -Value $(if ($null -ne $script:AdminConnection) { 'ACTIVA' } else { 'INACTIVA' }) -Style $(if ($null -ne $script:AdminConnection) { 'Success' } else { 'Muted' })
+    Write-AppField -Name 'Admin temporal' -Value $(if ($null -ne $script:TemporarySiteAdmin) { 'ACTIVO' } else { 'No' }) -Style $(if ($null -ne $script:TemporarySiteAdmin) { 'Warning' } else { 'Success' })
+    Write-AppField -Name 'Modo' -Value $(if ($script:Settings.Simulation) { 'SIMULACIÓN' } else { 'REAL' }) -Style $(if ($script:Settings.Simulation) { 'Warning' } else { 'Danger' })
+    Write-AppField -Name 'Reportes' -Value $script:ReportsPath -Style Muted
 }
 
 function Show-AppMainMenu {
@@ -2988,23 +3460,27 @@ function Show-AppMainMenu {
         Show-AppContext
         Write-Host ''
 
+        $appConfigured = (Test-AppTenant -Value $script:Settings.Tenant) -and (Test-AppGuid -Value $script:Settings.ClientId)
+        $contextActive = ($null -ne $script:Target) -or ($null -ne $script:PnPConnection)
+
         $choiceItems = @(
             @{ Key='1'; Value='Target'; Label='Seleccionar / cambiar sitio'; Description='Buscar SharePoint u OneDrive en el tenant o usar una URL directa.' }
             @{ Key='2'; Value='First'; Label='Vaciar primer nivel'; Description='Mueve los elementos al segundo nivel; no los elimina permanentemente.' }
             @{ Key='3'; Value='Second'; Label='Vaciar segundo nivel'; Description='Elimina permanentemente elementos del segundo nivel.' }
             @{ Key='4'; Value='Both'; Label='Vaciar ambos niveles'; Description='Primero mueve el primer nivel al segundo y después elimina del segundo; el límite se aplica por nivel.' }
             @{ Key='5'; Value='PHL'; Label='Procesar Preservation Hold Library'; Description='Detecta dinámicamente la biblioteca; no modifica políticas de retención.' }
-            @{ Key='6'; Value='Mode'; Label=$(if ($script:Settings.Simulation) { 'Cambiar a modo REAL' } else { 'Cambiar a modo SIMULACIÓN' }); Description='Simulación es el modo seguro.' }
-            @{ Key='7'; Value='Auth'; Label='Aplicación Entra / autenticación' }
-            @{ Key='8'; Value='Settings'; Label='Configuración' }
-            @{ Key='9'; Value='Diagnostics'; Label='Diagnóstico' }
+            @{ Key='6'; Value='Mode'; Label=$(if ($script:Settings.Simulation) { 'Cambiar a modo REAL' } else { 'Cambiar a modo SIMULACIÓN' }); Description=$(if ($script:Settings.Simulation) { 'SIMULACIÓN es el modo seguro.' } else { 'REAL elimina o modifica elementos según la operación elegida.' }) }
+            @{ Key='7'; Value='Context'; Label='Gestionar contexto de trabajo'; Description=$(if ($contextActive) { 'Contexto activo · limpia el destino o cambia tenant/aplicación conectada.' } else { 'No hay contexto activo · limpia selecciones o cambia tenant/aplicación conectada.' }) }
+            @{ Key='8'; Value='Auth'; Label='Aplicación Entra / autenticación PnP'; Description=$(if ($appConfigured) { 'CONFIGURADA · valida, cambia o registra otra aplicación.' } else { 'NO CONFIGURADA · usa una aplicación existente o registra una nueva.' }) }
+            @{ Key='9'; Value='Settings'; Label='Configuración'; Description='Tenant, límites, throttling, persistencia, idioma y reportes.' }
+            @{ Key='10'; Value='Diagnostics'; Label='Diagnóstico'; Description='Valida PowerShell, PnP, autenticación y acceso al sitio actual.' }
         )
 
         if ($null -ne $script:TemporarySiteAdmin) {
-            $choiceItems += @{ Key='10'; Value='RemoveTemporaryAdmin'; Label='Retirar Site Collection Admin temporal'; Description="Retira $($script:TemporarySiteAdmin.Upn) de $($script:TemporarySiteAdmin.SiteUrl)." }
+            $choiceItems += @{ Key='11'; Value='RemoveTemporaryAdmin'; Label='Retirar Site Collection Admin temporal'; Description="Retira $($script:TemporarySiteAdmin.Upn) de $($script:TemporarySiteAdmin.SiteUrl)." }
         }
 
-        $choiceItems += @{ Key='0'; Value='Exit'; Label='Salir' }
+        $choiceItems += @{ Key='0'; Value='Exit'; Label='Salir'; Description='Cierra la herramienta.' }
         $choice = Read-AppMenuChoice -Items $choiceItems
 
         switch ($choice.Value) {
@@ -3045,6 +3521,10 @@ function Show-AppMainMenu {
                 Show-AppDiagnostics
             }
 
+            'Context' {
+                Show-AppContextMenu
+            }
+
             'Exit' {
                 if ($null -ne $script:TemporarySiteAdmin) {
                     if (-not (Remove-AppTemporarySiteCollectionAdmin -Ask)) {
@@ -3071,8 +3551,8 @@ function Show-AppMainMenu {
 # =============================================================================
 
 try {
-    Initialize-AppLanguage
     Initialize-AppTerminal
+    Initialize-AppLanguage
     Initialize-AppFolders
 
     $script:Settings = Get-AppSettings

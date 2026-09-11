@@ -27,7 +27,7 @@ $ErrorActionPreference = 'Stop'
 # -----------------------------------------------------------------------------
 
 $script:AppName = 'M365 Permissions Scope Manager'
-$script:AppVersion = '6.4.1'
+$script:AppVersion = '6.5.0'
 $script:MinimumPnPVersion = [version]'3.2.0'
 $script:DefaultPageSize = 2000
 $script:DefaultMaxRetries = 5
@@ -58,6 +58,9 @@ $script:Ansi = $false
 $script:Language = 'es'
 $script:UiTranslations = @(
     @{ From = 'Contexto'; To = 'Context' }; @{ From = 'Inicio'; To = 'Home' }; @{ From = 'Finalizado'; To = 'Finished' }
+    @{ From = 'ACTIVO'; To = 'ACTIVE' }; @{ From = 'VACÍO'; To = 'EMPTY' }
+    @{ From = 'Reportes'; To = 'Reports' }; @{ From = 'Tipo'; To = 'Type' }; @{ From = 'App guardada'; To = 'Saved app' }
+    @{ From = 'Contexto de conexión'; To = 'Connection context' }
     @{ From = 'Error inesperado'; To = 'Unexpected error' }; @{ From = 'Detalles técnicos:'; To = 'Technical details:' }
     @{ From = 'Configuración'; To = 'Settings' }; @{ From = 'Salir'; To = 'Exit' }; @{ From = 'Volver'; To = 'Back' }
     @{ From = 'Cancelar'; To = 'Cancel' }; @{ From = 'Diagnóstico'; To = 'Diagnostics' }; @{ From = 'autenticación'; To = 'authentication' }
@@ -80,6 +83,9 @@ function Get-LocalizedText {
             @{ From = 'No seleccionado'; To = 'Not selected' }; @{ From = 'No configurado'; To = 'Not configured' }; @{ From = 'No instalado'; To = 'Not installed' }
             @{ From = 'Destino'; To = 'Target' }; @{ From = 'Actuales'; To = 'Current' }; @{ From = 'Seleccionadas'; To = 'Selected' }
             @{ From = 'CONFIGURADA'; To = 'CONFIGURED' }; @{ From = 'NO CONFIGURADA'; To = 'NOT CONFIGURED' }; @{ From = 'Activado'; To = 'Enabled' }; @{ From = 'Desactivado'; To = 'Disabled' }
+            @{ From = 'Actual: Sí/No; habilita elevación temporal cuando es necesaria.'; To = 'Current: Yes/No; enables temporary elevation when needed.' }
+            @{ From = 'Actual: Sí; habilita elevación temporal cuando es necesaria.'; To = 'Current: Yes; enables temporary elevation when needed.' }
+            @{ From = 'Actual: No; habilita elevación temporal cuando es necesaria.'; To = 'Current: No; enables temporary elevation when needed.' }
             @{ From = 'Sí'; To = 'Yes' }; @{ From = 'SÍ'; To = 'YES' }
             @{ From = 'SharePoint u OneDrive; al elegirlo se seleccionan sus bibliotecas.'; To = 'SharePoint or OneDrive; its libraries are selected when chosen.' }
             @{ From = 'Disponible después de seleccionar un sitio.'; To = 'Available after selecting a site.' }
@@ -106,6 +112,10 @@ function Get-LocalizedText {
             @{ From = 'Gestionar aplicación Entra / Client ID'; To = 'Manage Entra application / Client ID' }
             @{ From = 'Probar conexión al centro de administración'; To = 'Test connection to the admin center' }
             @{ From = 'Limpiar login persistido de PnP'; To = 'Clear persisted PnP login' }
+            @{ From = 'Abrir carpeta de reportes'; To = 'Open reports folder' }
+            @{ From = 'Abre la carpeta donde se guardan los CSV.'; To = 'Opens the folder where CSV files are saved.' }
+            @{ From = 'Carpeta de reportes abierta.'; To = 'Reports folder opened.' }
+            @{ From = 'No se pudo abrir la carpeta de reportes.'; To = 'Could not open reports folder.' }
             @{ From = 'LÍMITE MÁXIMO'; To = 'MAXIMUM LIMIT' }; @{ From = 'SOBRE RECOMENDADO'; To = 'ABOVE RECOMMENDED' }; @{ From = 'DENTRO DE RECOMENDADO'; To = 'WITHIN RECOMMENDED' }
             @{ From = 'Cada elemento de menú debe contener una propiedad Key.'; To = 'Every menu item must contain a Key property.' }
             @{ From = 'Opción inválida.'; To = 'Invalid option.' }; @{ From = 'Valor inválido.'; To = 'Invalid value.' }; @{ From = 'El valor no puede estar vacío.'; To = 'Value cannot be empty.' }
@@ -182,6 +192,55 @@ function Get-LocalizedText {
             @{ From = '$librariesOverRecommended biblioteca(s) superan el límite recomendado de $($script:RecommendedUniqueScopes) scopes.'; To = '$librariesOverRecommended library/libraries exceed the recommended limit of $($script:RecommendedUniqueScopes) scopes.' }
             @{ From = 'LIVE mode: se eliminarán asignaciones de permisos únicas y los objetos volverán a heredar.'; To = 'LIVE mode: unique permission assignments will be removed and objects will inherit again.' }
             @{ From = 'Reset raíz $($library.Title)'; To = 'Reset root $($library.Title)' }
+            @{ From = 'Destino seleccionado: '; To = 'Target selected: ' }
+            @{ From = 'Estado del entorno'; To = 'Environment status' }
+            @{ From = 'Sitios protegidos'; To = 'Protected sites' }
+            @{ From = 'GRANTS PENDIENTES'; To = 'PENDING GRANTS' }
+            @{ From = 'Limpia'; To = 'Clean' }
+            @{ From = 'Activo'; To = 'Active' }
+            @{ From = 'No activo'; To = 'Not active' }
+            @{ From = 'Admin temporal'; To = 'Temporary admin' }
+            @{ From = 'seleccionada(s)'; To = 'selected' }
+            @{ From = 'Detectados'; To = 'Detected' }
+            @{ From = 'Uso recomendado'; To = 'Recommended usage' }
+            @{ From = 'Uso máximo'; To = 'Maximum usage' }
+            @{ From = 'Otorga o remueve Site Collection Admin para el sitio actual.'; To = 'Grants or removes Site Collection Admin for the current site.' }
+            @{ From = 'Tenant, Client ID, reportes, modo, auto-grant e idioma.'; To = 'Tenant, Client ID, reports, mode, auto-grant, and language.' }
+            @{ From = 'Valida PowerShell, PnP, autenticación y conexión al Admin Center.'; To = 'Validates PowerShell, PnP, authentication, and Admin Center connectivity.' }
+            @{ From = 'GUID de la aplicación Entra usada para conectarse.'; To = 'GUID of the Entra application used to connect.' }
+            @{ From = 'Nombre mostrado cuando se registra una nueva aplicación.'; To = 'Display name used when registering a new application.' }
+            @{ From = 'Ruta donde se guardan los CSV.'; To = 'Path where CSV files are saved.' }
+            @{ From = 'Actual: '; To = 'Current: ' }
+            @{ From = 'UPN usado para el Site Collection Admin temporal.'; To = 'UPN used for temporary Site Collection Admin.' }
+            @{ From = 'Agrega el UPN configurado como administrador del sitio.'; To = 'Adds the configured UPN as site administrator.' }
+            @{ From = 'Remueve el UPN configurado del sitio actual.'; To = 'Removes the configured UPN from the current site.' }
+            @{ From = 'Comprueba la versión e instala o actualiza el módulo para CurrentUser.'; To = 'Checks the version and installs or updates the module for CurrentUser.' }
+            @{ From = 'Elimina el login persistido local de PnP; no elimina la aplicación.'; To = 'Removes the local persisted PnP login; it does not delete the application.' }
+            @{ From = 'Busca sitios publicados en el tenant.'; To = 'Searches sites published in the tenant.' }
+            @{ From = 'Especifica la URL de un sitio ya conocido.'; To = 'Specifies the URL of a known site.' }
+            @{ From = 'Cierra la herramienta.'; To = 'Closes the tool.' }
+            @{ From = 'Regresa al menú anterior.'; To = 'Returns to the previous menu.' }
+            @{ From = 'Limpiar contexto de trabajo'; To = 'Clear working context' }
+            @{ From = 'Gestionar contexto de trabajo'; To = 'Manage working context' }
+            @{ From = 'Gestión del contexto'; To = 'Context management' }
+            @{ From = 'Cambiar tenant o aplicación conectada'; To = 'Change tenant or connected application' }
+            @{ From = 'Abre la configuración para cambiar el tenant o la aplicación conectada.'; To = 'Opens settings to change the tenant or connected application.' }
+            @{ From = 'Limpia el sitio y las bibliotecas seleccionadas de esta sesión.'; To = 'Clears the selected site and libraries from this session.' }
+            @{ From = 'Gestiona selecciones de esta sesión o cambia tenant/aplicación conectada.'; To = "Manages this session's selections or changes the connected tenant/application." }
+            @{ From = 'Gestionar aplicación conectada'; To = 'Manage connected application' }
+            @{ From = 'Aplicación Entra / autenticación PnP'; To = 'Entra application / PnP authentication' }
+            @{ From = 'Validar, cambiar o registrar la aplicación usada por PnP.PowerShell.'; To = 'Validate, change, or register the application used by PnP.PowerShell.' }
+            @{ From = 'Restablece sitio, bibliotecas y selección de esta sesión. Conserva tenant, app, preferencias y reportes.'; To = 'Clears the site, libraries, and selection from this session. Preserves the tenant, app, preferences, and reports.' }
+            @{ From = 'No hay sitio seleccionado. Se conservarán tenant, app y reportes.'; To = 'No site is selected. The tenant, app, and reports will be preserved.' }
+            @{ From = 'Hay sitio y bibliotecas seleccionados. Se conservarán tenant, app y reportes.'; To = 'A site and libraries are selected. The tenant, app, and reports will be preserved.' }
+            @{ From = 'Sitio actual'; To = 'Current site' }
+            @{ From = 'No se puede limpiar el contexto mientras haya una elevación administrativa temporal activa.'; To = 'The context cannot be cleared while temporary administrative elevation is active.' }
+            @{ From = 'Retírala primero desde el menú principal.'; To = 'Remove it first from the main menu.' }
+            @{ From = '¿Limpiar el contexto de trabajo?'; To = 'Clear working context?' }
+            @{ From = 'Contexto de trabajo limpiado.'; To = 'Working context cleared.' }
+            @{ From = 'No hay una elevación temporal activa en esta sesión.'; To = 'No temporary elevation is active in this session.' }
+            @{ From = 'No hay acceso temporal activo.'; To = 'No temporary access is active.' }
+            @{ From = 'Sin descripción adicional.'; To = 'No additional details.' }
         )
         foreach ($translation in $phrases) { $result = $result.Replace($translation.From, $translation.To) }
         foreach ($translation in $script:UiTranslations) { $result = $result.Replace($translation.From, $translation.To) }
@@ -245,11 +304,22 @@ function Write-Progress {
     Microsoft.PowerShell.Utility\Write-Progress @parameters
 }
 function Initialize-AppLanguage {
+    Clear-Host
+    Write-Host ''
+    Write-Styled $script:AppName Primary
+    Write-Styled "v$script:AppVersion" Muted
+    Write-Styled ('─' * 72) Muted
+    Write-Host ''
+
     while ($true) {
-        Microsoft.PowerShell.Utility\Write-Host ''; Microsoft.PowerShell.Utility\Write-Host 'Select language / Seleccione idioma:'; Microsoft.PowerShell.Utility\Write-Host '1. English'; Microsoft.PowerShell.Utility\Write-Host '2. Español'
+        Write-Styled 'Select language / Seleccione idioma' Primary
+        Write-Styled '  1  English' Accent
+        Write-Styled '  2  Español' Accent
+        Write-Host ''
+
         $choice = (Microsoft.PowerShell.Utility\Read-Host 'Choice / Opción').Trim()
         if ($choice -eq '1') { $script:Language = 'en'; return }; if ($choice -eq '2') { $script:Language = 'es'; return }
-        Microsoft.PowerShell.Utility\Write-Host 'Please choose 1 or 2 / Elija 1 o 2.'
+        Write-Styled 'Please choose 1 or 2 / Elija 1 o 2.' Warning
     }
 }
 
@@ -300,6 +370,8 @@ function Write-Styled {
         [switch]$NoNewline
     )
 
+    $Text = Get-LocalizedText $Text
+
     $prefix = ''
     $suffix = ''
     $fallback = 'Gray'
@@ -335,9 +407,10 @@ function Write-AppHeader {
     catch { $width = 72 }
 
     Clear-Host
+    Write-Styled ('═' * $width) Accent
     Write-Styled "$script:AppName  v$script:AppVersion" Primary
-    if ($Context) { Write-Styled $Context Muted }
-    Write-Styled ('━' * $width) Muted
+    if ($Context) { Write-Styled "[$Context]" Muted }
+    Write-Styled ('─' * $width) Muted
 }
 
 function Write-Section {
@@ -361,12 +434,16 @@ function Write-Status {
 }
 
 function Write-Field {
-    param([string]$Name, [AllowNull()]$Value, [string]$State = '')
+    param(
+        [string]$Name,
+        [AllowNull()]$Value,
+        [ValidateSet('Normal','Muted','Primary','Success','Warning','Danger','Accent')]
+        [string]$Style = 'Normal'
+    )
 
     if ($null -eq $Value -or [string]::IsNullOrWhiteSpace([string]$Value)) { $Value = '—' }
-    $left = ('{0,-14}' -f $Name)
-    Write-Styled $left Muted -NoNewline
-    Write-Host "$Value$State"
+    Write-Styled ('{0,-18}' -f $Name) Muted -NoNewline
+    Write-Styled ([string]$Value) $Style
 }
 
 function Pause-Tui {
@@ -434,7 +511,8 @@ function Read-MenuChoice {
     param(
         [Parameter(Mandatory)][AllowEmptyCollection()][array]$Items,
         [string]$Prompt = 'Selecciona una opción',
-        [switch]$AllowBack
+        [switch]$AllowBack,
+        [scriptblock]$RenderBody
     )
 
     $normalizedItems = @(
@@ -474,22 +552,36 @@ function Read-MenuChoice {
         }
     )
 
+    if ($null -ne $RenderBody) {
+        & $RenderBody
+        Write-Host ''
+    }
+
     foreach ($item in $normalizedItems) {
-        Write-Styled ("{0,3}" -f $item.Key) Accent -NoNewline
+        $numberStyle = if ($item.Key -eq '0') { 'Muted' } else { 'Primary' }
+        Write-Styled ("{0,3}" -f $item.Key) $numberStyle -NoNewline
         Write-Host "  $($item.Label)"
 
         if (-not [string]::IsNullOrWhiteSpace($item.Description)) {
             Write-Styled ("     $($item.Description)") Muted
         }
+        else {
+            Write-Styled '     Sin descripción adicional.' Muted
+        }
+
+        Write-Host ''
     }
 
     $valid = @($normalizedItems | ForEach-Object { [string]$_.Key })
 
     if ($AllowBack -and -not ($valid -contains '0')) {
-        Write-Styled '  0' Accent -NoNewline
+        Write-Styled '  0' Muted -NoNewline
         Write-Host '  Volver'
+        Write-Styled '     Regresa al menú anterior.' Muted
         $valid += '0'
     }
+
+    Write-Styled ('─' * 32) Muted
 
     while ($true) {
         Write-Host ''
@@ -564,10 +656,10 @@ function Select-SingleByNumber {
 
     Write-Section $Title
     for ($i = 0; $i -lt $list.Count; $i++) {
-        Write-Styled ("{0,3}" -f ($i + 1)) Accent -NoNewline
+        Write-Styled ("{0,3}" -f ($i + 1)) Primary -NoNewline
         Write-Host ('  ' + (& $Label $list[$i]))
     }
-    Write-Styled '  0' Accent -NoNewline
+    Write-Styled '  0' Muted -NoNewline
     Write-Host '  Cancelar'
 
     while ($true) {
@@ -619,7 +711,7 @@ function Select-LibrariesInteractive {
         Write-Section 'Bibliotecas'
         for ($i = 0; $i -lt $libs.Count; $i++) {
             $flags = Get-LibraryFlagsText -Library $libs[$i]
-            Write-Styled ("{0,3}" -f ($i + 1)) Accent -NoNewline
+            Write-Styled ("{0,3}" -f ($i + 1)) Primary -NoNewline
             Write-Host "  $($libs[$i].Title)$flags"
             Write-Styled "     $($libs[$i].ItemCount) elementos · $($libs[$i].RootFolderUrl)" Muted
         }
@@ -780,6 +872,31 @@ function Ensure-ReportFolder {
     }
 }
 
+function Open-ReportsFolder {
+    try {
+        Ensure-ReportFolder
+        $folder = [System.IO.Path]::GetFullPath($script:Settings.ReportFolder)
+
+        if ($IsWindows) {
+            Start-Process -FilePath 'explorer.exe' -ArgumentList @($folder) | Out-Null
+        }
+        elseif (Get-Command xdg-open -ErrorAction SilentlyContinue) {
+            Start-Process -FilePath 'xdg-open' -ArgumentList @($folder) | Out-Null
+        }
+        else {
+            Invoke-Item -LiteralPath $folder
+        }
+
+        Write-Status Ok 'Carpeta de reportes abierta.'
+    }
+    catch {
+        Write-Status Error 'No se pudo abrir la carpeta de reportes.'
+        Write-Styled $_.Exception.Message Danger
+    }
+
+    Pause-Tui
+}
+
 function Show-SettingsMenu {
     while ($true) {
         Write-AppHeader 'Configuración'
@@ -796,14 +913,16 @@ function Show-SettingsMenu {
 
         $choice = Read-MenuChoice -AllowBack -Items @(
             @{ Key='1'; Label='Cambiar tenant'; Description='Dominio inicial, por ejemplo empresa.onmicrosoft.com' },
-            @{ Key='2'; Label='Cambiar Client ID' },
-            @{ Key='3'; Label='Cambiar nombre de app Entra' },
-            @{ Key='4'; Label='Cambiar carpeta de reportes' },
-            @{ Key='5'; Label='Alternar persistencia de login' },
-            @{ Key='6'; Label='Alternar dry-run' },
-            @{ Key='7'; Label='Alternar auto-grant de Site Collection Admin' },
-            @{ Key='8'; Label='Cambiar Admin UPN' },
-            @{ Key='9'; Label='Cambiar idioma' }
+            @{ Key='2'; Label='Cambiar Client ID'; Description='GUID de la aplicación Entra usada para conectarse.' },
+            @{ Key='3'; Label='Cambiar nombre de app Entra'; Description='Nombre mostrado cuando se registra una nueva aplicación.' },
+            @{ Key='4'; Label='Gestionar aplicación conectada'; Description='Validar, cambiar o registrar la aplicación usada por PnP.PowerShell.' },
+            @{ Key='5'; Label='Cambiar carpeta de reportes'; Description='Ruta donde se guardan los CSV.' },
+            @{ Key='6'; Label='Abrir carpeta de reportes'; Description='Abre la carpeta donde se guardan los CSV.' },
+            @{ Key='7'; Label='Alternar persistencia de login'; Description="Actual: $(if ($script:Settings.PersistLogin) { 'Sí' } else { 'No' })" },
+            @{ Key='8'; Label='Alternar dry-run'; Description="Actual: $(if ($script:Settings.DryRun) { 'Sí' } else { 'No' })" },
+            @{ Key='9'; Label='Alternar auto-grant de Site Collection Admin'; Description="Actual: $(if ($script:Settings.AutoGrantAdmin) { 'Sí' } else { 'No' }); habilita elevación temporal cuando es necesaria." },
+            @{ Key='10'; Label='Cambiar Admin UPN'; Description='UPN usado para el Site Collection Admin temporal.' },
+            @{ Key='11'; Label='Cambiar idioma'; Description="Actual: $(if ($script:Language -eq 'en') { 'English' } else { 'Español' })" }
         )
 
         switch ($choice) {
@@ -820,16 +939,18 @@ function Show-SettingsMenu {
                     -ValidationMessage 'Debe ser un GUID válido.'
             }
             '3' { $script:Settings.AppRegistrationName = Read-TextValue -Prompt 'Nombre de app' -Default $script:Settings.AppRegistrationName }
-            '4' { $script:Settings.ReportFolder = Read-TextValue -Prompt 'Carpeta de reportes' -Default $script:Settings.ReportFolder }
-            '5' { $script:Settings.PersistLogin = -not $script:Settings.PersistLogin }
-            '6' { $script:Settings.DryRun = -not $script:Settings.DryRun }
-            '7' { $script:Settings.AutoGrantAdmin = -not $script:Settings.AutoGrantAdmin }
-            '8' {
+            '4' { Show-AppRegistrationMenu }
+            '5' { $script:Settings.ReportFolder = Read-TextValue -Prompt 'Carpeta de reportes' -Default $script:Settings.ReportFolder }
+            '6' { Open-ReportsFolder }
+            '7' { $script:Settings.PersistLogin = -not $script:Settings.PersistLogin }
+            '8' { $script:Settings.DryRun = -not $script:Settings.DryRun }
+            '9' { $script:Settings.AutoGrantAdmin = -not $script:Settings.AutoGrantAdmin }
+            '10' {
                 $script:Settings.AdminUpn = Read-TextValue -Prompt 'Admin UPN' -Default $script:Settings.AdminUpn -AllowEmpty `
                     -Validator { param($v) [string]::IsNullOrWhiteSpace($v) -or $v -match '^[^@\s]+@[^@\s]+\.[^@\s]+$' } `
                     -ValidationMessage 'UPN inválido.'
             }
-            '9' {
+            '11' {
                 Initialize-AppLanguage
                 $script:Settings.Language = $script:Language
             }
@@ -1172,7 +1293,7 @@ function Show-AppRegistrationMenu {
         Write-Field 'Tenant' $script:Settings.Tenant
         Write-Field 'App guardada' $script:Settings.AppRegistrationName
         Write-Field 'Client ID' $script:Settings.ClientId
-        Write-Field 'Estado config' $(if ($configured) { 'CONFIGURADA' } else { 'NO CONFIGURADA' })
+        Write-Field 'Contexto de conexión' $(if ($configured) { 'CONFIGURADA' } else { 'NO CONFIGURADA' }) $(if ($configured) { 'Success' } else { 'Warning' })
 
         Write-Host ''
 
@@ -1597,8 +1718,8 @@ function Select-Target {
     switch ($choice) {
         '1' {
             $mode = Read-MenuChoice -AllowBack -Items @(
-                @{ Key='1'; Label='Buscar en el tenant' },
-                @{ Key='2'; Label='Introducir URL' }
+                @{ Key='1'; Label='Buscar en el tenant'; Description='Busca sitios publicados en el tenant.' },
+                @{ Key='2'; Label='Introducir URL'; Description='Especifica la URL de un sitio ya conocido.' }
             )
             if ($mode -eq '0') { return }
             if ($mode -eq '1') { $site = Find-SiteInteractively -Kind SharePoint }
@@ -2373,8 +2494,8 @@ function Show-AdminMenu {
     Write-Field 'Sitio' $script:Target.SiteUrl
     Write-Host ''
     $choice = Read-MenuChoice -AllowBack -Items @(
-        @{ Key='1'; Label='Otorgar Site Collection Admin' },
-        @{ Key='2'; Label='Remover Site Collection Admin' }
+        @{ Key='1'; Label='Otorgar Site Collection Admin'; Description='Agrega el UPN configurado como administrador del sitio.' },
+        @{ Key='2'; Label='Remover Site Collection Admin'; Description='Remueve el UPN configurado del sitio actual.' }
     )
 
     switch ($choice) {
@@ -2405,6 +2526,7 @@ function Run-SetupDiagnostics {
         @{
             Key   = '1'
             Label = 'Instalar / actualizar PnP.PowerShell'
+            Description = 'Comprueba la versión e instala o actualiza el módulo para CurrentUser.'
         },
         @{
             Key         = '2'
@@ -2419,6 +2541,7 @@ function Run-SetupDiagnostics {
         @{
             Key   = '4'
             Label = 'Limpiar login persistido de PnP'
+            Description = 'Elimina el login persistido local de PnP; no elimina la aplicación.'
         }
     )
 
@@ -2495,40 +2618,131 @@ function Run-SetupDiagnostics {
 }
 
 # -----------------------------------------------------------------------------
+# Working context
+# -----------------------------------------------------------------------------
+
+function Clear-WorkingContext {
+    Write-AppHeader 'Limpiar contexto de trabajo'
+
+    if ($script:Target) {
+        Write-Field 'Sitio actual' $script:Target.SiteTitle
+        Write-Field 'Bibliotecas' @($script:Target.Libraries).Count
+    }
+    else {
+        Write-Field 'Sitio actual' 'No seleccionado'
+        Write-Field 'Bibliotecas' 0
+    }
+
+    Write-Field 'Admin temporal' $(if ($null -ne $script:TemporarySiteAdmin) { 'Activo' } else { 'No activo' })
+    Write-Host ''
+    Write-Styled 'Restablece sitio, bibliotecas y selección de esta sesión. Conserva tenant, app, preferencias y reportes.' Muted
+
+    if ($null -ne $script:TemporarySiteAdmin) {
+        Write-Status Error 'No se puede limpiar el contexto mientras haya una elevación administrativa temporal activa.'
+        Write-Styled 'Retírala primero desde el menú principal.' Muted
+        Pause-Tui
+        return
+    }
+
+    if (-not (Read-YesNo '¿Limpiar el contexto de trabajo?' $false)) {
+        return
+    }
+
+    $script:Target = $null
+    Write-Status Ok 'Contexto de trabajo limpiado.'
+    Pause-Tui
+}
+
+function Show-WorkingContextMenu {
+    while ($true) {
+        $tenantConfigured = $script:Settings.Tenant -match '^[A-Za-z0-9-]+\.onmicrosoft\.com$'
+        $appConfigured = $tenantConfigured -and (Test-ClientIdFormat -ClientId $script:Settings.ClientId)
+        $appLabel = if ([string]::IsNullOrWhiteSpace($script:Settings.AppRegistrationName)) {
+            if ($appConfigured) { $script:Settings.ClientId } else { 'No configurada' }
+        }
+        else {
+            $script:Settings.AppRegistrationName
+        }
+
+        Write-AppHeader 'Gestión del contexto'
+        Write-Field 'Contexto' $(if ($script:Target) { 'ACTIVO' } else { 'VACÍO' }) $(if ($script:Target) { 'Success' } else { 'Muted' })
+        Write-Field 'Tenant' $(if ($tenantConfigured) { $script:Settings.Tenant } else { 'No configurado' }) $(if ($tenantConfigured) { 'Success' } else { 'Warning' })
+        Write-Field 'Aplicación' $appLabel $(if ($appConfigured) { 'Success' } else { 'Warning' })
+        Write-Field 'Reportes' $script:Settings.ReportFolder Muted
+        if ($script:Target) {
+            Write-Field 'Destino' $script:Target.SiteTitle Success
+            Write-Field 'Bibliotecas' @($script:Target.Libraries).Count Success
+        }
+        else {
+            Write-Field 'Destino' 'No seleccionado' Warning
+            Write-Field 'Bibliotecas' 0 Muted
+        }
+        Write-Host ''
+
+        $items = @(
+            @{
+                Key = '1'
+                Label = 'Limpiar contexto de trabajo'
+                Description = 'Limpia el sitio y las bibliotecas seleccionadas de esta sesión.'
+            },
+            @{
+                Key = '2'
+                Label = 'Cambiar tenant o aplicación conectada'
+                Description = 'Abre la configuración para cambiar el tenant o la aplicación conectada.'
+            }
+        )
+
+        $choice = Read-MenuChoice `
+            -AllowBack `
+            -Items $items
+
+        switch ($choice) {
+            '0' { return }
+            '1' { Clear-WorkingContext }
+            '2' { Show-SettingsMenu }
+        }
+    }
+}
+
+# -----------------------------------------------------------------------------
 # Main screen
 # -----------------------------------------------------------------------------
 
 function Show-CurrentTarget {
+    $pnp = Get-InstalledPnPModule
+    $tenantConfigured = $script:Settings.Tenant -match '^[A-Za-z0-9-]+\.onmicrosoft\.com$'
+    $authConfigured = $tenantConfigured -and (Test-ClientIdFormat -ClientId $script:Settings.ClientId)
+    $pnpReady = $null -ne $pnp -and [version]$pnp.Version -ge $script:MinimumPnPVersion
+
     Write-Section 'Contexto'
-    Write-Field 'Tenant' $script:Settings.Tenant
+    Write-Field 'Tenant' $script:Settings.Tenant $(if ($tenantConfigured) { 'Success' } else { 'Warning' })
+    Write-Field 'Reportes' $script:Settings.ReportFolder Muted
+    Write-Field 'PnP.PowerShell' $(if ($null -eq $pnp) { 'No instalado' } else { $pnp.Version }) $(if ($pnpReady) { 'Success' } else { 'Warning' })
+    Write-Field 'Autenticación' $(if ($authConfigured) { 'CONFIGURADA' } else { 'NO CONFIGURADA' }) $(if ($authConfigured) { 'Success' } else { 'Warning' })
 
     if ($script:Target) {
         $selectedLibraries = @($script:Target.Libraries)
         $libraryNames = ($selectedLibraries.Title -join ', ')
 
+        Write-Status Ok "Destino seleccionado: $($script:Target.SiteTitle)"
         Write-Field 'Tipo' $script:Target.Kind
         Write-Field 'Sitio' $script:Target.SiteTitle
         Write-Field 'URL' $script:Target.SiteUrl
-        Write-Field 'Libraries' ("{0} seleccionada(s)" -f $selectedLibraries.Count)
-        Write-Styled ("               " + $libraryNames) Muted
+        Write-Field 'Bibliotecas' ("{0} seleccionada(s)" -f $selectedLibraries.Count) Success
+        Write-Styled ("                  " + $libraryNames) Muted
     }
     else {
-        Write-Field 'Destino' 'No seleccionado'
+        Write-Field 'Destino' 'No seleccionado' Warning
     }
 
-    if ($script:Settings.DryRun) {
-        Write-Styled 'Modo           ● SIMULACIÓN' Success
-    }
-    else {
-        Write-Styled 'Modo           ● REAL' Danger
-    }
+    Write-Field 'Modo' $(if ($script:Settings.DryRun) { 'SIMULACIÓN' } else { 'REAL' }) $(if ($script:Settings.DryRun) { 'Warning' } else { 'Danger' })
+    Write-Field 'Auto-grant' $(if ($script:Settings.AutoGrantAdmin) { 'Activado' } else { 'Desactivado' }) $(if ($script:Settings.AutoGrantAdmin) { 'Warning' } else { 'Muted' })
+    Write-Field 'Admin temporal' $(if ($null -ne $script:TemporarySiteAdmin) { 'Activo' } else { 'No activo' }) $(if ($null -ne $script:TemporarySiteAdmin) { 'Warning' } else { 'Muted' })
 }
 
 function Show-MainMenu {
     while ($true) {
-        Write-AppHeader
-        Show-CurrentTarget
-        Write-Host ''
+        Write-AppHeader 'Inicio'
 
         $changeLibrariesDescription = if ($script:Target) {
             'Cambiar solo las bibliotecas del sitio actual; conserva el sitio seleccionado.'
@@ -2537,23 +2751,37 @@ function Show-MainMenu {
             'Disponible después de seleccionar un sitio.'
         }
 
+        $contextDescription = if ($script:Target) {
+            'Hay sitio y bibliotecas seleccionados. Limpia selecciones o cambia tenant/aplicación conectada.'
+        }
+        else {
+            'No hay contexto activo. Puedes cambiar tenant/aplicación o iniciar una selección.'
+        }
+
+        $temporaryAdminDescription = if ($null -ne $script:TemporarySiteAdmin) {
+            'Quita la elevación temporal usada para esta tarea.'
+        }
+        else {
+            'No hay una elevación temporal activa en esta sesión.'
+        }
+
         $menuItems = @(
             @{ Key='1'; Label='Seleccionar / cambiar sitio'; Description='SharePoint u OneDrive; al elegirlo se seleccionan sus bibliotecas.' },
             @{ Key='2'; Label='Cambiar bibliotecas del sitio actual'; Description=$changeLibrariesDescription },
             @{ Key='3'; Label='Analizar Unique Permission Scopes'; Description='Solo lectura · muestra recomendado 5,000 y máximo 50,000 por biblioteca · genera CSV.' },
             @{ Key='4'; Label='Restablecer herencia'; Description='Respeta Dry-run y procesa las bibliotecas seleccionadas.' },
             @{ Key='5'; Label=$(if ($script:Settings.DryRun) { 'Cambiar a modo REAL' } else { 'Cambiar a modo SIMULACIÓN' }); Description='El modo simulación es el valor seguro.' },
-            @{ Key='6'; Label='Gestionar Site Collection Admin' },
-            @{ Key='7'; Label='Configuración' },
-            @{ Key='8'; Label='Diagnóstico / autenticación' }
+            @{ Key='6'; Label='Gestionar Site Collection Admin'; Description='Otorga o remueve Site Collection Admin para el sitio actual.' },
+            @{ Key='7'; Label='Gestionar contexto de trabajo'; Description=$contextDescription },
+            @{ Key='8'; Label='Configuración'; Description='Tenant, Client ID, reportes, modo, auto-grant e idioma.' },
+            @{ Key='9'; Label='Diagnóstico / autenticación'; Description='Valida PowerShell, PnP, autenticación y conexión al Admin Center.' },
+            @{ Key='10'; Label='Retirar acceso temporal de Site Collection Admin'; Description=$temporaryAdminDescription }
         )
 
-        if ($null -ne $script:TemporarySiteAdmin) {
-            $menuItems += @{ Key='9'; Label='Retirar acceso temporal de Site Collection Admin'; Description='Quita la elevación temporal usada para esta tarea.' }
-        }
-
-        $menuItems += @{ Key='0'; Label='Salir' }
-        $choice = Read-MenuChoice -Items $menuItems
+        $menuItems += @{ Key='0'; Label='Salir'; Description='Cierra la herramienta.' }
+        $choice = Read-MenuChoice `
+            -Items $menuItems `
+            -RenderBody { Show-CurrentTarget }
 
         switch ($choice) {
             '1' { Select-Target }
@@ -2565,9 +2793,16 @@ function Show-MainMenu {
                 Save-Settings
             }
             '6' { Show-AdminMenu }
-            '7' { Show-SettingsMenu }
-            '8' { Run-SetupDiagnostics }
-            '9' {
+            '7' { Show-WorkingContextMenu }
+            '8' { Show-SettingsMenu }
+            '9' { Run-SetupDiagnostics }
+            '10' {
+                if ($null -eq $script:TemporarySiteAdmin) {
+                    Write-Status Info 'No hay acceso temporal activo.'
+                    Pause-Tui
+                    continue
+                }
+
                 [void](Remove-TemporarySiteAdmin -Ask)
                 Pause-Tui
             }
@@ -2590,8 +2825,8 @@ function Show-MainMenu {
 # Entry point
 # -----------------------------------------------------------------------------
 
-Initialize-AppLanguage
 Initialize-Terminal
+Initialize-AppLanguage
 
 if (-not (Test-Path -LiteralPath $script:ConfigRoot)) {
     [void](New-Item -ItemType Directory -Path $script:ConfigRoot -Force)
