@@ -2,7 +2,7 @@
 
 A collection of interactive tools for troubleshooting, analyzing, and maintaining OneDrive for Business and SharePoint Online.
 
-## Herramientas
+## Tools
 
 | Script | Purpose |
 | --- | --- |
