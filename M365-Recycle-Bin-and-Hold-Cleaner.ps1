@@ -57,6 +57,7 @@ $script:ReportsPath = Join-Path $script:AppRoot 'Reportes'
 $script:Settings       = $null
 $script:Target         = $null
 $script:PnPConnection  = $null
+$script:TemporarySiteAdmin = $null
 $script:Ansi           = $false
 $script:ThrottleEvents = [System.Collections.Generic.List[object]]::new()
 
@@ -182,6 +183,11 @@ function Get-LocalizedText {
             @{ From = '(sin título)'; To = '(untitled)' }
             @{ From = 'Introduce una URL HTTPS válida de *.sharepoint.com.'; To = 'Enter a valid HTTPS URL from *.sharepoint.com.' }
             @{ From = 'El sitio seleccionado no contiene una URL válida.'; To = 'The selected site does not contain a valid URL.' }
+            @{ From = 'Destino seleccionado: '; To = 'Target selected: ' }
+            @{ From = 'Validando destino'; To = 'Validating target' }
+            @{ From = 'Validación del destino'; To = 'Target validation' }
+            @{ From = 'No se obtuvo una conexión PnP válida.'; To = 'A valid PnP connection was not obtained.' }
+            @{ From = 'Access denied: '; To = 'Access denied: ' }
             @{ From = 'Se moverán hasta $($items.Count) elemento(s) del primer nivel al segundo nivel. No es una eliminación permanente.'; To = 'Up to $($items.Count) item(s) will be moved from the first stage to the second stage. This is not a permanent deletion.' }
             @{ From = 'Se eliminarán permanentemente hasta $($items.Count) elemento(s) del segundo nivel.'; To = 'Up to $($items.Count) item(s) will be permanently deleted from the second stage.' }
             @{ From = 'Se intentará eliminar permanentemente hasta $($items.Count) elemento(s) de la biblioteca detectada.'; To = 'Up to $($items.Count) item(s) will be permanently deleted from the detected library.' }
@@ -198,6 +204,31 @@ function Get-LocalizedText {
             @{ From = 'Simulación completada. No se modificó la biblioteca.'; To = 'Simulation completed. The library was not modified.' }
             @{ From = 'Simulation completed. No se modificó la biblioteca.'; To = 'Simulation completed. The library was not modified.' }
             @{ From = 'Restablecer configuración'; To = 'Reset settings' }
+            @{ From = 'La cuenta conectada no es Site Collection Administrator para este sitio.'; To = 'The connected account is not a Site Collection Administrator for this site.' }
+            @{ From = 'Get-PnPRecycleBinItem requiere Site Collection Administrator.'; To = 'Get-PnPRecycleBinItem requires Site Collection Administrator access.' }
+            @{ From = '¿Deseas agregarte temporalmente como Site Collection Administrator?'; To = 'Do you want to add yourself temporarily as Site Collection Administrator?' }
+            @{ From = 'UPN de la cuenta que se agregará como Site Collection Administrator'; To = 'UPN of the account to add as Site Collection Administrator' }
+            @{ From = 'No se pudo detectar el UPN de la cuenta conectada.'; To = 'Could not detect the UPN of the connected account.' }
+            @{ From = 'Se agregó acceso temporal como Site Collection Administrator.'; To = 'Temporary Site Collection Administrator access was added.' }
+            @{ From = 'La cuenta conectada no tiene permisos para agregar Site Collection Administrators desde el centro de administración.'; To = 'The connected account does not have permission to add Site Collection Administrators from the admin center.' }
+            @{ From = 'El acceso temporal se mantendrá hasta que lo retires desde el menú principal.'; To = 'Temporary access will remain until you remove it from the main menu.' }
+            @{ From = 'Retirar Site Collection Admin temporal'; To = 'Remove temporary Site Collection Admin' }
+            @{ From = 'Hay un acceso temporal de Site Collection Admin activo para este sitio.'; To = 'Temporary Site Collection Admin access is active for this site.' }
+            @{ From = '¿Retirar ahora el acceso temporal?'; To = 'Remove temporary access now?' }
+            @{ From = '¿Retirar el acceso temporal ahora?'; To = 'Remove temporary access now?' }
+            @{ From = 'Acceso temporal retirado correctamente.'; To = 'Temporary access removed successfully.' }
+            @{ From = 'No se retiró el acceso temporal.'; To = 'Temporary access was not removed.' }
+            @{ From = 'El acceso temporal sigue activo.'; To = 'Temporary access is still active.' }
+            @{ From = 'La operación terminó. Puedes retirar ahora el acceso temporal.'; To = 'The operation is finished. You can remove temporary access now.' }
+            @{ From = 'Debes retirar el acceso temporal antes de cambiar de sitio.'; To = 'You must remove temporary access before changing sites.' }
+            @{ From = '¿Retirar el acceso temporal antes de salir?'; To = 'Remove temporary access before exiting?' }
+            @{ From = 'No se puede continuar con otro sitio mientras el acceso temporal siga activo.'; To = 'You cannot continue with another site while temporary access remains active.' }
+            @{ From = '¿Agregar '; To = 'Add ' }; @{ From = ' como Site Collection Administrator?'; To = ' as Site Collection Administrator?' }
+            @{ From = 'Se agregará '; To = 'Will add ' }; @{ From = ' al sitio como Site Collection Administrator.'; To = ' to the site as Site Collection Administrator.' }
+            @{ From = 'UPN detectado: '; To = 'Detected UPN: ' }
+            @{ From = 'Esperando propagación del acceso administrativo...'; To = 'Waiting for administrative access propagation...' }
+            @{ From = 'Reintentando validación de acceso...'; To = 'Retrying access validation...' }
+            @{ From = 'No se pudo confirmar el acceso administrativo después de agregar el usuario.'; To = 'Administrative access could not be confirmed after adding the user.' }
         )
         foreach ($translation in $phrases) { $result = $result.Replace($translation.From, $translation.To) }
         foreach ($translation in $script:UiTranslations) { $result = $result.Replace($translation.From, $translation.To) }
@@ -1579,7 +1610,242 @@ function Test-AppRecycleBinAccess {
     }
 }
 
+function Test-AppUserUpn {
+    param([string]$Value)
+
+    if ([string]::IsNullOrWhiteSpace($Value)) {
+        return $false
+    }
+
+    return $Value.Trim() -match '^[^@\s]+@[^@\s]+\.[^@\s]+$'
+}
+
+function Get-AppConnectedUserUpn {
+    param(
+        [Parameter(Mandatory)]$Connection
+    )
+
+    foreach ($propertyName in @('PSCredential', 'Credential')) {
+        $credentialProperty = $Connection.PSObject.Properties[$propertyName]
+
+        if ($null -eq $credentialProperty -or $null -eq $credentialProperty.Value) {
+            continue
+        }
+
+        $userNameProperty = $credentialProperty.Value.PSObject.Properties['UserName']
+
+        if ($null -ne $userNameProperty -and
+            -not [string]::IsNullOrWhiteSpace([string]$userNameProperty.Value) -and
+            [string]$userNameProperty.Value -match '(?<Upn>[^\s|]+@[^\s|]+)') {
+
+            return $Matches['Upn']
+        }
+    }
+
+    $userProperty = $Connection.PSObject.Properties['User']
+
+    if ($null -ne $userProperty -and $null -ne $userProperty.Value) {
+        foreach ($propertyName in @('Email', 'UserPrincipalName', 'LoginName')) {
+            $identityProperty = $userProperty.Value.PSObject.Properties[$propertyName]
+
+            if ($null -ne $identityProperty -and
+                [string]$identityProperty.Value -match '(?<Upn>[^\s|]+@[^\s|]+)') {
+
+                return $Matches['Upn']
+            }
+        }
+    }
+
+    return ''
+}
+
+function Add-AppTemporarySiteCollectionAdmin {
+    param(
+        [Parameter(Mandatory)][string]$SiteUrl,
+        [AllowNull()]$SiteConnection
+    )
+
+    $detectedUpn = if ($null -ne $SiteConnection) {
+        Get-AppConnectedUserUpn -Connection $SiteConnection
+    }
+    else {
+        ''
+    }
+    $defaultUpn = if (Test-AppUserUpn -Value $detectedUpn) {
+        $detectedUpn
+    }
+    elseif (Test-AppUserUpn -Value ([string]$script:Settings.AdminUpn)) {
+        [string]$script:Settings.AdminUpn
+    }
+    else {
+        ''
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($defaultUpn)) {
+        Write-AppMuted -Message "UPN detectado: $defaultUpn"
+    }
+    else {
+        Write-AppWarning -Message 'No se pudo detectar el UPN de la cuenta conectada.'
+    }
+
+    $upn = Read-AppText `
+        -Prompt 'UPN de la cuenta que se agregará como Site Collection Administrator' `
+        -Default $defaultUpn `
+        -Validator { param($value) Test-AppUserUpn -Value $value } `
+        -ValidationMessage 'Introduce un UPN válido.'
+
+    if (-not (Read-AppYesNo -Prompt "¿Agregar $upn como Site Collection Administrator?" -DefaultYes $true)) {
+        return $null
+    }
+
+    $adminUrl = Get-AppAdminUrl
+
+    if ([string]::IsNullOrWhiteSpace($adminUrl)) {
+        throw 'No fue posible determinar la URL del centro de administración.'
+    }
+
+    Write-AppInfo -Message "Conectando al centro de administración: $adminUrl"
+    $adminConnection = Connect-AppUrl -Url $adminUrl -SkipEnsureAuth
+
+    Write-AppInfo -Message "Se agregará $upn al sitio como Site Collection Administrator."
+
+    Set-PnPTenantSite `
+        -Identity $SiteUrl `
+        -Owners @($upn) `
+        -Connection $adminConnection `
+        -ErrorAction Stop
+
+    # Track the grant immediately. If propagation takes longer than expected,
+    # the user can still remove the temporary administrator from the main menu.
+    $script:TemporarySiteAdmin = [pscustomobject]@{
+        Upn        = $upn
+        SiteUrl    = $SiteUrl
+        Connection = $SiteConnection
+    }
+
+    for ($attempt = 1; $attempt -le 6; $attempt++) {
+        Write-AppInfo -Message 'Esperando propagación del acceso administrativo...'
+        Start-Sleep -Seconds 3
+
+        try {
+            $refreshedConnection = Connect-AppUrl -Url $SiteUrl -SkipEnsureAuth
+            $access = Test-AppRecycleBinAccess -Connection $refreshedConnection
+
+            if ($access.Success) {
+                Write-AppOk -Message 'Se agregó acceso temporal como Site Collection Administrator.'
+                Write-AppMuted -Message 'El acceso temporal se mantendrá hasta que lo retires desde el menú principal.'
+
+                return [pscustomobject]@{
+                    Upn        = $upn
+                    SiteUrl    = $SiteUrl
+                    Connection = $refreshedConnection
+                }
+            }
+        }
+        catch {
+            $access = [pscustomobject]@{
+                Success = $false
+                Message = $_.Exception.Message
+            }
+        }
+
+        if ($attempt -lt 6) {
+            Write-AppMuted -Message 'Reintentando validación de acceso...'
+        }
+    }
+
+    throw 'No se pudo confirmar el acceso administrativo después de agregar el usuario.'
+}
+
+function Request-AppTemporarySiteCollectionAdmin {
+    param(
+        [Parameter(Mandatory)][string]$SiteUrl,
+        [AllowNull()]$SiteConnection,
+        [Parameter(Mandatory)][string]$ErrorMessage
+    )
+
+    if ($ErrorMessage -notmatch '(?i)unauthori[sz]ed|access denied|forbidden|\b401\b|\b403\b|attempted to perform') {
+        return $null
+    }
+
+    if ($null -ne $script:TemporarySiteAdmin) {
+        if (([string]$script:TemporarySiteAdmin.SiteUrl).TrimEnd('/') -eq $SiteUrl.TrimEnd('/')) {
+            return $script:TemporarySiteAdmin
+        }
+
+        return $null
+    }
+
+    if (-not (Read-AppYesNo -Prompt '¿Deseas agregarte temporalmente como Site Collection Administrator?' -DefaultYes $true)) {
+        return $null
+    }
+
+    try {
+        return Add-AppTemporarySiteCollectionAdmin `
+            -SiteUrl $SiteUrl `
+            -SiteConnection $SiteConnection
+    }
+    catch {
+        Show-AppErrorScreen `
+            -Title 'Agregar Site Collection Administrator' `
+            -Message "La cuenta conectada no tiene permisos para agregar Site Collection Administrators desde el centro de administración. $($_.Exception.Message)"
+        return $null
+    }
+}
+
+function Remove-AppTemporarySiteCollectionAdmin {
+    param(
+        [switch]$Ask
+    )
+
+    if ($null -eq $script:TemporarySiteAdmin) {
+        return $true
+    }
+
+    $temporaryAdmin = $script:TemporarySiteAdmin
+
+    if ($Ask -and -not (Read-AppYesNo -Prompt '¿Retirar el acceso temporal ahora?' -DefaultYes $true)) {
+        Write-AppWarning -Message 'No se retiró el acceso temporal.'
+        return $false
+    }
+
+    try {
+        $connection = Connect-AppUrl -Url $temporaryAdmin.SiteUrl -SkipEnsureAuth
+
+        Remove-PnPSiteCollectionAdmin `
+            -Owners @($temporaryAdmin.Upn) `
+            -Connection $connection `
+            -ErrorAction Stop
+
+        $script:TemporarySiteAdmin = $null
+        $script:PnPConnection = $null
+        $script:Target = $null
+        Write-AppOk -Message 'Acceso temporal retirado correctamente.'
+        return $true
+    }
+    catch {
+        Write-AppError -Message 'No se pudo retirar el acceso temporal.'
+        Write-AppMuted -Message $_.Exception.Message
+        return $false
+    }
+}
+
 function Set-AppTarget {
+    if ($null -ne $script:TemporarySiteAdmin) {
+        Write-AppWarning -Message 'Hay un acceso temporal de Site Collection Admin activo para este sitio.'
+
+        if (-not (Read-AppYesNo -Prompt '¿Retirar el acceso temporal antes de cambiar de sitio?' -DefaultYes $true)) {
+            Write-AppWarning -Message 'No se puede continuar con otro sitio mientras el acceso temporal siga activo.'
+            Wait-App
+            return
+        }
+
+        if (-not (Remove-AppTemporarySiteCollectionAdmin)) {
+            Wait-App
+            return
+        }
+    }
+
     Show-AppHeader -Section 'Seleccionar destino'
 
     if (-not (Ensure-AppAuthentication)) {
@@ -1639,8 +1905,12 @@ function Set-AppTarget {
     Show-AppHeader -Section 'Validando destino'
     Write-AppInfo -Message $url
 
-    try {
-        $connection = Connect-AppUrl -Url $url
+    $connection = $null
+    $temporaryAdmin = $null
+    $loadTarget = {
+        if ($null -eq $connection) {
+            throw 'No se obtuvo una conexión PnP válida.'
+        }
 
         $web = Get-PnPWeb `
             -Connection $connection `
@@ -1655,14 +1925,51 @@ function Set-AppTarget {
         $access = Test-AppRecycleBinAccess -Connection $connection
 
         if (-not $access.Success) {
-            Write-AppError -Message 'La cuenta conectada no puede leer la papelera de este sitio.'
+            Write-AppError -Message 'La cuenta conectada no es Site Collection Administrator para este sitio.'
             Write-AppMuted -Message 'Get-PnPRecycleBinItem requiere Site Collection Administrator.'
             Write-AppMuted -Message $access.Message
-            Wait-App
-            return
+            # Mark this failure explicitly as an authorization failure. PnP can
+            # return different localized messages for OneDrive recycle-bin access.
+            throw "Access denied: $($access.Message)"
         }
 
         Write-AppOk -Message 'Acceso a la papelera validado.'
+
+        return [pscustomobject]@{
+            Web        = $web
+            Connection = $connection
+        }
+    }
+
+    try {
+        $connection = Connect-AppUrl -Url $url
+        $targetData = & $loadTarget
+    }
+    catch {
+        $message = $_.Exception.Message
+        $temporaryAdmin = Request-AppTemporarySiteCollectionAdmin `
+            -SiteUrl $url `
+            -SiteConnection $connection `
+            -ErrorMessage $message
+
+        if ($null -eq $temporaryAdmin) {
+            Show-AppErrorScreen -Title 'Conexión al destino' -Message $message
+            return
+        }
+
+        try {
+            $connection = $temporaryAdmin.Connection
+            $targetData = & $loadTarget
+        }
+        catch {
+            Show-AppErrorScreen -Title 'Validación del destino' -Message $_.Exception.Message
+            return
+        }
+    }
+
+    try {
+        $web = $targetData.Web
+        $connection = $targetData.Connection
 
         $owner = ''
         $ownerProperty = $site.PSObject.Properties['Owner']
@@ -1671,6 +1978,11 @@ function Set-AppTarget {
         }
 
         $script:PnPConnection = $connection
+
+        if ($null -ne $temporaryAdmin) {
+            $script:TemporarySiteAdmin = $temporaryAdmin
+        }
+
         $script:Target = [pscustomobject]@{
             Type    = $type
             Url     = $url.TrimEnd('/')
@@ -1678,6 +1990,7 @@ function Set-AppTarget {
             Owner   = $owner
         }
 
+        Write-AppOk -Message "Destino seleccionado: $($script:Target.Title)"
         Start-Sleep -Milliseconds 700
     }
     catch {
@@ -2399,6 +2712,17 @@ function Start-AppStageCleanup {
             Invoke-AppPreservationHoldCleanup -Limit $limit
         }
     }
+
+    if ($null -ne $script:TemporarySiteAdmin) {
+        Write-AppInfo -Message 'La operación terminó. Puedes retirar ahora el acceso temporal.'
+        [void](Remove-AppTemporarySiteCollectionAdmin -Ask)
+
+        if ($null -ne $script:TemporarySiteAdmin) {
+            Write-AppWarning -Message 'El acceso temporal sigue activo.'
+        }
+
+        Wait-App
+    }
 }
 
 
@@ -2543,16 +2867,28 @@ function Show-AppSettingsMenu {
                 Write-Host ''
 
                 if (Read-AppYesNo -Prompt '¿Continuar?' -DefaultYes $false) {
-                    if (Test-Path -LiteralPath $script:ConfigPath) {
-                        Remove-Item -LiteralPath $script:ConfigPath -Force
+                    $canReset = $true
+
+                    if ($null -ne $script:TemporarySiteAdmin) {
+                        $canReset = Remove-AppTemporarySiteCollectionAdmin -Ask
                     }
 
-                    $script:Settings = Get-DefaultAppSettings
-                    $script:Target = $null
-                    $script:PnPConnection = $null
+                    if ($canReset) {
+                        if (Test-Path -LiteralPath $script:ConfigPath) {
+                            Remove-Item -LiteralPath $script:ConfigPath -Force
+                        }
 
-                    Write-AppOk -Message 'Configuración restablecida.'
-                    Wait-App
+                        $script:Settings = Get-DefaultAppSettings
+                        $script:Target = $null
+                        $script:PnPConnection = $null
+
+                        Write-AppOk -Message 'Configuración restablecida.'
+                        Wait-App
+                    }
+                    else {
+                        Write-AppWarning -Message 'El acceso temporal sigue activo.'
+                        Wait-App
+                    }
                 }
             }
 
@@ -2652,7 +2988,7 @@ function Show-AppMainMenu {
         Show-AppContext
         Write-Host ''
 
-        $choice = Read-AppMenuChoice -Items @(
+        $choiceItems = @(
             @{ Key='1'; Value='Target'; Label='Seleccionar / cambiar sitio'; Description='Buscar SharePoint u OneDrive en el tenant o usar una URL directa.' }
             @{ Key='2'; Value='First'; Label='Vaciar primer nivel'; Description='Mueve los elementos al segundo nivel; no los elimina permanentemente.' }
             @{ Key='3'; Value='Second'; Label='Vaciar segundo nivel'; Description='Elimina permanentemente elementos del segundo nivel.' }
@@ -2662,8 +2998,14 @@ function Show-AppMainMenu {
             @{ Key='7'; Value='Auth'; Label='Aplicación Entra / autenticación' }
             @{ Key='8'; Value='Settings'; Label='Configuración' }
             @{ Key='9'; Value='Diagnostics'; Label='Diagnóstico' }
-            @{ Key='0'; Value='Exit'; Label='Salir' }
         )
+
+        if ($null -ne $script:TemporarySiteAdmin) {
+            $choiceItems += @{ Key='10'; Value='RemoveTemporaryAdmin'; Label='Retirar Site Collection Admin temporal'; Description="Retira $($script:TemporarySiteAdmin.Upn) de $($script:TemporarySiteAdmin.SiteUrl)." }
+        }
+
+        $choiceItems += @{ Key='0'; Value='Exit'; Label='Salir' }
+        $choice = Read-AppMenuChoice -Items $choiceItems
 
         switch ($choice.Value) {
             'Target' {
@@ -2704,7 +3046,20 @@ function Show-AppMainMenu {
             }
 
             'Exit' {
+                if ($null -ne $script:TemporarySiteAdmin) {
+                    if (-not (Remove-AppTemporarySiteCollectionAdmin -Ask)) {
+                        Write-AppWarning -Message 'El acceso temporal sigue activo.'
+                        Wait-App
+                        continue
+                    }
+                }
+
                 return
+            }
+
+            'RemoveTemporaryAdmin' {
+                [void](Remove-AppTemporarySiteCollectionAdmin -Ask)
+                Wait-App
             }
         }
     }

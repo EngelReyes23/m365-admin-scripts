@@ -48,6 +48,7 @@ $script:DefaultReportFolder = Join-Path $script:ConfigRoot 'reports'
 
 $script:Settings = $null
 $script:Target = $null
+$script:TemporarySiteAdmin = $null
 $script:Ansi = $false
 
 # -----------------------------------------------------------------------------
@@ -143,6 +144,18 @@ function Get-LocalizedText {
             @{ From = 'Buscar OneDrive reales desde el tenant; no se construyen URLs manualmente.'; To = 'Search for real OneDrive sites from the tenant; URLs are not constructed manually.' }
             @{ From = 'Buscar en el tenant'; To = 'Search in the tenant' }; @{ From = 'Introducir URL'; To = 'Enter URL' }
             @{ From = 'Otorgar Site Collection Admin'; To = 'Grant Site Collection Admin' }; @{ From = 'Remover Site Collection Admin'; To = 'Remove Site Collection Admin' }
+            @{ From = 'Retirar acceso temporal de Site Collection Admin'; To = 'Remove temporary Site Collection Admin access' }
+            @{ From = 'Quita la elevación temporal usada para esta tarea.'; To = 'Removes the temporary elevation used for this task.' }
+            @{ From = 'La tarea terminó. Puedes retirar ahora el acceso temporal.'; To = 'The task is finished. You can remove temporary access now.' }
+            @{ From = 'El acceso temporal sigue activo.'; To = 'Temporary access is still active.' }
+            @{ From = '¿Retirar el acceso temporal ahora?'; To = 'Remove temporary access now?' }
+            @{ From = 'No se retiró el acceso temporal.'; To = 'Temporary access was not removed.' }
+            @{ From = 'Acceso temporal retirado correctamente.'; To = 'Temporary access removed successfully.' }
+            @{ From = 'No se pudo retirar el acceso temporal.'; To = 'Temporary access could not be removed.' }
+            @{ From = 'No se pudo obtener una conexión PnP válida.'; To = 'A valid PnP connection could not be obtained.' }
+            @{ From = '¿Deseas agregarte temporalmente como Site Collection Admin para continuar?'; To = 'Do you want to add yourself temporarily as Site Collection Admin to continue?' }
+            @{ From = 'Auto-grant está activado; se intentará otorgar acceso temporal.'; To = 'Auto-grant is enabled; temporary access will be granted.' }
+            @{ From = 'La operación requiere permisos administrativos para este sitio.'; To = 'The operation requires administrative permissions for this site.' }
             @{ From = 'Instalar / actualizar PnP.PowerShell'; To = 'Install / update PnP.PowerShell' }
             @{ From = 'Validar, usar una existente o registrar una nueva.'; To = 'Validate, use an existing one, or register a new one.' }
             @{ From = 'Usa la aplicación actualmente configurada.'; To = 'Uses the currently configured application.' }
@@ -1330,6 +1343,64 @@ function Test-UnauthorizedError {
     return $Message -match '(?i)unauthori[sz]ed|access denied|forbidden|\b401\b|\b403\b|attempted to perform'
 }
 
+function Try-EnableTemporarySiteAdmin {
+    param(
+        [Parameter(Mandatory)][string]$SiteUrl,
+        [Parameter(Mandatory)][string]$ErrorMessage
+    )
+
+    if (-not (Test-UnauthorizedError -Message $ErrorMessage)) {
+        return $false
+    }
+
+    if ($null -ne $script:TemporarySiteAdmin) {
+        return ([string]$script:TemporarySiteAdmin.SiteUrl).TrimEnd('/') -eq $SiteUrl.TrimEnd('/')
+    }
+
+    if ($script:Settings.AutoGrantAdmin) {
+        Write-Status Warn 'Auto-grant está activado; se intentará otorgar acceso temporal.'
+    }
+    elseif (-not (Read-YesNo -Prompt '¿Deseas agregarte temporalmente como Site Collection Admin para continuar?' -Default $true)) {
+        return $false
+    }
+
+    if (-not (Grant-SiteAdminAccess -SiteUrl $SiteUrl -TrackTemporary)) {
+        return $false
+    }
+
+    Write-Status Info 'Esperando propagación del acceso administrativo...'
+    Start-Sleep -Seconds 5
+    return $true
+}
+
+function Connect-M365SiteWithRecovery {
+    param(
+        [Parameter(Mandatory)][string]$Url,
+        [switch]$SkipAutoGrant
+    )
+
+    try {
+        $connection = Connect-M365Site -Url $Url
+        if ($null -eq $connection) {
+            throw 'No se pudo obtener una conexión PnP válida.'
+        }
+
+        return $connection
+    }
+    catch {
+        if ($SkipAutoGrant -or -not (Try-EnableTemporarySiteAdmin -SiteUrl $Url -ErrorMessage $_.Exception.Message)) {
+            throw
+        }
+
+        $connection = Connect-M365Site -Url $Url
+        if ($null -eq $connection) {
+            throw 'No se pudo obtener una conexión PnP válida después de otorgar acceso.'
+        }
+
+        return $connection
+    }
+}
+
 function Invoke-WithRetry {
     param(
         [Parameter(Mandatory)][scriptblock]$ScriptBlock,
@@ -1553,24 +1624,21 @@ function Select-Target {
 
     if (-not $site) { return }
 
-    Write-Status Info "Conectando a $($site.Url)"
+    $siteUrl = [string]$site.Url
+    if ([string]::IsNullOrWhiteSpace($siteUrl)) {
+        Write-Status Error 'El sitio seleccionado no tiene una URL válida.'
+        Pause-Tui
+        return
+    }
+
+    Write-Status Info "Conectando a $siteUrl"
     try {
-        $connection = Connect-M365Site -Url $site.Url
+        $connection = Connect-M365SiteWithRecovery -Url $siteUrl
     }
     catch {
-        $msg = $_.Exception.Message
-        if ((Test-UnauthorizedError $msg) -and $script:Settings.AutoGrantAdmin) {
-            Write-Status Warn 'Acceso insuficiente. Auto-grant está activado.'
-            if (Grant-SiteAdminAccess -SiteUrl $site.Url) {
-                Start-Sleep -Seconds 5
-                $connection = Connect-M365Site -Url $site.Url
-            }
-            else { return }
-        }
-        else {
-            Write-Status Error "No se pudo conectar: $msg"
-            return
-        }
+        Write-Status Error "No se pudo conectar: $($_.Exception.Message)"
+        Pause-Tui
+        return
     }
 
     try {
@@ -1578,12 +1646,27 @@ function Select-Target {
         $libraries = @(Resolve-Libraries -Connection $connection -TargetKind $kind)
     }
     catch {
-        Write-Status Error "No se pudieron leer las bibliotecas: $($_.Exception.Message)"
-        return
+        $message = $_.Exception.Message
+
+        try {
+            if (-not (Try-EnableTemporarySiteAdmin -SiteUrl $siteUrl -ErrorMessage $message)) {
+                throw $message
+            }
+
+            $connection = Connect-M365SiteWithRecovery -Url $siteUrl -SkipAutoGrant
+            $web = Get-PnPWeb -Connection $connection -Includes Title,Url -ErrorAction Stop
+            $libraries = @(Resolve-Libraries -Connection $connection -TargetKind $kind)
+        }
+        catch {
+            Write-Status Error "No se pudieron leer las bibliotecas: $($_.Exception.Message)"
+            Pause-Tui
+            return
+        }
     }
 
     if ($libraries.Count -eq 0) {
         Write-Status Warn 'No se encontraron bibliotecas de documentos en este web.'
+        Pause-Tui
         return
     }
 
@@ -1598,16 +1681,33 @@ function Select-Target {
         }
     }
 
-    $selected = @(Select-LibrariesInteractive -Libraries $libraries)
-    if ($selected.Count -eq 0) { return }
+    try {
+        $selected = @(Select-LibrariesInteractive -Libraries $libraries)
+    }
+    catch {
+        Write-Status Error "No se pudieron seleccionar las bibliotecas: $($_.Exception.Message)"
+        Pause-Tui
+        return
+    }
+
+    if ($selected.Count -eq 0) {
+        Write-Status Warn 'No se seleccionó ninguna biblioteca; el destino no fue guardado.'
+        Pause-Tui
+        return
+    }
 
     $script:Target = [pscustomobject]@{
         Kind = $kind
-        SiteUrl = [string]$site.Url
+        SiteUrl = $siteUrl.TrimEnd('/')
         SiteTitle = [string]$web.Title
         Owner = [string]$site.Owner
         Libraries = $selected
     }
+
+    $script:PnPConnection = $connection
+
+    Write-Status Ok "Destino seleccionado: $($script:Target.SiteTitle)"
+    Start-Sleep -Milliseconds 700
 }
 
 function Reselect-TargetLibraries {
@@ -1792,11 +1892,15 @@ function Export-ObjectListToCsv {
 }
 
 function Run-CountUniqueScopes {
+    param([switch]$SkipAutoGrant)
+
     Write-AppHeader 'Análisis de permisos únicos'
     if (-not (Test-TargetSelected)) { Pause-Tui; return }
 
     try {
-        $connection = Connect-M365Site -Url $script:Target.SiteUrl
+        $connection = Connect-M365SiteWithRecovery `
+            -Url $script:Target.SiteUrl `
+            -SkipAutoGrant:$SkipAutoGrant
     }
     catch {
         Write-Status Error "Conexión fallida: $($_.Exception.Message)"
@@ -1866,7 +1970,15 @@ function Run-CountUniqueScopes {
             }
         }
         catch {
-            Write-Status Error "$($library.Title): $($_.Exception.Message)"
+            $message = $_.Exception.Message
+
+            if (-not $SkipAutoGrant -and
+                (Try-EnableTemporarySiteAdmin -SiteUrl $script:Target.SiteUrl -ErrorMessage $message)) {
+                [void](Run-CountUniqueScopes -SkipAutoGrant)
+                return
+            }
+
+            Write-Status Error "$($library.Title): $message"
             [void]$summary.Add([pscustomobject]@{
                 Library      = $library.Title
                 Principal    = $library.IsDefaultDocumentLibrary
@@ -1894,10 +2006,10 @@ function Run-CountUniqueScopes {
     Write-Section 'Resumen por biblioteca'
 
     if ($summary.Count -gt 0) {
-        $summary.ToArray() |
+        $summaryText = $summary.ToArray() |
             Format-Table Library,Items,UniqueScopes,Recommended,Maximum,Status -AutoSize |
-            Out-String |
-            Write-Host
+            Out-String
+        Write-Host $summaryText
     }
 
     $grandTotal = 0
@@ -1941,6 +2053,14 @@ function Run-CountUniqueScopes {
 
     if ($librariesAtMaximum -eq 0 -and $librariesOverRecommended -eq 0) {
         Write-Status Ok 'Todas las bibliotecas analizadas están dentro del límite recomendado.'
+    }
+
+    if ($null -ne $script:TemporarySiteAdmin) {
+        Write-Status Info 'La tarea terminó. Puedes retirar ahora el acceso temporal.'
+        [void](Remove-TemporarySiteAdmin -Ask)
+        if ($null -ne $script:TemporarySiteAdmin) {
+            Write-Status Warn 'El acceso temporal sigue activo.'
+        }
     }
 
     Write-Field 'Reporte' $path
@@ -2003,6 +2123,8 @@ function Invoke-ResetItemBatch {
 }
 
 function Run-ResetInheritance {
+    param([switch]$SkipAutoGrant)
+
     Write-AppHeader 'Restablecer herencia'
     if (-not (Test-TargetSelected)) { Pause-Tui; return }
 
@@ -2024,7 +2146,9 @@ function Run-ResetInheritance {
     }
 
     try {
-        $connection = Connect-M365Site -Url $script:Target.SiteUrl
+        $connection = Connect-M365SiteWithRecovery `
+            -Url $script:Target.SiteUrl `
+            -SkipAutoGrant:$SkipAutoGrant
     }
     catch {
         Write-Status Error "Conexión fallida: $($_.Exception.Message)"
@@ -2085,7 +2209,15 @@ function Run-ResetInheritance {
             }
         }
         catch {
-            Write-Status Error "$($library.Title): $($_.Exception.Message)"
+            $message = $_.Exception.Message
+
+            if (-not $SkipAutoGrant -and
+                (Try-EnableTemporarySiteAdmin -SiteUrl $script:Target.SiteUrl -ErrorMessage $message)) {
+                [void](Run-ResetInheritance -SkipAutoGrant)
+                return
+            }
+
+            Write-Status Error "$($library.Title): $message"
             [void]$log.Add([pscustomobject]@{
                 Site    = $script:Target.SiteUrl
                 Library = $library.Title
@@ -2126,6 +2258,14 @@ function Run-ResetInheritance {
     elseif ($script:Settings.DryRun) { Write-Status Ok 'Simulación completada sin modificar permisos.' }
     else { Write-Status Ok 'Restablecimiento completado.' }
 
+    if ($null -ne $script:TemporarySiteAdmin) {
+        Write-Status Info 'La tarea terminó. Puedes retirar ahora el acceso temporal.'
+        [void](Remove-TemporarySiteAdmin -Ask)
+        if ($null -ne $script:TemporarySiteAdmin) {
+            Write-Status Warn 'El acceso temporal sigue activo.'
+        }
+    }
+
     Pause-Tui
 }
 
@@ -2148,18 +2288,64 @@ function Get-AdminUpn {
 }
 
 function Grant-SiteAdminAccess {
-    param([Parameter(Mandatory)][string]$SiteUrl)
+    param(
+        [Parameter(Mandatory)][string]$SiteUrl,
+        [switch]$TrackTemporary
+    )
 
     try {
         $adminUpn = Get-AdminUpn
         $adminUrl = Get-AdminUrl
         $conn = Connect-M365Site -Url $adminUrl
         Set-PnPTenantSite -Identity $SiteUrl -Owners $adminUpn -Connection $conn -ErrorAction Stop
+
+        if ($TrackTemporary) {
+            # Track the grant immediately so it can still be removed if the
+            # following site reconnection or propagation check fails.
+            $script:TemporarySiteAdmin = [pscustomobject]@{
+                Upn     = $adminUpn
+                SiteUrl = $SiteUrl
+            }
+        }
+
         Write-Status Ok "$adminUpn agregado como Site Collection Admin."
         return $true
     }
     catch {
         Write-Status Error "No se pudo otorgar acceso: $($_.Exception.Message)"
+        return $false
+    }
+}
+
+function Remove-TemporarySiteAdmin {
+    param([switch]$Ask)
+
+    if ($null -eq $script:TemporarySiteAdmin) {
+        return $true
+    }
+
+    $temporaryAdmin = $script:TemporarySiteAdmin
+
+    if ($Ask -and -not (Read-YesNo -Prompt '¿Retirar el acceso temporal ahora?' -Default $true)) {
+        Write-Status Warn 'No se retiró el acceso temporal.'
+        return $false
+    }
+
+    try {
+        $connection = Connect-M365Site -Url $temporaryAdmin.SiteUrl
+
+        Remove-PnPSiteCollectionAdmin `
+            -Owners $temporaryAdmin.Upn `
+            -Connection $connection `
+            -ErrorAction Stop
+
+        $script:TemporarySiteAdmin = $null
+        Write-Status Ok 'Acceso temporal retirado correctamente.'
+        return $true
+    }
+    catch {
+        Write-Status Error 'No se pudo retirar el acceso temporal.'
+        Write-Styled $_.Exception.Message Danger
         return $false
     }
 }
@@ -2351,7 +2537,7 @@ function Show-MainMenu {
             'Disponible después de seleccionar un sitio.'
         }
 
-        $choice = Read-MenuChoice -Items @(
+        $menuItems = @(
             @{ Key='1'; Label='Seleccionar / cambiar sitio'; Description='SharePoint u OneDrive; al elegirlo se seleccionan sus bibliotecas.' },
             @{ Key='2'; Label='Cambiar bibliotecas del sitio actual'; Description=$changeLibrariesDescription },
             @{ Key='3'; Label='Analizar Unique Permission Scopes'; Description='Solo lectura · muestra recomendado 5,000 y máximo 50,000 por biblioteca · genera CSV.' },
@@ -2359,9 +2545,15 @@ function Show-MainMenu {
             @{ Key='5'; Label=$(if ($script:Settings.DryRun) { 'Cambiar a modo REAL' } else { 'Cambiar a modo SIMULACIÓN' }); Description='El modo simulación es el valor seguro.' },
             @{ Key='6'; Label='Gestionar Site Collection Admin' },
             @{ Key='7'; Label='Configuración' },
-            @{ Key='8'; Label='Diagnóstico / autenticación' },
-            @{ Key='0'; Label='Salir' }
+            @{ Key='8'; Label='Diagnóstico / autenticación' }
         )
+
+        if ($null -ne $script:TemporarySiteAdmin) {
+            $menuItems += @{ Key='9'; Label='Retirar acceso temporal de Site Collection Admin'; Description='Quita la elevación temporal usada para esta tarea.' }
+        }
+
+        $menuItems += @{ Key='0'; Label='Salir' }
+        $choice = Read-MenuChoice -Items $menuItems
 
         switch ($choice) {
             '1' { Select-Target }
@@ -2375,7 +2567,21 @@ function Show-MainMenu {
             '6' { Show-AdminMenu }
             '7' { Show-SettingsMenu }
             '8' { Run-SetupDiagnostics }
-            '0' { return }
+            '9' {
+                [void](Remove-TemporarySiteAdmin -Ask)
+                Pause-Tui
+            }
+            '0' {
+                if ($null -ne $script:TemporarySiteAdmin) {
+                    if (-not (Remove-TemporarySiteAdmin -Ask)) {
+                        Write-Status Warn 'El acceso temporal sigue activo.'
+                        Pause-Tui
+                        continue
+                    }
+                }
+
+                return
+            }
         }
     }
 }
