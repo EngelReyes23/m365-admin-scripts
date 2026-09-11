@@ -1,0 +1,12 @@
+# Archivos generados por Windows
+desktop.ini
+
+# Configuración y reportes locales
+*.csv
+reports/
+Reportes/
+.m365-*/
+
+# Archivos temporales
+*.tmp
+*.log
