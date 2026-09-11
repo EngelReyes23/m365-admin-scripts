@@ -83,6 +83,7 @@ function Get-LocalizedText {
     if ($script:Language -eq 'en') {
         $phrases = @(
             @{ From = 'Selecciona una opción'; To = 'Select an option' }; @{ From = 'Seleccionar destino'; To = 'Select target' }
+            @{ From = 'Idioma'; To = 'Language' }; @{ From = 'Cambiar idioma'; To = 'Change language' }
             @{ From = 'No seleccionado'; To = 'Not selected' }; @{ From = 'No configurado'; To = 'Not configured' }; @{ From = 'No instalado'; To = 'Not installed' }
             @{ From = 'Destino'; To = 'Target' }; @{ From = 'CONFIGURADA'; To = 'CONFIGURED' }; @{ From = 'NO CONFIGURADA'; To = 'NOT CONFIGURED' }
             @{ From = 'Activado'; To = 'Enabled' }; @{ From = 'Desactivado'; To = 'Disabled' }; @{ From = 'Sí'; To = 'Yes' }; @{ From = 'SÍ'; To = 'YES' }
@@ -97,6 +98,20 @@ function Get-LocalizedText {
             @{ From = 'Los elementos del primer nivel se moverán al segundo nivel; no se eliminarán permanentemente.'; To = 'First-stage items will be moved to the second stage; they will not be permanently deleted.' }
             @{ From = 'Los elementos del segundo nivel se eliminarán permanentemente.'; To = 'Second-stage items will be permanently deleted.' }
             @{ From = 'No hay elementos en este nivel dentro del límite solicitado.'; To = 'There are no items in this stage within the requested limit.' }
+            @{ From = 'Valor inválido.'; To = 'Invalid value.' }; @{ From = 'El valor no puede estar vacío.'; To = 'Value cannot be empty.' }
+            @{ From = 'Cada elemento del menú debe tener Key.'; To = 'Every menu item must have a Key.' }; @{ From = 'Selección inválida.'; To = 'Invalid selection.' }
+            @{ From = 'No hay coincidencias.'; To = 'No matches.' }; @{ From = 'Filtrar por nombre, URL o propietario (vacío = todos)'; To = 'Filter by name, URL, or owner (empty = all)' }
+            @{ From = 'No se pudieron enumerar los sitios.'; To = 'The sites could not be enumerated.' }; @{ From = 'No se encontraron sitios accesibles.'; To = 'No accessible sites were found.' }
+            @{ From = 'Primero selecciona un sitio SharePoint o OneDrive.'; To = 'First select a SharePoint or OneDrive site.' }
+            @{ From = 'La cuenta conectada no puede leer la papelera de este sitio.'; To = 'The connected account cannot read this site recycle bin.' }
+            @{ From = 'Acceso a la papelera validado.'; To = 'Recycle-bin access validated.' }; @{ From = 'Conexión establecida.'; To = 'Connection established.' }
+            @{ From = 'Cantidad máxima de elementos a procesar'; To = 'Maximum number of items to process' }
+            @{ From = 'Límite de procesamiento'; To = 'Processing limit' }; @{ From = 'Primer nivel: mover al segundo. Segundo nivel: eliminación permanente.'; To = 'First stage: move to the second. Second stage: permanent deletion.' }
+            @{ From = 'En "ambos niveles", el límite se aplica por separado a cada nivel.'; To = 'For "both stages", the limit applies separately to each stage.' }
+            @{ From = 'La operación terminó con errores. Revisa el reporte.'; To = 'The operation finished with errors. Review the report.' }
+            @{ From = 'Procesamiento completado.'; To = 'Processing completed.' }; @{ From = 'No se encontró Preservation Hold Library en este sitio.'; To = 'Preservation Hold Library was not found on this site.' }
+            @{ From = 'No hay elementos para procesar dentro del límite solicitado.'; To = 'There are no items to process within the requested limit.' }
+            @{ From = 'Configuración de throttling guardada.'; To = 'Throttling settings saved.' }; @{ From = 'Restablecer configuración local'; To = 'Reset local settings' }
             @{ From = 'La operación terminó con errores. Revisa el reporte.'; To = 'The operation finished with errors. Review the report.' }
             @{ From = 'Simulación completada. No se movió ningún elemento.'; To = 'Simulation completed. No items were moved.' }
             @{ From = 'Simulación completada. No se eliminó ningún elemento.'; To = 'Simulation completed. No items were deleted.' }
@@ -106,6 +121,83 @@ function Get-LocalizedText {
             @{ From = 'Puede no existir, estar vacía/no provisionada o no ser accesible con la identidad actual.'; To = 'It may not exist, be empty/not provisioned, or be inaccessible to the current identity.' }
             @{ From = 'Eliminar contenido de Preservation Hold Library puede verse bloqueado por políticas de retención.'; To = 'Deleting Preservation Hold Library content may be blocked by retention policies.' }
             @{ From = 'La herramienta no deshabilita ni modifica políticas de cumplimiento o retención.'; To = 'The tool does not disable or modify compliance or retention policies.' }
+            @{ From = 'Aplicación Entra / autenticación'; To = 'Entra application / authentication' }
+            @{ From = 'Aplicación Entra / autenticación PnP'; To = 'Entra application / PnP authentication' }
+            @{ From = 'Comprueba autenticación y acceso a búsqueda de sitios.'; To = 'Checks authentication and access to site search.' }
+            @{ From = 'Usar otra aplicación existente'; To = 'Use another existing application' }
+            @{ From = 'Introduce y opcionalmente valida otro Client ID.'; To = 'Enter and optionally validate another Client ID.' }
+            @{ From = 'Registrar una nueva aplicación Entra'; To = 'Register a new Entra application' }
+            @{ From = 'Crea otra app PnP y la configura en esta herramienta.'; To = 'Creates another PnP app and configures it in this tool.' }
+            @{ From = 'Quitar Client ID de la configuración local'; To = 'Remove Client ID from local configuration' }
+            @{ From = 'No elimina la aplicación en Entra.'; To = 'Does not delete the application in Entra.' }
+            @{ From = 'Eliminar sesión persistente'; To = 'Clear persisted session' }
+            @{ From = 'Introduce y opcionalmente valida un Client ID ya registrado.'; To = 'Enter and optionally validate an already registered Client ID.' }
+            @{ From = 'Crea una nueva app PnP para esta herramienta.'; To = 'Creates a new PnP app for this tool.' }
+            @{ From = 'Usar una aplicación existente'; To = 'Use an existing application' }
+            @{ From = 'Instalar / actualizar PnP.PowerShell'; To = 'Install / update PnP.PowerShell' }
+            @{ From = 'Probar nuevamente el sitio actual'; To = 'Test the current site again' }
+            @{ From = 'Alternar persistencia de login'; To = 'Toggle login persistence' }
+            @{ From = 'Cambiar límite predeterminado'; To = 'Change default limit' }
+            @{ From = 'Cambiar límite máximo permitido'; To = 'Change maximum allowed limit' }
+            @{ From = 'Rango permitido por la herramienta: 1 a 10000.'; To = 'Allowed range for this tool: 1 to 10,000.' }
+            @{ From = 'Abrir reportes'; To = 'Open reports' }
+            @{ From = 'Seleccionar / cambiar sitio'; To = 'Select / change site' }
+            @{ From = 'Buscar SharePoint u OneDrive en el tenant o usar una URL directa.'; To = 'Search for SharePoint or OneDrive in the tenant, or use a direct URL.' }
+            @{ From = 'Buscar sitios del tenant.'; To = 'Search for sites in the tenant.' }
+            @{ From = 'Buscar OneDrive reales del tenant.'; To = 'Search for real OneDrive sites in the tenant.' }
+            @{ From = 'Detecta automáticamente SharePoint u OneDrive.'; To = 'Automatically detects SharePoint or OneDrive.' }
+            @{ From = 'Validar aplicación'; To = 'Validate application' }
+            @{ From = 'Autenticación requerida'; To = 'Authentication required' }
+            @{ From = 'Configuración'; To = 'Settings' }
+            @{ From = 'Diagnóstico'; To = 'Diagnostics' }
+            @{ From = 'Alternar persistencia de login'; To = 'Toggle login persistence' }
+            @{ From = 'Introduce un número entre $Minimum y $Maximum.'; To = 'Enter a number between $Minimum and $Maximum.' }
+            @{ From = 'Opción inválida.'; To = 'Invalid option.' }
+            @{ From = 'PnP.PowerShell no está instalado.'; To = 'PnP.PowerShell is not installed.' }
+            @{ From = 'PnP.PowerShell $version es anterior a $script:MinimumPnPVersion.'; To = 'PnP.PowerShell $version is older than $script:MinimumPnPVersion.' }
+            @{ From = 'PnP.PowerShell está listo.'; To = 'PnP.PowerShell is ready.' }
+            @{ From = 'PnP.PowerShell no está disponible.'; To = 'PnP.PowerShell is not available.' }
+            @{ From = ' está instalado.'; To = ' is installed.' }; @{ From = ' es anterior a '; To = ' is older than ' }; @{ From = ' está listo.'; To = ' is ready.' }; @{ From = ' no está disponible.'; To = ' is not available.' }
+            @{ From = 'No existe una autenticación válida configurada.'; To = 'No valid authentication is configured.' }
+            @{ From = 'Tenant no configurado o inválido.'; To = 'Tenant is not configured or is invalid.' }
+            @{ From = 'Client ID no configurado o inválido.'; To = 'Client ID is not configured or is invalid.' }
+            @{ From = 'No fue posible determinar la URL del centro de administración.'; To = 'Could not determine the admin center URL.' }
+            @{ From = 'Validando autenticación contra el tenant...'; To = 'Validating authentication against the tenant...' }
+            @{ From = 'La validación falló.'; To = 'Validation failed.' }
+            @{ From = 'Usar aplicación existente'; To = 'Use existing application' }
+            @{ From = 'Client ID de la aplicación existente'; To = 'Client ID of the existing application' }
+            @{ From = 'Se conservó el Client ID anterior.'; To = 'The previous Client ID was preserved.' }
+            @{ From = 'Registrar nueva aplicación Entra'; To = 'Register new Entra application' }
+            @{ From = 'La aplicación solicitará el permiso delegado de SharePoint:'; To = 'The application will request delegated SharePoint permission:' }
+            @{ From = 'Nombre de la aplicación'; To = 'Application name' }
+            @{ From = 'Nueva aplicación configurada.'; To = 'New application configured.' }
+            @{ From = 'Registrar aplicación'; To = 'Register application' }
+            @{ From = 'Esto no elimina la aplicación de Microsoft Entra ID.'; To = 'This does not delete the application from Microsoft Entra ID.' }
+            @{ From = 'Client ID eliminado de la configuración local.'; To = 'Client ID removed from local configuration.' }
+            @{ From = 'Sesión persistente'; To = 'Persisted session' }
+            @{ From = 'Sesión persistente eliminada.'; To = 'Persisted session removed.' }
+            @{ From = 'No hay una aplicación Entra configurada.'; To = 'No Entra application is configured.' }
+            @{ From = 'Conectando al centro de administración: $adminUrl'; To = 'Connecting to the admin center: $adminUrl' }
+            @{ From = 'Conectando al centro de administración: '; To = 'Connecting to the admin center: ' }
+            @{ From = '(sin título)'; To = '(untitled)' }
+            @{ From = 'Introduce una URL HTTPS válida de *.sharepoint.com.'; To = 'Enter a valid HTTPS URL from *.sharepoint.com.' }
+            @{ From = 'El sitio seleccionado no contiene una URL válida.'; To = 'The selected site does not contain a valid URL.' }
+            @{ From = 'Se moverán hasta $($items.Count) elemento(s) del primer nivel al segundo nivel. No es una eliminación permanente.'; To = 'Up to $($items.Count) item(s) will be moved from the first stage to the second stage. This is not a permanent deletion.' }
+            @{ From = 'Se eliminarán permanentemente hasta $($items.Count) elemento(s) del segundo nivel.'; To = 'Up to $($items.Count) item(s) will be permanently deleted from the second stage.' }
+            @{ From = 'Se intentará eliminar permanentemente hasta $($items.Count) elemento(s) de la biblioteca detectada.'; To = 'Up to $($items.Count) item(s) will be permanently deleted from the detected library.' }
+            @{ From = 'Simulation completed. No se modificó la biblioteca.'; To = 'Simulation completed. The library was not modified.' }
+            @{ From = 'Máximo configurado por ejecución: '; To = 'Maximum configured per run: ' }
+            @{ From = 'Espera máxima de retry (segundos)'; To = 'Maximum retry wait (seconds)' }
+            @{ From = 'Modo inicial'; To = 'Initial mode' }
+            @{ From = 'Se eliminarán las preferencias locales de esta herramienta.'; To = 'Local preferences for this tool will be deleted.' }
+            @{ From = 'La conexión funciona, pero no hay acceso suficiente a la papelera.'; To = 'The connection works, but there is not enough access to the recycle bin.' }
+            @{ From = 'SharePoint/OneDrive aplicó throttling.'; To = 'SharePoint/OneDrive applied throttling.' }
+            @{ From = 'No se pudo obtener el contexto CSOM de la conexión PnP.'; To = 'Could not obtain the CSOM context from the PnP connection.' }
+            @{ From = 'Acción'; To = 'Action' }; @{ From = 'Modo'; To = 'Mode' }
+            @{ From = 'MODO REAL'; To = 'LIVE MODE' }
+            @{ From = 'Simulación completada. No se modificó la biblioteca.'; To = 'Simulation completed. The library was not modified.' }
+            @{ From = 'Simulation completed. No se modificó la biblioteca.'; To = 'Simulation completed. The library was not modified.' }
+            @{ From = 'Restablecer configuración'; To = 'Reset settings' }
         )
         foreach ($translation in $phrases) { $result = $result.Replace($translation.From, $translation.To) }
         foreach ($translation in $script:UiTranslations) { $result = $result.Replace($translation.From, $translation.To) }
@@ -123,6 +215,23 @@ function Get-LocalizedText {
             @{ From = 'Operación cancelada'; To = 'Operation canceled' }; @{ From = 'Simulación completada'; To = 'Simulation completed' }; @{ From = 'Errores'; To = 'Errors' }
         )
         foreach ($translation in $common) { $result = $result.Replace($translation.From, $translation.To) }
+        $words = @(
+            @{ From = 'al'; To = 'when' }; @{ From = 'alguna'; To = 'some' }; @{ From = 'actual'; To = 'current' }; @{ From = 'administrador'; To = 'administrator' }
+            @{ From = 'archivo'; To = 'file' }; @{ From = 'archivos'; To = 'files' }; @{ From = 'analizar'; To = 'analyze' }; @{ From = 'buscar'; To = 'search' }
+            @{ From = 'cambiar'; To = 'change' }; @{ From = 'con'; To = 'with' }; @{ From = 'contenido'; To = 'content' }; @{ From = 'después'; To = 'after' }
+            @{ From = 'dentro'; To = 'within' }; @{ From = 'eliminar'; To = 'remove' }; @{ From = 'eliminación'; To = 'removal' }; @{ From = 'en'; To = 'in' }
+            @{ From = 'estado'; To = 'status' }; @{ From = 'elemento'; To = 'item' }; @{ From = 'elementos'; To = 'items' }; @{ From = 'encontrados'; To = 'found' }
+            @{ From = 'introducir'; To = 'enter' }; @{ From = 'límite'; To = 'limit' }; @{ From = 'máximo'; To = 'maximum' }; @{ From = 'nivel'; To = 'stage' }
+            @{ From = 'nueva'; To = 'new' }; @{ From = 'opción'; To = 'option' }; @{ From = 'para'; To = 'for' }; @{ From = 'papelera'; To = 'recycle bin' }
+            @{ From = 'procesar'; To = 'process' }; @{ From = 'procesando'; To = 'processing' }; @{ From = 'reporte'; To = 'report' }; @{ From = 'reportes'; To = 'reports' }
+            @{ From = 'resultado'; To = 'result' }; @{ From = 'selecciona'; To = 'select' }; @{ From = 'seleccionar'; To = 'select' }; @{ From = 'seleccionado'; To = 'selected' }
+            @{ From = 'sitio'; To = 'site' }; @{ From = 'sitios'; To = 'sites' }; @{ From = 'sin'; To = 'without' }; @{ From = 'total'; To = 'total' }
+            @{ From = 'vaciar'; To = 'empty' }; @{ From = 'válido'; To = 'valid' }; @{ From = 'y'; To = 'and' }; @{ From = 'u'; To = 'or' }
+        )
+        foreach ($translation in $words) {
+            $pattern = '(?<![\p{L}])' + [regex]::Escape($translation.From) + '(?![\p{L}])'
+            $result = [regex]::Replace($result, $pattern, $translation.To)
+        }
     }
     return $result
 }
@@ -648,6 +757,7 @@ function Get-DefaultAppSettings {
         ClientId            = $clientId
         AppRegistrationName = 'Microsoft 365 Recycle Bin and Hold Cleaner'
         PersistLogin        = $true
+        Language            = 'es'
         Simulation          = $true
         DefaultLimit        = 1000
         MaximumLimit        = 10000
@@ -2356,6 +2466,7 @@ function Show-AppSettingsMenu {
 
         Write-AppField -Name 'Tenant' -Value $script:Settings.Tenant
         Write-AppField -Name 'Client ID' -Value $script:Settings.ClientId
+        Write-AppField -Name 'Idioma' -Value $(if ($script:Language -eq 'en') { 'English' } else { 'Español' })
         Write-AppField -Name 'Persist login' -Value $(if ($script:Settings.PersistLogin) { 'Sí' } else { 'No' })
         Write-AppField -Name 'Modo inicial' -Value $(if ($script:Settings.Simulation) { 'SIMULACIÓN' } else { 'REAL' })
         Write-AppField -Name 'Límite defecto' -Value $script:Settings.DefaultLimit
@@ -2365,18 +2476,25 @@ function Show-AppSettingsMenu {
 
         $choice = Read-AppMenuChoice -Items @(
             @{ Key='1'; Value='Auth'; Label='Aplicación Entra / autenticación' }
-            @{ Key='2'; Value='Persist'; Label='Alternar persistencia de login' }
-            @{ Key='3'; Value='DefaultLimit'; Label='Cambiar límite predeterminado' }
-            @{ Key='4'; Value='MaxLimit'; Label='Cambiar límite máximo permitido'; Description='Rango permitido por la herramienta: 1 a 10000.' }
-            @{ Key='5'; Value='Throttle'; Label='Throttling y reintentos' }
-            @{ Key='6'; Value='Reports'; Label='Abrir reportes' }
-            @{ Key='7'; Value='Reset'; Label='Restablecer configuración local' }
+            @{ Key='2'; Value='Language'; Label='Cambiar idioma' }
+            @{ Key='3'; Value='Persist'; Label='Alternar persistencia de login' }
+            @{ Key='4'; Value='DefaultLimit'; Label='Cambiar límite predeterminado' }
+            @{ Key='5'; Value='MaxLimit'; Label='Cambiar límite máximo permitido'; Description='Rango permitido por la herramienta: 1 a 10000.' }
+            @{ Key='6'; Value='Throttle'; Label='Throttling y reintentos' }
+            @{ Key='7'; Value='Reports'; Label='Abrir reportes' }
+            @{ Key='8'; Value='Reset'; Label='Restablecer configuración local' }
             @{ Key='0'; Value='Back'; Label='Volver' }
         )
 
         switch ($choice.Value) {
             'Auth' {
                 Show-AppAuthenticationMenu
+            }
+
+            'Language' {
+                Initialize-AppLanguage
+                $script:Settings.Language = $script:Language
+                Save-AppSettings
             }
 
             'Persist' {

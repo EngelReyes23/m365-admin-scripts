@@ -94,6 +94,27 @@ $script:UiTranslations = @(
     @{ From = 'REAL'; To = 'LIVE' }
     @{ From = 'Enter para continuar'; To = 'Press Enter to continue' }
     @{ From = 'Presione ENTER para cerrar'; To = 'Press ENTER to close' }
+    @{ From = 'Shortcut / ubicación anidada'; To = 'Shortcut / nested location' }
+    @{ From = 'Ubicaciones seleccionadas'; To = 'Selected locations' }
+    @{ From = 'Raíz principal'; To = 'Main root' }
+    @{ From = 'Raices físicas a recorrer'; To = 'Physical roots to scan' }
+    @{ From = 'SELECCIONAR UBICACIONES'; To = 'SELECT LOCATIONS' }
+    @{ From = 'LISTO PARA ANALIZAR'; To = 'READY TO ANALYZE' }
+    @{ From = 'ANALIZANDO'; To = 'ANALYZING' }
+    @{ From = 'RUTAS QUE REQUIEREN ATENCION'; To = 'PATHS REQUIRING ATTENTION' }
+    @{ From = 'Analizando rutas de OneDrive / SharePoint'; To = 'Analyzing OneDrive / SharePoint paths' }
+    @{ From = 'Windows : aviso desde 240 | crítico desde 256'; To = 'Windows : warning at 240 | critical at 256' }
+    @{ From = 'Cloud   : aviso desde 360 | crítico sobre 400'; To = 'Cloud   : warning at 360 | critical over 400' }
+    @{ From = 'Nombre  : aviso desde 240 | crítico sobre 255'; To = 'Name    : warning at 240 | critical over 255' }
+    @{ From = 'Rutas de usuario analizadas'; To = 'Analyzed user paths' }
+    @{ From = 'Rutas en AVISO'; To = 'WARNING paths' }
+    @{ From = 'Rutas CRITICAS'; To = 'CRITICAL paths' }
+    @{ From = 'Errores de lectura'; To = 'Read errors' }
+    @{ From = 'Ruta de usuario más larga:'; To = 'Longest user path:' }
+    @{ From = 'RESULTADO: CRITICO'; To = 'RESULT: CRITICAL' }
+    @{ From = 'RESULTADO: REQUIERE REVISION'; To = 'RESULT: NEEDS REVIEW' }
+    @{ From = 'RESULTADO: OK'; To = 'RESULT: OK' }
+    @{ From = 'No se generó CSV porque no existen rutas con AVISO o CRITICO.'; To = 'No CSV was generated because no WARNING or CRITICAL paths exist.' }
 )
 
 function Get-LocalizedText {
@@ -120,6 +141,33 @@ function Get-LocalizedText {
             @{ From = 'Varias'; To = 'Multiple' }; @{ From = 'Críticas'; To = 'Critical' }; @{ From = 'crítico'; To = 'critical' }
         )
         foreach ($translation in $common) { $result = $result.Replace($translation.From, $translation.To) }
+        $words = @(
+            @{ From = 'al'; To = 'when' }; @{ From = 'alguna'; To = 'some' }; @{ From = 'algunas'; To = 'some' }; @{ From = 'actual'; To = 'current' }
+            @{ From = 'administrador'; To = 'administrator' }; @{ From = 'administración'; To = 'administration' }; @{ From = 'ahora'; To = 'now' }
+            @{ From = 'archivo'; To = 'file' }; @{ From = 'archivos'; To = 'files' }; @{ From = 'abrir'; To = 'open' }; @{ From = 'acceso'; To = 'access' }
+            @{ From = 'afectado'; To = 'affected' }; @{ From = 'analizadas'; To = 'analyzed' }; @{ From = 'analizar'; To = 'analyze' }; @{ From = 'atención'; To = 'attention' }
+            @{ From = 'automáticamente'; To = 'automatically' }; @{ From = 'buscar'; To = 'search' }; @{ From = 'carpeta'; To = 'folder' }; @{ From = 'carpetas'; To = 'folders' }
+            @{ From = 'cambiar'; To = 'change' }; @{ From = 'cantidad'; To = 'amount' }; @{ From = 'con'; To = 'with' }; @{ From = 'contenido'; To = 'content' }
+            @{ From = 'correcto'; To = 'correct' }; @{ From = 'crítico'; To = 'critical' }; @{ From = 'datos'; To = 'data' }; @{ From = 'después'; To = 'after' }
+            @{ From = 'dentro'; To = 'within' }; @{ From = 'desde'; To = 'from' }; @{ From = 'elemento'; To = 'item' }; @{ From = 'elementos'; To = 'items' }
+            @{ From = 'en'; To = 'in' }; @{ From = 'entre'; To = 'between' }; @{ From = 'es'; To = 'is' }; @{ From = 'estado'; To = 'status' }
+            @{ From = 'existe'; To = 'exists' }; @{ From = 'externo'; To = 'external' }; @{ From = 'filtro'; To = 'filter' }; @{ From = 'generado'; To = 'generated' }
+            @{ From = 'guardar'; To = 'save' }; @{ From = 'hasta'; To = 'up to' }; @{ From = 'individual'; To = 'individual' }; @{ From = 'inicial'; To = 'initial' }
+            @{ From = 'introducir'; To = 'enter' }; @{ From = 'límite'; To = 'limit' }; @{ From = 'límites'; To = 'limits' }; @{ From = 'lista'; To = 'list' }
+            @{ From = 'máximo'; To = 'maximum' }; @{ From = 'máximo'; To = 'maximum' }; @{ From = 'mínimo'; To = 'minimum' }; @{ From = 'nombre'; To = 'name' }
+            @{ From = 'nueva'; To = 'new' }; @{ From = 'nuevo'; To = 'new' }; @{ From = 'opción'; To = 'option' }; @{ From = 'opciones'; To = 'options' }
+            @{ From = 'para'; To = 'for' }; @{ From = 'permiso'; To = 'permission' }; @{ From = 'permisos'; To = 'permissions' }; @{ From = 'primero'; To = 'first' }
+            @{ From = 'puede'; To = 'can' }; @{ From = 'reporte'; To = 'report' }; @{ From = 'reportes'; To = 'reports' }; @{ From = 'resultado'; To = 'result' }
+            @{ From = 'revisar'; To = 'review' }; @{ From = 'seleccionado'; To = 'selected' }; @{ From = 'seleccionados'; To = 'selected' }; @{ From = 'seleccionar'; To = 'select' }
+            @{ From = 'selección'; To = 'selection' }; @{ From = 'selecciones'; To = 'selections' }; @{ From = 'sin'; To = 'without' }; @{ From = 'sobre'; To = 'over' }
+            @{ From = 'suficiente'; To = 'sufficient' }; @{ From = 'tipo'; To = 'type' }; @{ From = 'total'; To = 'total' }; @{ From = 'usuario'; To = 'user' }
+            @{ From = 'usuarios'; To = 'users' }; @{ From = 'válido'; To = 'valid' }; @{ From = 'válida'; To = 'valid' }; @{ From = 'valor'; To = 'value' }
+            @{ From = 'versiones'; To = 'versions' }; @{ From = 'versión'; To = 'version' }; @{ From = 'volver'; To = 'back' }; @{ From = 'y'; To = 'and' }; @{ From = 'u'; To = 'or' }
+        )
+        foreach ($translation in $words) {
+            $pattern = '(?<![\p{L}])' + [regex]::Escape($translation.From) + '(?![\p{L}])'
+            $result = [regex]::Replace($result, $pattern, $translation.To)
+        }
     }
     return $result
 }

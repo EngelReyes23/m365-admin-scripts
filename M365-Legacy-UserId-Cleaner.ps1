@@ -95,6 +95,7 @@ function Get-LocalizedText {
     if ($script:Language -eq 'en') {
         $phrases = @(
             @{ From = 'Selecciona una opción'; To = 'Select an option' }; @{ From = 'Seleccionar / validar usuario afectado'; To = 'Select / validate affected user' }
+            @{ From = 'Idioma'; To = 'Language' }; @{ From = 'Cambiar idioma'; To = 'Change language' }
             @{ From = 'No seleccionado'; To = 'Not selected' }; @{ From = 'No configurado'; To = 'Not configured' }; @{ From = 'No instalado'; To = 'Not installed' }
             @{ From = 'Destino'; To = 'Target' }; @{ From = 'CONFIGURADA'; To = 'CONFIGURED' }; @{ From = 'NO CONFIGURADA'; To = 'NOT CONFIGURED' }
             @{ From = 'Activado'; To = 'Enabled' }; @{ From = 'Desactivado'; To = 'Disabled' }; @{ From = 'Sí'; To = 'Yes' }; @{ From = 'SÍ'; To = 'YES' }
@@ -115,6 +116,141 @@ function Get-LocalizedText {
             @{ From = 'Los sitios que todavía devuelvan 401/403 se reintentan individualmente.'; To = 'Sites that still return 401/403 are retried individually.' }
             @{ From = 'Validando la identidad ACTUAL del usuario...'; To = 'Validating the user CURRENT identity...' }
             @{ From = 'El SID actual está vacío. Se bloquea la ejecución para impedir falsos positivos.'; To = 'The current SID is empty. Execution is blocked to prevent false positives.' }
+            @{ From = 'Opción no válida.'; To = 'Invalid option.' }; @{ From = 'Opción inválida.'; To = 'Invalid option.' }; @{ From = 'Selección inválida.'; To = 'Invalid selection.' }
+            @{ From = 'Valor inválido.'; To = 'Invalid value.' }; @{ From = 'El valor no puede estar vacío.'; To = 'Value cannot be empty.' }
+            @{ From = 'Prueba token, Admin Center, Get-PnPTenant y enumeración de sitios.'; To = 'Tests the token, Admin Center, Get-PnPTenant, and site enumeration.' }
+            @{ From = 'La configuración actual solo cambia después de validar correctamente.'; To = 'The current configuration changes only after successful validation.' }
+            @{ From = 'Crea y valida una nueva app de PnP con AllSites.FullControl delegado.'; To = 'Creates and validates a new PnP app with delegated AllSites.FullControl.' }
+            @{ From = 'Limpia la autenticación persistida por PnP.PowerShell.'; To = 'Clears persisted PnP.PowerShell authentication.' }
+            @{ From = 'Se preserva Site Collection Admin después de las ejecuciones.'; To = 'Site Collection Admin is preserved after runs.' }
+            @{ From = 'Buscar dinámicamente un sitio SPO del tenant.'; To = 'Dynamically search for an SPO site in the tenant.' }
+            @{ From = 'Dejará de preservarse por esta política.'; To = 'It will no longer be preserved by this policy.' }
+            @{ From = 'Estos sitios conservan tu Site Collection Admin al terminar.'; To = 'These sites retain your Site Collection Admin when finished.' }
+            @{ From = 'Dominio inicial'; To = 'Initial domain' }; @{ From = 'UPN del administrador'; To = 'Administrator UPN' }; @{ From = 'Alcance predeterminado'; To = 'Default scope' }
+            @{ From = 'Timeout de propagación'; To = 'Propagation timeout' }; @{ From = 'Exclusiones de sitios de sistema'; To = 'System-site exclusions' }
+            @{ From = 'Recomendado: mantener activado.'; To = 'Recommended: keep enabled.' }; @{ From = 'Muestra roots, templates y fragmentos de URL excluidos.'; To = 'Shows excluded roots, templates, and URL fragments.' }
+            @{ From = 'Solo sitios SPO.'; To = 'SPO sites only.' }; @{ From = 'Recorre ambos tipos.'; To = 'Processes both types.' }
+            @{ From = 'Excluye automáticamente el OneDrive propio del usuario afectado.'; To = "Automatically excludes the affected user's own OneDrive." }
+            @{ From = 'Esta opción intenta retirar únicamente los grants marcados como temporales en el estado guardado.'; To = 'This option attempts to remove only grants marked as temporary in the saved state.' }
+            @{ From = 'No se recomienda procesar hosts raíz ni colecciones de sistema.'; To = 'Processing root hosts or system collections is not recommended.' }
+            @{ From = 'Validando la identidad ACTUAL del usuario...'; To = "Validating the user's CURRENT identity..." }
+            @{ From = 'Existe un estado de grants administrativos pendiente de recuperación.'; To = 'Recoverable administrative-grant state exists.' }
+            @{ From = 'Aplicación Entra / autenticación PnP'; To = 'Entra application / PnP authentication' }
+            @{ From = 'Validar aplicación configurada'; To = 'Validate configured application' }
+            @{ From = 'Usar otra aplicación existente'; To = 'Use another existing application' }
+            @{ From = 'La configuración actual solo cambia después de validar correctamente.'; To = 'The current configuration changes only after successful validation.' }
+            @{ From = 'Registrar una nueva aplicación Entra'; To = 'Register a new Entra application' }
+            @{ From = 'Quitar Client ID de la configuración local'; To = 'Remove Client ID from local configuration' }
+            @{ From = 'Eliminar sesión persistente'; To = 'Clear persisted session' }
+            @{ From = 'Autenticación requerida'; To = 'Authentication required' }
+            @{ From = 'Validar un Client ID ya registrado antes de guardarlo.'; To = 'Validate an already registered Client ID before saving it.' }
+            @{ From = 'Crear una app PnP nueva y validarla.'; To = 'Create and validate a new PnP app.' }
+            @{ From = 'No hay una App Registration válida configurada.'; To = 'No valid App Registration is configured.' }
+            @{ From = 'Selecciona cómo quieres configurar la autenticación.'; To = 'Select how you want to configure authentication.' }
+            @{ From = 'Prueba token, Admin Center, Get-PnPTenant y enumeración de sitios.'; To = 'Tests the token, Admin Center, Get-PnPTenant, and site enumeration.' }
+            @{ From = 'No elimina la aplicación en Entra ID.'; To = 'Does not delete the application in Entra ID.' }
+            @{ From = 'Quitar configuración de aplicación'; To = 'Remove application configuration' }
+            @{ From = 'Esto NO elimina la App Registration en Entra ID.'; To = 'This does NOT delete the App Registration in Entra ID.' }
+            @{ From = '¿Quitar el Client ID de esta herramienta?'; To = 'Remove the Client ID from this tool?' }
+            @{ From = 'Seleccionar sitio protegido'; To = 'Select protected site' }
+            @{ From = 'Quitar sitio SPO protegido'; To = 'Remove protected SPO site' }
+            @{ From = 'Agregar sitio protegido'; To = 'Add protected site' }
+            @{ From = 'Quitar sitio protegido'; To = 'Remove protected site' }
+            @{ From = 'Buscar dinámicamente un sitio SPO del tenant.'; To = 'Dynamically search for an SPO site in the tenant.' }
+            @{ From = 'Dejará de preservarse por esta política.'; To = 'It will no longer be preserved by this policy.' }
+            @{ From = 'Configurados: '; To = 'Configured: ' }
+            @{ From = 'Estos sitios conservan tu Site Collection Admin al terminar.'; To = 'These sites retain your Site Collection Admin when finished.' }
+            @{ From = 'Fast path / propagación'; To = 'Fast path / propagation' }
+            @{ From = 'Validación de App Registration'; To = 'App Registration validation' }
+            @{ From = 'Sesión persistente'; To = 'Persisted session' }
+            @{ From = 'Solo SharePoint'; To = 'SharePoint only' }
+            @{ From = 'Solo OneDrive'; To = 'OneDrive only' }
+            @{ From = 'SharePoint + OneDrive'; To = 'SharePoint + OneDrive' }
+            @{ From = 'sitio(s)'; To = 'site(s)' }
+            @{ From = 'segundos'; To = 'seconds' }
+            @{ From = 'intento(s)'; To = 'attempt(s)' }
+            @{ From = 'Estas reglas se evalúan antes de conceder Site Collection Admin.'; To = 'These rules are evaluated before granting Site Collection Admin.' }
+            @{ From = 'Recomendado: mantener activado.'; To = 'Recommended: keep enabled.' }
+            @{ From = 'Muestra roots, templates y fragmentos de URL excluidos.'; To = 'Shows excluded roots, templates, and URL fragments.' }
+            @{ From = 'Desactivar exclusiones de sistema'; To = 'Disable system exclusions' }
+            @{ From = 'Activar exclusiones de sistema'; To = 'Enable system exclusions' }
+            @{ From = 'Ver reglas activas'; To = 'View active rules' }
+            @{ From = 'SharePoint Online'; To = 'SharePoint Online' }
+            @{ From = 'OneDrive for Business'; To = 'OneDrive for Business' }
+            @{ From = 'SPO no protegido se considera acceso temporal.'; To = 'Unprotected SPO is treated as temporary access.' }
+            @{ From = 'Own OneDrive del afectado se omite; ODB de terceros se limpia al final.'; To = "The affected user's own OneDrive is skipped; third-party ODB is cleaned at the end." }
+            @{ From = 'Ejecuta ambos alcances.'; To = 'Runs both scopes.' }
+            @{ From = 'Alcance de esta ejecución'; To = 'Scope for this run' }
+            @{ From = 'Predeterminado: '; To = 'Default: ' }
+            @{ From = 'Seleccionar / validar usuario afectado'; To = 'Select / validate affected user' }
+            @{ From = 'Resuelve AccountName, SID actual y OneDrive propio.'; To = "Resolves AccountName, current SID, and the user's own OneDrive." }
+            @{ From = 'Ejecutar reparación tenant'; To = 'Run tenant repair' }
+            @{ From = 'Grant masivo → espera global → procesar directo → restaurar admins.'; To = 'Bulk grant → global wait → direct processing → restore admins.' }
+            @{ From = 'Cambiar a SIMULACIÓN'; To = 'Switch to SIMULATION' }
+            @{ From = 'SIMULACIÓN no elimina UserInfoList; los grants temporales sí pueden aplicarse.'; To = 'SIMULATION does not remove UserInfoList entries; temporary grants may still be applied.' }
+            @{ From = 'REAL elimina únicamente mismatches inequívocos.'; To = 'LIVE removes only unambiguous mismatches.' }
+            @{ From = 'Configurada · validar, cambiar o registrar otra app.'; To = 'Configured · validate, change, or register another app.' }
+            @{ From = 'No configurada · usar existente o registrar nueva.'; To = 'Not configured · use an existing app or register a new one.' }
+            @{ From = 'Recuperar / retirar grants temporales'; To = 'Recover / remove temporary grants' }
+            @{ From = 'Hay un estado pendiente de restauración.'; To = 'A pending restoration state exists.' }
+            @{ From = 'No hay grants pendientes registrados.'; To = 'No pending grants are registered.' }
+            @{ From = 'Tenant, admin, alcance, exclusiones de sistema, fast path y autenticación.'; To = 'Tenant, admin, scope, system exclusions, fast path, and authentication.' }
+            @{ From = 'Valida PowerShell, PnP, App Registration y acceso tenant.'; To = 'Validates PowerShell, PnP, App Registration, and tenant access.' }
+            @{ From = 'Connect-PnPOnline no devolvió una conexión.'; To = 'Connect-PnPOnline did not return a connection.' }
+            @{ From = 'Get-PnPTenant no devolvió información del tenant.'; To = 'Get-PnPTenant did not return tenant information.' }
+            @{ From = 'Validando aplicación · intento '; To = 'Validating application · attempt ' }
+            @{ From = 'La validación aún no pasó. Reintentando en '; To = 'Validation has not passed yet. Retrying in ' }
+            @{ From = 'No fue posible ejecutar la validación.'; To = 'The validation could not be executed.' }
+            @{ From = 'La aplicación no pasó la validación.'; To = 'The application did not pass validation.' }
+            @{ From = 'Usar aplicación existente'; To = 'Use existing application' }
+            @{ From = 'La configuración actual no se reemplazará hasta que la nueva aplicación pase la validación.'; To = 'The current configuration will not be replaced until the new application passes validation.' }
+            @{ From = 'No se modificó la configuración guardada.'; To = 'The saved configuration was not modified.' }
+            @{ From = '¿Mantener la sesión autenticada?'; To = 'Keep the authenticated session?' }
+            @{ From = 'Registrar nueva aplicación Entra'; To = 'Register new Entra application' }
+            @{ From = 'La aplicación se crea para login interactivo de PnP.PowerShell.'; To = 'The application is created for interactive PnP.PowerShell sign-in.' }
+            @{ From = 'La app anterior seguirá activa hasta que la nueva pase una prueba real.'; To = 'The previous app remains active until the new one passes a live test.' }
+            @{ From = '¿Registrar una nueva aplicación?'; To = 'Register a new application?' }
+            @{ From = 'Nombre de la aplicación'; To = 'Application name' }
+            @{ From = 'PnP no devolvió el Client ID en un formato reconocible.'; To = 'PnP did not return the Client ID in a recognizable format.' }
+            @{ From = 'No fue posible obtener un Client ID válido para la aplicación creada.'; To = 'Could not obtain a valid Client ID for the created application.' }
+            @{ From = 'Nueva aplicación validada'; To = 'New application validated' }
+            @{ From = 'La app fue creada en Entra, pero NO reemplazó la configuración activa.'; To = 'The app was created in Entra, but did NOT replace the active configuration.' }
+            @{ From = 'Puedes volver a validarla más tarde desde este mismo menú.'; To = 'You can validate it again later from this same menu.' }
+            @{ From = 'La nueva aplicación quedó configurada como activa.'; To = 'The new application is now configured as active.' }
+            @{ From = 'La configuración anterior se conservó.'; To = 'The previous configuration was preserved.' }
+            @{ From = 'La configuración no contiene tenant y Client ID válidos.'; To = 'The configuration does not contain a valid tenant and Client ID.' }
+            @{ From = 'Usar una aplicación existente'; To = 'Use an existing application' }
+            @{ From = 'Sitio raíz del tenant'; To = 'Tenant root site' }
+            @{ From = 'My Site Host raíz'; To = 'Root My Site Host' }
+            @{ From = 'SharePoint no devolvió un perfil para '; To = 'SharePoint did not return a profile for ' }
+            @{ From = 'El usuario fue localizado, pero PnP no devolvió un SID utilizable. Shape recibido: '; To = 'The user was located, but PnP did not return a usable SID. Received shape: ' }
+            @{ From = 'Múltiples entradas legacy coincidentes'; To = 'Multiple matching legacy entries' }
+            @{ From = 'Múltiples coincidencias; ninguna mismatch inequívoca'; To = 'Multiple matches; no unambiguous mismatch' }
+            @{ From = 'No hay una entrada única y segura para eliminar.'; To = 'There is no single safe entry to remove.' }
+            @{ From = 'Fast path: no se abre una conexión previa a cada sitio.'; To = 'Fast path: no connection is opened in advance for each site.' }
+            @{ From = 'El ID antiguo todavía resolvió inmediatamente después de Remove-PnPUser.'; To = 'The old ID still resolved immediately after Remove-PnPUser.' }
+            @{ From = 'Espera global de propagación: '; To = 'Global propagation wait: ' }
+            @{ From = 'Timeout esperando propagación administrativa: '; To = 'Timeout while waiting for administrative propagation: ' }
+            @{ From = 'Acceso aún no propagado · intento '; To = 'Access not propagated yet · attempt ' }
+            @{ From = 'Hay $($matches.Count) coincidencias. Refina la búsqueda.'; To = '$($matches.Count) matches found. Refine the search.' }
+            @{ From = 'Propagación'; To = 'Propagation' }
+            @{ From = 'Reglas de exclusión'; To = 'Exclusion rules' }
+            @{ From = 'Hosts raíz'; To = 'Root hosts' }
+            @{ From = 'Intentos de validación'; To = 'Validation attempts' }
+            @{ From = 'Confirmar ejecución'; To = 'Confirm run' }
+            @{ From = 'Hosts raíz y sitios de sistema: OMITIDOS antes de cualquier grant.'; To = 'Root hosts and system sites: SKIPPED before any grant.' }
+            @{ From = 'Validación previa'; To = 'Pre-validation' }
+            @{ From = 'Restauración incompleta'; To = 'Incomplete restoration' }
+            @{ From = 'Ejecutando prueba real de autenticación...'; To = 'Running live authentication test...' }
+            @{ From = '$(@($script:Settings.ProtectedSpoSites).Count) sitio(s) conservarán tu Site Collection Admin.'; To = '$(@($script:Settings.ProtectedSpoSites).Count) site(s) will retain your Site Collection Admin.' }
+            @{ From = 'Activar modo REAL'; To = 'Enable LIVE mode' }
+            @{ From = 'El modo LIVE puede eliminar entradas legacy de UserInfoList.'; To = 'LIVE mode can remove legacy UserInfoList entries.' }
+            @{ From = 'El modo REAL puede eliminar entradas legacy de UserInfoList.'; To = 'LIVE mode can remove legacy UserInfoList entries.' }
+            @{ From = 'La confirmación REPARAR seguirá siendo obligatoria al ejecutar.'; To = 'REPAIR confirmation will still be required when running.' }
+            @{ From = 'Modo'; To = 'Mode' }
+            @{ From = 'Operación'; To = 'Operation' }
+            @{ From = 'Detección ODB'; To = 'ODB detection' }
+            @{ From = ' conservarán tu Site Collection Admin.'; To = ' will retain your Site Collection Admin.' }
         )
         foreach ($translation in $phrases) { $result = $result.Replace($translation.From, $translation.To) }
         foreach ($translation in $script:UiTranslations) { $result = $result.Replace($translation.From, $translation.To) }
@@ -133,6 +269,24 @@ function Get-LocalizedText {
             @{ From = 'Operación cancelada'; To = 'Operation canceled' }; @{ From = 'Límite'; To = 'Limit' }; @{ From = 'Máximo'; To = 'Maximum' }
         )
         foreach ($translation in $common) { $result = $result.Replace($translation.From, $translation.To) }
+        $words = @(
+            @{ From = 'al'; To = 'when' }; @{ From = 'alguna'; To = 'some' }; @{ From = 'actual'; To = 'current' }; @{ From = 'administrador'; To = 'administrator' }
+            @{ From = 'afectado'; To = 'affected' }; @{ From = 'analizar'; To = 'analyze' }; @{ From = 'análisis'; To = 'analysis' }; @{ From = 'agregar'; To = 'add' }
+            @{ From = 'buscar'; To = 'search' }; @{ From = 'cambiar'; To = 'change' }; @{ From = 'con'; To = 'with' }; @{ From = 'configuración'; To = 'configuration' }
+            @{ From = 'confirmada'; To = 'confirmed' }; @{ From = 'después'; To = 'after' }; @{ From = 'dentro'; To = 'within' }; @{ From = 'eliminar'; To = 'remove' }
+            @{ From = 'en'; To = 'in' }; @{ From = 'estado'; To = 'status' }; @{ From = 'exclusiones'; To = 'exclusions' }; @{ From = 'identidad'; To = 'identity' }
+            @{ From = 'introducir'; To = 'enter' }; @{ From = 'límite'; To = 'limit' }; @{ From = 'máximo'; To = 'maximum' }; @{ From = 'nueva'; To = 'new' }
+            @{ From = 'opción'; To = 'option' }; @{ From = 'para'; To = 'for' }; @{ From = 'procesar'; To = 'process' }; @{ From = 'procesando'; To = 'processing' }
+            @{ From = 'protegido'; To = 'protected' }; @{ From = 'protegidos'; To = 'protected' }; @{ From = 'recuperación'; To = 'recovery' }; @{ From = 'reporte'; To = 'report' }
+            @{ From = 'reportes'; To = 'reports' }; @{ From = 'resultado'; To = 'result' }; @{ From = 'selecciona'; To = 'select' }; @{ From = 'seleccionar'; To = 'select' }
+            @{ From = 'seleccionado'; To = 'selected' }; @{ From = 'seleccionados'; To = 'selected' }; @{ From = 'sitio'; To = 'site' }; @{ From = 'sitios'; To = 'sites' }
+            @{ From = 'sistema'; To = 'system' }; @{ From = 'sin'; To = 'without' }; @{ From = 'usuario'; To = 'user' }; @{ From = 'usuarios'; To = 'users' }
+            @{ From = 'válido'; To = 'valid' }; @{ From = 'válida'; To = 'valid' }; @{ From = 'y'; To = 'and' }; @{ From = 'u'; To = 'or' }
+        )
+        foreach ($translation in $words) {
+            $pattern = '(?<![\p{L}])' + [regex]::Escape($translation.From) + '(?![\p{L}])'
+            $result = [regex]::Replace($result, $pattern, $translation.To)
+        }
     }
     return $result
 }
@@ -440,6 +594,7 @@ function New-DefaultSettings {
         ClientId                       = ''
         AppRegistrationName            = 'Microsoft 365 Legacy UserId Cleaner'
         PersistLogin                    = $false
+        Language                        = 'es'
         AdminUpn                        = ''
         AffectedUserUpn                 = ''
         DryRun                          = $true
@@ -2794,12 +2949,23 @@ function Show-SettingsMenu {
                 Value = 'Persist'
                 Hint = if ($script:Settings.PersistLogin) { 'Activada' } else { 'Desactivada' }
             }
+            [pscustomobject]@{
+                Label = 'Cambiar idioma'
+                Value = 'Language'
+                Hint = if ($script:Language -eq 'en') { 'English' } else { 'Español' }
+            }
         )
 
         $choice = Read-MenuChoice -Title 'Configuración' -Items $items
         if ($null -eq $choice) { return }
 
         switch ($choice.Value) {
+            'Language' {
+                Initialize-AppLanguage
+                $script:Settings.Language = $script:Language
+                Save-Settings
+            }
+
             'Tenant' {
                 Write-AppHeader 'Tenant'
                 $value = Read-TextValue 'Tenant' -Default $script:Settings.Tenant -Required

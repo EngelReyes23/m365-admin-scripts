@@ -75,6 +75,7 @@ function Get-LocalizedText {
     if ($script:Language -eq 'en') {
         $phrases = @(
             @{ From = 'Selecciona una opción'; To = 'Select an option' }
+            @{ From = 'Idioma'; To = 'Language' }; @{ From = 'Cambiar idioma'; To = 'Change language' }
             @{ From = 'No seleccionado'; To = 'Not selected' }; @{ From = 'No configurado'; To = 'Not configured' }; @{ From = 'No instalado'; To = 'Not installed' }
             @{ From = 'Destino'; To = 'Target' }; @{ From = 'Actuales'; To = 'Current' }; @{ From = 'Seleccionadas'; To = 'Selected' }
             @{ From = 'CONFIGURADA'; To = 'CONFIGURED' }; @{ From = 'NO CONFIGURADA'; To = 'NOT CONFIGURED' }; @{ From = 'Activado'; To = 'Enabled' }; @{ From = 'Desactivado'; To = 'Disabled' }
@@ -104,6 +105,70 @@ function Get-LocalizedText {
             @{ From = 'Gestionar aplicación Entra / Client ID'; To = 'Manage Entra application / Client ID' }
             @{ From = 'Probar conexión al centro de administración'; To = 'Test connection to the admin center' }
             @{ From = 'Limpiar login persistido de PnP'; To = 'Clear persisted PnP login' }
+            @{ From = 'LÍMITE MÁXIMO'; To = 'MAXIMUM LIMIT' }; @{ From = 'SOBRE RECOMENDADO'; To = 'ABOVE RECOMMENDED' }; @{ From = 'DENTRO DE RECOMENDADO'; To = 'WITHIN RECOMMENDED' }
+            @{ From = 'Cada elemento de menú debe contener una propiedad Key.'; To = 'Every menu item must contain a Key property.' }
+            @{ From = 'Opción inválida.'; To = 'Invalid option.' }; @{ From = 'Valor inválido.'; To = 'Invalid value.' }; @{ From = 'El valor no puede estar vacío.'; To = 'Value cannot be empty.' }
+            @{ From = 'Selección inválida.'; To = 'Invalid selection.' }; @{ From = 'Números separados por coma (ej. 1,3,4)'; To = 'Comma-separated numbers (e.g. 1,3,4)' }
+            @{ From = 'Selección de bibliotecas'; To = 'Library selection' }; @{ From = 'Marca al menos una biblioteca.'; To = 'Select at least one library.' }
+            @{ From = 'UPN inválido.'; To = 'Invalid UPN.' }; @{ From = 'No se pudo determinar la URL del centro de administración.'; To = 'Could not determine the admin center URL.' }
+            @{ From = 'No se pudo determinar una URL para inicializar la sesión PnP.'; To = 'Could not determine a URL to initialize the PnP session.' }
+            @{ From = 'La aplicación existe y puede autenticarse correctamente.'; To = 'The application exists and can authenticate successfully.' }
+            @{ From = 'La aplicación configurada no pudo validarse.'; To = 'The configured application could not be validated.' }
+            @{ From = 'El Client ID no se guardó porque la validación falló.'; To = 'The Client ID was not saved because validation failed.' }
+            @{ From = 'Se solicitará AllSites.FullControl delegado para las operaciones de este toolkit.'; To = 'Delegated AllSites.FullControl will be requested for this tool.' }
+            @{ From = 'PnP no devolvió el Client ID de forma utilizable.'; To = 'PnP did not return a usable Client ID.' }
+            @{ From = 'La opción seleccionada no tiene una acción asociada.'; To = 'The selected option has no associated action.' }
+            @{ From = 'Filtrar por nombre, URL o propietario (vacío = mostrar todo)'; To = 'Filter by name, URL, or owner (empty = show all)' }
+            @{ From = 'Útil para un sitio ya conocido.'; To = 'Useful for a known site.' }
+            @{ From = 'Acceso insuficiente. Auto-grant está activado.'; To = 'Insufficient access. Auto-grant is enabled.' }
+            @{ From = 'No se pudo identificar la biblioteca principal automáticamente; se muestran todas las bibliotecas detectadas.'; To = 'The main library could not be identified automatically; all detected libraries are shown.' }
+            @{ From = 'Actualizando la lista de bibliotecas del sitio actual...'; To = 'Updating the library list for the current site...' }
+            @{ From = 'La raíz de la biblioteca principal de OneDrive se omite del total accionable.'; To = 'The root of the main OneDrive library is excluded from the actionable total.' }
+            @{ From = 'Raíz de la biblioteca principal de OneDrive omitida.'; To = 'Root of the main OneDrive library omitted.' }
+            @{ From = 'ERROR DE ANÁLISIS'; To = 'ANALYSIS ERROR' }; @{ From = 'Resumen por biblioteca'; To = 'Summary by library' }
+            @{ From = '{0:N0} por biblioteca'; To = '{0:N0} per library' }
+            @{ From = 'Los límites se aplican individualmente a cada lista/biblioteca; el total observado no se compara contra 5,000 o 50,000.'; To = 'Limits apply individually to each list/library; the observed total is not compared against 5,000 or 50,000.' }
+            @{ From = 'Todas las bibliotecas analizadas están dentro del límite recomendado.'; To = 'All analyzed libraries are within the recommended limit.' }
+            @{ From = 'Cambiar solo las bibliotecas del sitio actual; conserva el sitio seleccionado.'; To = 'Change only the libraries for the current site; keep the selected site.' }
+            @{ From = 'Dominio inicial, por ejemplo empresa.onmicrosoft.com'; To = 'Initial domain, for example company.onmicrosoft.com' }
+            @{ From = 'Cambiar nombre de app Entra'; To = 'Change Entra app name' }; @{ From = 'Cambiar carpeta de reportes'; To = 'Change report folder' }
+            @{ From = 'Alternar persistencia de login'; To = 'Toggle login persistence' }; @{ From = 'Alternar dry-run'; To = 'Toggle dry-run' }
+            @{ From = 'Alternar auto-grant de Site Collection Admin'; To = 'Toggle Site Collection Admin auto-grant' }; @{ From = 'Cambiar Admin UPN'; To = 'Change Admin UPN' }
+            @{ From = 'Comprueba que el Client ID pueda autenticarse en este tenant.'; To = 'Checks that the Client ID can authenticate in this tenant.' }
+            @{ From = 'Introduce y opcionalmente valida un Client ID ya registrado.'; To = 'Enter and optionally validate an already registered Client ID.' }
+            @{ From = 'Crea una app PnP nueva y la guarda como configuración activa.'; To = 'Creates a new PnP app and saves it as the active configuration.' }
+            @{ From = 'Quitar Client ID de la configuración local'; To = 'Remove Client ID from local configuration' }
+            @{ From = 'No elimina la aplicación de Entra; solo deja de usarla en este toolkit.'; To = 'Does not delete the Entra application; it only stops using it in this toolkit.' }
+            @{ From = 'Buscar sitios del tenant o introducir una URL.'; To = 'Search for sites in the tenant or enter a URL.' }
+            @{ From = 'Buscar OneDrive reales desde el tenant; no se construyen URLs manualmente.'; To = 'Search for real OneDrive sites from the tenant; URLs are not constructed manually.' }
+            @{ From = 'Buscar en el tenant'; To = 'Search in the tenant' }; @{ From = 'Introducir URL'; To = 'Enter URL' }
+            @{ From = 'Otorgar Site Collection Admin'; To = 'Grant Site Collection Admin' }; @{ From = 'Remover Site Collection Admin'; To = 'Remove Site Collection Admin' }
+            @{ From = 'Instalar / actualizar PnP.PowerShell'; To = 'Install / update PnP.PowerShell' }
+            @{ From = 'Validar, usar una existente o registrar una nueva.'; To = 'Validate, use an existing one, or register a new one.' }
+            @{ From = 'Usa la aplicación actualmente configurada.'; To = 'Uses the currently configured application.' }
+            @{ From = 'Cambiar bibliotecas del sitio actual'; To = 'Change libraries for the current site' }
+            @{ From = 'Change libraries del sitio actual'; To = 'Change libraries for the current site' }
+            @{ From = 'Analizar Unique Permission Scopes'; To = 'Analyze unique permission scopes' }
+            @{ From = 'El elemento de menú'; To = 'The menu item' }
+            @{ From = 'Hay $($list.Count) resultados. Se muestran los primeros $MaxDisplay; usa un filtro más específico si el elemento no aparece.'; To = '$($list.Count) results found. Showing the first $MaxDisplay; use a more specific filter if the item is not listed.' }
+            @{ From = 'PnP.PowerShell no está instalado.'; To = 'PnP.PowerShell is not installed.' }
+            @{ From = 'PnP.PowerShell $($pnp.Version) es menor que $script:MinimumPnPVersion.'; To = 'PnP.PowerShell $($pnp.Version) is older than $script:MinimumPnPVersion.' }
+            @{ From = 'PnP.PowerShell listo: $((Get-Module PnP.PowerShell).Version)'; To = 'PnP.PowerShell ready: $((Get-Module PnP.PowerShell).Version)' }
+            @{ From = ' es menor que '; To = ' is older than ' }; @{ From = ' listo: '; To = ' ready: ' }
+            @{ From = 'Client ID inválido: '; To = 'Invalid Client ID: ' }
+            @{ From = 'no tiene consentimiento suficiente o el inicio de sesión fue cancelado.'; To = 'does not have sufficient consent or sign-in was canceled.' }
+            @{ From = 'Si tu tenant requiere consentimiento administrativo, concédelo antes de usar '; To = 'If your tenant requires administrative consent, grant it before using ' }
+            @{ From = 'Autenticación'; To = 'Authentication' }
+            @{ From = 'Conectando al centro de administración: $adminUrl'; To = 'Connecting to the admin center: $adminUrl' }
+            @{ From = 'El filtro devuelve $($filtered.Count) sitios. Refina la búsqueda para evitar una lista enorme.'; To = 'The filter returns $($filtered.Count) sites. Refine the search to avoid an oversized list.' }
+            @{ From = '(sin título)'; To = '(untitled)' }
+            @{ From = 'No se pudieron leer las bibliotecas: '; To = 'The libraries could not be read: ' }
+            @{ From = 'REST página $page'; To = 'REST page $page' }
+            @{ From = 'Página $page · $($items.Count) elementos'; To = 'Page $page · $($items.Count) items' }
+            @{ From = '$librariesAtMaximum biblioteca(s) alcanzaron o superaron el límite máximo de $($script:MaximumUniqueScopes) scopes.'; To = '$librariesAtMaximum library/libraries reached or exceeded the maximum limit of $($script:MaximumUniqueScopes) scopes.' }
+            @{ From = '$librariesOverRecommended biblioteca(s) superan el límite recomendado de $($script:RecommendedUniqueScopes) scopes.'; To = '$librariesOverRecommended library/libraries exceed the recommended limit of $($script:RecommendedUniqueScopes) scopes.' }
+            @{ From = 'LIVE mode: se eliminarán asignaciones de permisos únicas y los objetos volverán a heredar.'; To = 'LIVE mode: unique permission assignments will be removed and objects will inherit again.' }
+            @{ From = 'Reset raíz $($library.Title)'; To = 'Reset root $($library.Title)' }
         )
         foreach ($translation in $phrases) { $result = $result.Replace($translation.From, $translation.To) }
         foreach ($translation in $script:UiTranslations) { $result = $result.Replace($translation.From, $translation.To) }
@@ -121,6 +186,25 @@ function Get-LocalizedText {
             @{ From = 'No hay'; To = 'There are no' }; @{ From = 'No se encontraron'; To = 'No ... were found' }; @{ From = 'No se pudo'; To = 'Could not' }
         )
         foreach ($translation in $common) { $result = $result.Replace($translation.From, $translation.To) }
+        $words = @(
+            @{ From = 'al'; To = 'when' }; @{ From = 'alguna'; To = 'some' }; @{ From = 'actual'; To = 'current' }; @{ From = 'administrador'; To = 'administrator' }
+            @{ From = 'aplicación'; To = 'application' }; @{ From = 'aplicaciones'; To = 'applications' }; @{ From = 'archivo'; To = 'file' }; @{ From = 'archivos'; To = 'files' }
+            @{ From = 'analizar'; To = 'analyze' }; @{ From = 'análisis'; To = 'analysis' }; @{ From = 'buscar'; To = 'search' }; @{ From = 'cambiar'; To = 'change' }
+            @{ From = 'con'; To = 'with' }; @{ From = 'conexión'; To = 'connection' }; @{ From = 'configuración'; To = 'configuration' }; @{ From = 'contenido'; To = 'content' }
+            @{ From = 'después'; To = 'after' }; @{ From = 'dentro'; To = 'within' }; @{ From = 'eliminar'; To = 'remove' }; @{ From = 'en'; To = 'in' }
+            @{ From = 'estado'; To = 'status' }; @{ From = 'elemento'; To = 'item' }; @{ From = 'elementos'; To = 'items' }; @{ From = 'encontrados'; To = 'found' }
+            @{ From = 'introducir'; To = 'enter' }; @{ From = 'límite'; To = 'limit' }; @{ From = 'lista'; To = 'list' }; @{ From = 'máximo'; To = 'maximum' }
+            @{ From = 'mínimo'; To = 'minimum' }; @{ From = 'nombre'; To = 'name' }; @{ From = 'nueva'; To = 'new' }; @{ From = 'opción'; To = 'option' }
+            @{ From = 'para'; To = 'for' }; @{ From = 'permiso'; To = 'permission' }; @{ From = 'permisos'; To = 'permissions' }; @{ From = 'procesando'; To = 'processing' }
+            @{ From = 'reporte'; To = 'report' }; @{ From = 'reportes'; To = 'reports' }; @{ From = 'resultado'; To = 'result' }; @{ From = 'seleccionar'; To = 'select' }
+            @{ From = 'selecciona'; To = 'select' }; @{ From = 'seleccionadas'; To = 'selected' }; @{ From = 'seleccionados'; To = 'selected' }; @{ From = 'selección'; To = 'selection' }
+            @{ From = 'sitio'; To = 'site' }; @{ From = 'sitios'; To = 'sites' }; @{ From = 'sin'; To = 'without' }; @{ From = 'total'; To = 'total' }
+            @{ From = 'únicos'; To = 'unique' }; @{ From = 'válido'; To = 'valid' }; @{ From = 'válida'; To = 'valid' }; @{ From = 'y'; To = 'and' }; @{ From = 'u'; To = 'or' }
+        )
+        foreach ($translation in $words) {
+            $pattern = '(?<![\p{L}])' + [regex]::Escape($translation.From) + '(?![\p{L}])'
+            $result = [regex]::Replace($result, $pattern, $translation.To)
+        }
     }
     return $result
 }
@@ -628,6 +712,7 @@ function New-DefaultSettings {
         AppRegistrationName = 'M365 Permissions Scope Manager'
         ReportFolder    = $script:DefaultReportFolder
         PersistLogin    = $true
+        Language        = 'es'
         DryRun          = $true
         AutoGrantAdmin  = $false
         AdminUpn        = ''
@@ -689,6 +774,7 @@ function Show-SettingsMenu {
         Write-Field 'Client ID' $script:Settings.ClientId
         Write-Field 'App' $script:Settings.AppRegistrationName
         Write-Field 'Reportes' $script:Settings.ReportFolder
+        Write-Field 'Idioma' $(if ($script:Language -eq 'en') { 'English' } else { 'Español' })
         Write-Field 'Persist login' $(if ($script:Settings.PersistLogin) { 'Sí' } else { 'No' })
         Write-Field 'Dry-run' $(if ($script:Settings.DryRun) { 'Sí' } else { 'No' })
         Write-Field 'Auto admin' $(if ($script:Settings.AutoGrantAdmin) { 'Sí' } else { 'No' })
@@ -703,7 +789,8 @@ function Show-SettingsMenu {
             @{ Key='5'; Label='Alternar persistencia de login' },
             @{ Key='6'; Label='Alternar dry-run' },
             @{ Key='7'; Label='Alternar auto-grant de Site Collection Admin' },
-            @{ Key='8'; Label='Cambiar Admin UPN' }
+            @{ Key='8'; Label='Cambiar Admin UPN' },
+            @{ Key='9'; Label='Cambiar idioma' }
         )
 
         switch ($choice) {
@@ -728,6 +815,10 @@ function Show-SettingsMenu {
                 $script:Settings.AdminUpn = Read-TextValue -Prompt 'Admin UPN' -Default $script:Settings.AdminUpn -AllowEmpty `
                     -Validator { param($v) [string]::IsNullOrWhiteSpace($v) -or $v -match '^[^@\s]+@[^@\s]+\.[^@\s]+$' } `
                     -ValidationMessage 'UPN inválido.'
+            }
+            '9' {
+                Initialize-AppLanguage
+                $script:Settings.Language = $script:Language
             }
         }
         Save-Settings

@@ -89,6 +89,7 @@ function Get-LocalizedText {
     if ($script:Language -eq 'en') {
         $phrases = @(
             @{ From = 'Selecciona una opción'; To = 'Select an option' }; @{ From = 'Nueva limpieza'; To = 'New cleanup' }
+            @{ From = 'Idioma'; To = 'Language' }; @{ From = 'Cambiar idioma'; To = 'Change language' }
             @{ From = 'No seleccionado'; To = 'Not selected' }; @{ From = 'No configurado'; To = 'Not configured' }; @{ From = 'No instalado'; To = 'Not installed' }
             @{ From = 'Destino'; To = 'Target' }; @{ From = 'CONFIGURADA'; To = 'CONFIGURED' }; @{ From = 'NO CONFIGURADA'; To = 'NOT CONFIGURED' }
             @{ From = 'Activado'; To = 'Enabled' }; @{ From = 'Desactivado'; To = 'Disabled' }; @{ From = 'Sí'; To = 'Yes' }; @{ From = 'SÍ'; To = 'YES' }
@@ -111,6 +112,92 @@ function Get-LocalizedText {
             @{ From = 'La estimación no incluye'; To = 'The estimate does not include' }; @{ From = 'versión(es) sin tamaño disponible.'; To = 'version(s) without an available size.' }
             @{ From = 'Cada versión será revalidada contra el historial actual.'; To = 'Each version will be revalidated against the current history.' }
             @{ From = 'Configuración de throttling guardada.'; To = 'Throttling settings saved.' }
+            @{ From = 'Opción inválida.'; To = 'Invalid option.' }; @{ From = 'Selección inválida.'; To = 'Invalid selection.' }; @{ From = 'Selección de bibliotecas'; To = 'Library selection' }
+            @{ From = 'Marca al menos una biblioteca.'; To = 'Select at least one library.' }; @{ From = 'URL HTTPS no válida.'; To = 'Invalid HTTPS URL.' }
+            @{ From = 'Formato esperado: nombre.onmicrosoft.com'; To = 'Expected format: name.onmicrosoft.com' }; @{ From = 'Tenant (ej. contoso.onmicrosoft.com)'; To = 'Tenant (e.g. contoso.onmicrosoft.com)' }
+            @{ From = 'No existe un tenant válido configurado.'; To = 'No valid tenant is configured.' }; @{ From = 'PnP no devolvió una conexión válida.'; To = 'PnP did not return a valid connection.' }
+            @{ From = 'No se encontraron bibliotecas documentales visibles.'; To = 'No visible document libraries were found.' }; @{ From = 'Obtener bibliotecas'; To = 'Get libraries' }
+            @{ From = 'Biblioteca estándar (101)'; To = 'Standard library (101)' }; @{ From = 'Con historial'; To = 'With history' }
+            @{ From = 'Se muestran los 50 archivos con más versiones a eliminar.'; To = 'The 50 files with the most versions to remove are shown.' }
+            @{ From = 'Ya no cumple la política de eliminación'; To = 'No longer meets the removal policy' }; @{ From = 'La versión ya no existe'; To = 'The version no longer exists' }
+            @{ From = 'El historial cambió durante la operación.'; To = 'The history changed during the operation.' }
+            @{ From = 'Máximo de reintentos'; To = 'Maximum retries' }; @{ From = 'Espera máxima de retry (segundos)'; To = 'Maximum retry wait (seconds)' }
+            @{ From = 'Revalida cada versión antes de eliminar'; To = 'Revalidate each version before removal' }; @{ From = 'Resumen por biblioteca'; To = 'Summary by library' }
+            @{ From = 'Restablecer configuración'; To = 'Reset settings' }; @{ From = 'Requiere configuración'; To = 'Configuration required' }
+            @{ From = 'Se eliminarán las preferencias locales.'; To = 'Local preferences will be deleted.' }; @{ From = 'No se encontraron bibliotecas documentales visibles.'; To = 'No visible document libraries were found.' }
+            @{ From = 'Cada versión será revalidada contra el historial actual.'; To = 'Each version will be revalidated against the current history.' }
+            @{ From = 'Aplicación Entra / autenticación PnP'; To = 'Entra application / PnP authentication' }
+            @{ From = 'Validar aplicación configurada'; To = 'Validate configured application' }
+            @{ From = 'Prueba autenticación real contra este tenant'; To = 'Test real authentication against this tenant' }
+            @{ From = 'Usar otra aplicación existente'; To = 'Use another existing application' }
+            @{ From = 'Usar una aplicación existente'; To = 'Use an existing application' }
+            @{ From = 'Introduce un Client ID ya registrado'; To = 'Enter an already registered Client ID' }
+            @{ From = 'Registrar una nueva aplicación Entra'; To = 'Register a new Entra application' }
+            @{ From = 'Crea una app PnP nueva'; To = 'Create a new PnP app' }
+            @{ From = 'Quitar Client ID de la configuración local'; To = 'Remove Client ID from local configuration' }
+            @{ From = 'No elimina la app de Entra'; To = 'Does not delete the Entra app' }
+            @{ From = 'Eliminar sesión persistente'; To = 'Clear persisted session' }
+            @{ From = 'Limpia el token persistido de PnP'; To = 'Clears the persisted PnP token' }
+            @{ From = 'Autenticación requerida'; To = 'Authentication required' }
+            @{ From = 'Crear mediante PnP.PowerShell'; To = 'Create using PnP.PowerShell' }
+            @{ From = 'Buscar sitio en el tenant'; To = 'Search for a site in the tenant' }
+            @{ From = 'Busca por nombre, URL o propietario'; To = 'Search by name, URL, or owner' }
+            @{ From = 'Buscar OneDrive en el tenant'; To = 'Search for OneDrive in the tenant' }
+            @{ From = 'Busca por propietario o URL real'; To = 'Search by owner or real URL' }
+            @{ From = 'Buscar en el tenant o usar URL directa'; To = 'Search in the tenant or use a direct URL' }
+            @{ From = 'Buscar OneDrive reales del tenant'; To = 'Search for real OneDrive sites in the tenant' }
+            @{ From = 'Retención'; To = 'Retention' }
+            @{ From = 'Ejemplo: 10 = actual + 10 históricas'; To = 'Example: 10 = current + 10 historical' }
+            @{ From = 'Ejemplo: 10 = actual + 9 históricas'; To = 'Example: 10 = current + 9 historical' }
+            @{ From = 'Resultado del análisis'; To = 'Analysis result' }
+            @{ From = 'Ejecutar limpieza'; To = 'Run cleanup' }
+            @{ From = 'Ver archivos afectados'; To = 'View affected files' }
+            @{ From = 'Hasta 50 archivos ordenados por impacto'; To = 'Up to 50 files sorted by impact' }
+            @{ From = 'Abrir reportes'; To = 'Open reports' }
+            @{ From = 'Sesión persistente'; To = 'Persisted session' }
+            @{ From = 'Throttling y reintentos'; To = 'Throttling and retries' }
+            @{ From = 'Inicio'; To = 'Home' }
+            @{ From = 'Limpieza de historial de versiones'; To = 'Version history cleanup' }
+            @{ From = 'Selecciona un sitio y una biblioteca para comenzar.'; To = 'Select a site and library to begin.' }
+            @{ From = 'Seleccionar sitio y biblioteca'; To = 'Select site and library' }
+            @{ From = 'Selecciona un sitio SharePoint o OneDrive.'; To = 'Select a SharePoint or OneDrive site.' }
+            @{ From = 'Cambiar destino'; To = 'Change target' }
+            @{ From = 'Limpiar historial de versiones'; To = 'Clean version history' }
+            @{ From = 'Configuración'; To = 'Settings' }
+            @{ From = 'SharePoint Online o OneDrive for Business'; To = 'SharePoint Online or OneDrive for Business' }
+            @{ From = 'Introduce un número entre $Minimum y $Maximum.'; To = 'Enter a number between $Minimum and $Maximum.' }
+            @{ From = 'SharePoint/OneDrive aplicó throttling.'; To = 'SharePoint/OneDrive applied throttling.' }
+            @{ From = 'Operación: $OperationName'; To = 'Operation: $OperationName' }
+            @{ From = 'Operación: '; To = 'Operation: ' }
+            @{ From = 'PnP.PowerShell $version está instalado.'; To = 'PnP.PowerShell $version is installed.' }
+            @{ From = 'PnP.PowerShell no está instalado.'; To = 'PnP.PowerShell is not installed.' }
+            @{ From = 'PnP.PowerShell está listo.'; To = 'PnP.PowerShell is ready.' }
+            @{ From = ' está instalado.'; To = ' is installed.' }; @{ From = ' no está instalado.'; To = ' is not installed.' }; @{ From = ' está listo.'; To = ' is ready.' }
+            @{ From = ' es menor que '; To = ' is older than ' }
+            @{ From = 'La aplicación pudo autenticarse correctamente.'; To = 'The application authenticated successfully.' }
+            @{ From = 'No fue posible validar la aplicación.'; To = 'The application could not be validated.' }
+            @{ From = 'Usar aplicación existente'; To = 'Use existing application' }
+            @{ From = 'Client ID de la aplicación existente'; To = 'Client ID of the existing application' }
+            @{ From = '¿Validar la aplicación antes de guardarla?'; To = 'Validate the application before saving it?' }
+            @{ From = 'La configuración anterior se conservará.'; To = 'The previous configuration will be preserved.' }
+            @{ From = '¿Mantener sesión autenticada?'; To = 'Keep the authenticated session?' }
+            @{ From = 'Registrar nueva aplicación Entra'; To = 'Register new Entra application' }
+            @{ From = 'Nombre de la aplicación [$defaultName]'; To = 'Application name [$defaultName]' }
+            @{ From = '¿Registrar esta aplicación?'; To = 'Register this application?' }
+            @{ From = '¿Validar la nueva aplicación ahora?'; To = 'Validate the new application now?' }
+            @{ From = 'No se pudo registrar la aplicación: '; To = 'The application could not be registered: ' }
+            @{ From = 'Client ID eliminado de la configuración local.'; To = 'Client ID removed from local configuration.' }
+            @{ From = 'No hay una aplicación Entra válida configurada.'; To = 'No valid Entra application is configured.' }
+            @{ From = 'Conectando al centro de administración: $adminUrl'; To = 'Connecting to the admin center: $adminUrl' }
+            @{ From = 'Conectando al centro de administración: '; To = 'Connecting to the admin center: ' }
+            @{ From = 'Filtra por nombre, URL o propietario. Deja vacío para mostrar todos si son 50 o menos.'; To = 'Filter by name, URL, or owner. Leave empty to show all when there are 50 or fewer.' }
+            @{ From = '(sin título)'; To = '(untitled)' }
+            @{ From = 'Actual + $historicalToKeep histórica(s)'; To = 'Current + $historicalToKeep historical version(s)' }
+            @{ From = 'La versión ya no existe'; To = 'The version no longer exists' }
+            @{ From = 'Eliminar versión '; To = 'Remove version ' }
+            @{ From = ' de '; To = ' from ' }
+            @{ From = 'Auditoría:'; To = 'Audit:' }
+            @{ From = 'Versión $pnpVersion'; To = 'Version $pnpVersion' }
         )
         foreach ($translation in $phrases) { $result = $result.Replace($translation.From, $translation.To) }
         foreach ($translation in $script:UiTranslations) { $result = $result.Replace($translation.From, $translation.To) }
@@ -131,6 +218,26 @@ function Get-LocalizedText {
             @{ From = 'Operación cancelada'; To = 'Operation canceled' }; @{ From = 'Duración'; To = 'Duration' }; @{ From = 'Límite'; To = 'Limit' }
         )
         foreach ($translation in $common) { $result = $result.Replace($translation.From, $translation.To) }
+        $words = @(
+            @{ From = 'al'; To = 'when' }; @{ From = 'alguna'; To = 'some' }; @{ From = 'alguna(s)'; To = 'some' }; @{ From = 'actual'; To = 'current' }
+            @{ From = 'administrador'; To = 'administrator' }; @{ From = 'archivo'; To = 'file' }; @{ From = 'archivos'; To = 'files' }; @{ From = 'afectados'; To = 'affected' }
+            @{ From = 'analizar'; To = 'analyze' }; @{ From = 'análisis'; To = 'analysis' }; @{ From = 'buscar'; To = 'search' }; @{ From = 'cambiar'; To = 'change' }
+            @{ From = 'con'; To = 'with' }; @{ From = 'conservar'; To = 'keep' }; @{ From = 'contenido'; To = 'content' }; @{ From = 'creada'; To = 'created' }
+            @{ From = 'después'; To = 'after' }; @{ From = 'dentro'; To = 'within' }; @{ From = 'eliminar'; To = 'remove' }; @{ From = 'eliminación'; To = 'removal' }
+            @{ From = 'en'; To = 'in' }; @{ From = 'entre'; To = 'between' }; @{ From = 'es'; To = 'is' }; @{ From = 'espera'; To = 'wait' }
+            @{ From = 'estado'; To = 'status' }; @{ From = 'historial'; To = 'history' }; @{ From = 'históricas'; To = 'historical' }; @{ From = 'históricas'; To = 'historical' }
+            @{ From = 'introducir'; To = 'enter' }; @{ From = 'límite'; To = 'limit' }; @{ From = 'máximo'; To = 'maximum' }; @{ From = 'menú'; To = 'menu' }
+            @{ From = 'nueva'; To = 'new' }; @{ From = 'nuevo'; To = 'new' }; @{ From = 'opción'; To = 'option' }; @{ From = 'para'; To = 'for' }
+            @{ From = 'papelera'; To = 'recycle bin' }; @{ From = 'procesando'; To = 'processing' }; @{ From = 'procesar'; To = 'process' }; @{ From = 'reporte'; To = 'report' }
+            @{ From = 'reportes'; To = 'reports' }; @{ From = 'resultado'; To = 'result' }; @{ From = 'selecciona'; To = 'select' }; @{ From = 'seleccionar'; To = 'select' }
+            @{ From = 'seleccionadas'; To = 'selected' }; @{ From = 'selección'; To = 'selection' }; @{ From = 'sitio'; To = 'site' }; @{ From = 'sitios'; To = 'sites' }
+            @{ From = 'sin'; To = 'without' }; @{ From = 'sobre'; To = 'over' }; @{ From = 'total'; To = 'total' }; @{ From = 'versión'; To = 'version' }
+            @{ From = 'versiones'; To = 'versions' }; @{ From = 'usuario'; To = 'user' }; @{ From = 'válido'; To = 'valid' }; @{ From = 'y'; To = 'and' }; @{ From = 'u'; To = 'or' }
+        )
+        foreach ($translation in $words) {
+            $pattern = '(?<![\p{L}])' + [regex]::Escape($translation.From) + '(?![\p{L}])'
+            $result = [regex]::Replace($result, $pattern, $translation.To)
+        }
     }
     return $result
 }
@@ -563,6 +670,7 @@ function Get-DefaultAppConfig {
         VersionsToKeep = 10
         CountMode = "Historical"
         PersistLogin = $false
+        Language = "es"
 
         RequestDelayMs = 150
         MaxRetries = 8
@@ -2500,6 +2608,11 @@ function Show-AppSettings {
                 Hint = $authStatus
             },
             [PSCustomObject]@{
+                Label = "Cambiar idioma"
+                Value = "Language"
+                Hint = if ($script:Language -eq 'en') { 'English' } else { 'Español' }
+            },
+            [PSCustomObject]@{
                 Label = "Sesión persistente"
                 Value = "Persist"
                 Hint = $persistStatus
@@ -2531,6 +2644,12 @@ function Show-AppSettings {
         switch ($choice.Value) {
             "Auth" {
                 Show-AppAuthenticationMenu
+            }
+
+            "Language" {
+                Initialize-AppLanguage
+                $config.Language = $script:Language
+                Save-AppConfig -Config $config
             }
 
             "Persist" {
