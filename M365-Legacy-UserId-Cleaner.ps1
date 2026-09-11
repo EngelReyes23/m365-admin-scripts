@@ -45,7 +45,7 @@ $ErrorActionPreference = 'Stop'
 # =============================================================================
 
 $script:AppName = 'Microsoft 365 Legacy UserId Cleaner'
-$script:AppVersion = '2.2.0'
+$script:AppVersion = '2.3.0'
 $script:MinimumPnPVersion = [version]'3.2.0'
 
 $script:DefaultMaxRetries = 5
@@ -251,6 +251,14 @@ function Get-LocalizedText {
             @{ From = 'Operación'; To = 'Operation' }
             @{ From = 'Detección ODB'; To = 'ODB detection' }
             @{ From = ' conservarán tu Site Collection Admin.'; To = ' will retain your Site Collection Admin.' }
+            @{ From = 'Destino'; To = 'Target' }
+            @{ From = 'Alcance'; To = 'Scope' }
+            @{ From = 'Sitios protegidos'; To = 'Protected sites' }
+            @{ From = 'PnP listo'; To = 'PnP ready' }
+            @{ From = 'GRANTS PENDIENTES'; To = 'PENDING GRANTS' }
+            @{ From = 'Limpia'; To = 'Clean' }
+            @{ From = 'SID validado'; To = 'SID validated' }
+            @{ From = 'pendiente de validar'; To = 'pending validation' }
         )
         foreach ($translation in $phrases) { $result = $result.Replace($translation.From, $translation.To) }
         foreach ($translation in $script:UiTranslations) { $result = $result.Replace($translation.From, $translation.To) }
@@ -314,11 +322,22 @@ function Write-Progress {
     Microsoft.PowerShell.Utility\Write-Progress @parameters
 }
 function Initialize-AppLanguage {
+    Clear-Host
+    Write-Host ''
+    Write-Styled $script:AppName Primary
+    Write-Styled "v$script:AppVersion" Muted
+    Write-Styled ('─' * 72) Muted
+    Write-Host ''
+
     while ($true) {
-        Microsoft.PowerShell.Utility\Write-Host ''; Microsoft.PowerShell.Utility\Write-Host 'Select language / Seleccione idioma:'; Microsoft.PowerShell.Utility\Write-Host '1. English'; Microsoft.PowerShell.Utility\Write-Host '2. Español'
+        Write-Styled 'Select language / Seleccione idioma' Primary
+        Write-Styled '  1  English' Accent
+        Write-Styled '  2  Español' Accent
+        Write-Host ''
+
         $choice = (Microsoft.PowerShell.Utility\Read-Host 'Choice / Opción').Trim()
         if ($choice -eq '1') { $script:Language = 'en'; return }; if ($choice -eq '2') { $script:Language = 'es'; return }
-        Microsoft.PowerShell.Utility\Write-Host 'Please choose 1 or 2 / Elija 1 o 2.'
+        Write-Styled 'Please choose 1 or 2 / Elija 1 o 2.' Warning
     }
 }
 
@@ -407,11 +426,12 @@ function Write-AppHeader {
     catch { $width = 72 }
 
     Clear-Host
+    Write-Styled ('═' * $width) Accent
     Write-Styled "$script:AppName  v$script:AppVersion" Primary
     if (-not [string]::IsNullOrWhiteSpace($Context)) {
-        Write-Styled $Context Muted
+        Write-Styled "[$Context]" Muted
     }
-    Write-Styled ('━' * $width) Muted
+    Write-Styled ('─' * $width) Muted
 }
 
 function Write-Section {
@@ -460,7 +480,8 @@ function Read-MenuChoice {
         [Parameter(Mandatory)][string]$Title,
         [Parameter(Mandatory)][AllowEmptyCollection()][array]$Items,
         [string[]]$Description = @(),
-        [string]$ZeroLabel = 'Volver'
+        [string]$ZeroLabel = 'Volver',
+        [scriptblock]$RenderBody
     )
 
     while ($true) {
@@ -471,6 +492,11 @@ function Read-MenuChoice {
         }
 
         if ($Description.Count -gt 0) { Write-Host '' }
+
+        if ($null -ne $RenderBody) {
+            & $RenderBody
+            Write-Host ''
+        }
 
         for ($i = 0; $i -lt $Items.Count; $i++) {
             $item = $Items[$i]
@@ -492,6 +518,7 @@ function Read-MenuChoice {
 
         Write-Styled '   0  ' Muted -NoNewline
         Write-Host $ZeroLabel
+        Write-Styled ('─' * 32) Muted
         Write-Host ''
 
         $raw = (Read-Host 'Selecciona una opción').Trim()
@@ -3388,17 +3415,26 @@ function Get-AffectedUserStatusText {
 }
 
 function Write-MainDashboard {
+    $module = Get-InstalledPnPModule
     $auth = Get-AppAuthState
     $mode = if ($script:Settings.DryRun) { 'SIMULACIÓN' } else { 'REAL' }
     $modeStyle = if ($script:Settings.DryRun) { 'Warning' } else { 'Danger' }
     $pending = Test-Path -LiteralPath $script:StatePath
+    $scopeLabel = switch ($script:Settings.Scope) {
+        'SharePoint' { 'Solo SharePoint' }
+        'OneDrive' { 'Solo OneDrive' }
+        default { 'SharePoint + OneDrive' }
+    }
 
     Write-Section 'Estado'
     Write-Field 'Tenant' $(if (Test-TenantFormat $script:Settings.Tenant) { $script:Settings.Tenant } else { 'No configurado' })
+    Write-Field 'PnP.PowerShell' $(if ($null -eq $module) { 'No instalado' } else { $module.Version }) $(if ($null -ne $module -and $module.Version -ge $script:MinimumPnPVersion) { 'Success' } else { 'Warning' })
     Write-Field 'Autenticación' $auth.Label $auth.Style
     Write-Field 'Administrador' $(if ([string]::IsNullOrWhiteSpace($script:Settings.AdminUpn)) { 'No configurado' } else { $script:Settings.AdminUpn })
     Write-Field 'Usuario' (Get-AffectedUserStatusText)
+    Write-Field 'Alcance' $scopeLabel
     Write-Field 'Modo' $mode $modeStyle
+    Write-Field 'Sitios protegidos' @($script:Settings.ProtectedSpoSites).Count
 
     if ($pending) {
         Write-Field 'Recuperación' 'GRANTS PENDIENTES' Warning
@@ -3412,12 +3448,8 @@ function Write-MainDashboard {
 
 function Show-MainMenu {
     while ($true) {
-        $mode = if ($script:Settings.DryRun) { 'SIMULACIÓN' } else { 'REAL' }
         $auth = Get-AppAuthState
         $pending = Test-Path -LiteralPath $script:StatePath
-
-        Write-AppHeader 'Inicio'
-        Write-MainDashboard
 
         $items = @(
             [pscustomobject]@{
@@ -3477,37 +3509,13 @@ function Show-MainMenu {
             }
         )
 
-        # Dibujamos el menú aquí, conservando la TUI numérica y el 0 para salir.
-        for ($i = 0; $i -lt $items.Count; $i++) {
-            $item = $items[$i]
-            Write-Styled ('  {0,2}  ' -f ($i + 1)) Primary -NoNewline
-            Write-Host $item.Label
-            if (-not [string]::IsNullOrWhiteSpace([string]$item.Hint)) {
-                Write-Styled "      $($item.Hint)" Muted
-            }
-            Write-Host ''
-        }
+        $choice = Read-MenuChoice `
+            -Title 'Inicio' `
+            -Items $items `
+            -ZeroLabel 'Salir' `
+            -RenderBody { Write-MainDashboard }
 
-        Write-Styled '   0  ' Muted -NoNewline
-        Write-Host 'Salir'
-        Write-Host ''
-
-        $raw = (Read-Host 'Selecciona una opción').Trim()
-        $selected = 0
-
-        if (-not [int]::TryParse($raw, [ref]$selected) -or
-            $selected -lt 0 -or
-            $selected -gt $items.Count) {
-
-            Write-Host ''
-            Write-Status Warn 'Opción no válida.'
-            Start-Sleep -Milliseconds 700
-            continue
-        }
-
-        if ($selected -eq 0) { return }
-
-        $choice = $items[$selected - 1]
+        if ($null -eq $choice) { return }
 
         switch ($choice.Value) {
             'User' {
@@ -3576,8 +3584,8 @@ function Show-MainMenu {
 # =============================================================================
 
 try {
-    Initialize-AppLanguage
     Initialize-Terminal
+    Initialize-AppLanguage
     Ensure-AppFolders
     $script:Settings = Load-Settings
 
