@@ -1,28 +1,28 @@
 # Microsoft 365 Administration Scripts
 
-Colección de herramientas interactivas para diagnóstico, análisis y mantenimiento de OneDrive for Business y SharePoint Online.
+A collection of interactive tools for troubleshooting, analyzing, and maintaining OneDrive for Business and SharePoint Online.
 
 ## Herramientas
 
-| Script | Función |
+| Script | Purpose |
 | --- | --- |
-| `OneDrive-Path-Analyzer.zsh` | Analiza rutas largas de OneDrive/SharePoint en macOS y genera un CSV con avisos o hallazgos críticos. Requiere Zsh. |
-| `OneDrive-Path-Analyzer.ps1` | Analiza rutas largas de OneDrive/SharePoint en Windows. |
-| `M365-Version-History-Cleaner.ps1` | Analiza y limpia versiones históricas de archivos en SharePoint Online y OneDrive for Business. Incluye simulación, revalidación y auditoría. |
-| `M365-Legacy-UserId-Cleaner.ps1` | Detecta y repara entradas de usuarios legacy con User ID mismatch en `UserInfoList`. |
-| `M365-Recycle-Bin-and-Hold-Cleaner.ps1` | Gestiona la papelera de reciclaje de SharePoint/OneDrive y la Preservation Hold Library. |
-| `M365-Permissions-Scope-Manager.ps1` | Cuenta Unique Permission Scopes y permite restablecer la herencia de permisos. |
+| `OneDrive-Path-Analyzer.zsh` | Analyzes long OneDrive/SharePoint paths on macOS and generates a CSV with warnings or critical findings. Requires Zsh. |
+| `OneDrive-Path-Analyzer.ps1` | Analyzes long OneDrive/SharePoint paths on Windows. |
+| `M365-Version-History-Cleaner.ps1` | Analyzes and cleans historical file versions in SharePoint Online and OneDrive for Business. Includes simulation, revalidation, and auditing. |
+| `M365-Legacy-UserId-Cleaner.ps1` | Detects and repairs legacy user entries with User ID mismatches in `UserInfoList`. |
+| `M365-Recycle-Bin-and-Hold-Cleaner.ps1` | Manages the SharePoint/OneDrive recycle bins and the Preservation Hold Library. |
+| `M365-Permissions-Scope-Manager.ps1` | Counts unique permission scopes and can reset permission inheritance. |
 
-## Requisitos
+## Requirements
 
-- Windows: PowerShell 7.4 o superior.
-- macOS: Zsh y las utilidades estándar del sistema.
-- Herramientas de Microsoft 365: módulo `PnP.PowerShell` 3.2 o superior.
-- Una cuenta con permisos suficientes en el tenant y, según la operación, permisos de administrador de colección de sitios.
+- Windows: PowerShell 7.4 or later.
+- macOS: Zsh and standard system utilities.
+- Microsoft 365 tools: `PnP.PowerShell` module 3.2 or later.
+- An account with sufficient tenant permissions and, depending on the operation, Site Collection Administrator permissions.
 
-## Uso
+## Usage
 
-En Windows, abrir PowerShell 7.4+ en esta carpeta y ejecutar el script deseado:
+On Windows, open PowerShell 7.4+ in this folder and run the desired script:
 
 ```powershell
 ./M365-Version-History-Cleaner.ps1
@@ -32,19 +32,19 @@ En Windows, abrir PowerShell 7.4+ en esta carpeta y ejecutar el script deseado:
 ./OneDrive-Path-Analyzer.ps1
 ```
 
-En macOS:
+On macOS:
 
 ```zsh
 chmod +x ./OneDrive-Path-Analyzer.zsh
 ./OneDrive-Path-Analyzer.zsh
 ```
 
-Las herramientas destructivas comienzan en modo simulación cuando es posible. Revisa siempre el destino, el resumen y los reportes antes de confirmar una operación real.
+Destructive tools start in simulation mode whenever possible. Always review the target, summary, and reports before confirming a real operation.
 
-## Reportes y configuración
+## Reports and Configuration
 
-Los scripts de Microsoft 365 guardan configuración y reportes localmente en la carpeta de usuario correspondiente. Los analizadores de rutas generan CSV con los hallazgos detectados.
+The Microsoft 365 scripts store configuration and reports locally in the corresponding user directory. The path analyzers generate CSV files containing detected findings.
 
-## Aviso
+## Warning
 
-Estas herramientas pueden modificar permisos, usuarios legacy, versiones, elementos de papelera o contenido retenido. Úsalas primero en modo simulación y valida los resultados en un entorno controlado antes de ejecutarlas en producción.
+These tools can modify permissions, legacy users, versions, recycle bin items, or retained content. Use simulation mode first and validate the results in a controlled environment before running them in production.
