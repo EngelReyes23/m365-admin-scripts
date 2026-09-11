@@ -69,6 +69,76 @@ fi
 
 
 # ============================================================
+# IDIOMA
+# ============================================================
+
+LANGUAGE="es"
+
+localize() {
+    local value="$1"
+
+    if [[ "$LANGUAGE" == "en" ]]; then
+        value="${value//Diagnóstico de rutas largas para troubleshooting de sincronización./Long-path diagnostics for synchronization troubleshooting.}"
+        value="${value//Buscando ubicaciones sincronizadas.../Searching for synchronized locations...}"
+        value="${value//No se detectaron ubicaciones automáticamente./No locations were detected automatically.}"
+        value="${value//Puede introducir una ruta manual./You can enter a path manually.}"
+        value="${value//Ubicaciones detectadas/Detected locations}"
+        value="${value//Analizar todas/Analyze all}"
+        value="${value//Introducir ruta manual/Enter a path manually}"
+        value="${value//Ruta a analizar/Path to analyze}"
+        value="${value//No existen ubicaciones detectadas./No detected locations exist.}"
+        value="${value//La ruta indicada no existe./The specified path does not exist.}"
+        value="${value//Esta ubicación corresponde a contenido auxiliar./This location contains auxiliary content.}"
+        value="${value//Utilice M para introducir una ruta manual./Use M to enter a path manually.}"
+        value="${value//Selección no válida/Invalid selection}"
+        value="${value//Número fuera de rango/Number out of range}"
+        value="${value//Umbrales activos:/Active thresholds:}"
+        value="${value//Ruta de usuario más larga:/Longest user path:}"
+        value="${value//caracteres/characters}"
+        value="${value//bytes UTF-8/UTF-8 bytes}"
+        value="${value//RESULTADO:/RESULT:}"
+        value="${value//CRITICO/CRITICAL}"
+        value="${value//AVISO/WARNING}"
+        value="${value//REQUIERE REVISION/NEEDS REVIEW}"
+        value="${value//Se encontraron rutas que deberían corregirse./Paths that should be corrected were found.}"
+        value="${value//Se encontraron rutas cercanas a los límites./Paths near the limits were found.}"
+        value="${value//No se encontraron rutas cercanas o superiores a los límites./No paths near or over the limits were found.}"
+        value="${value//CSV generado:/CSV generated:}"
+        value="${value//No se generó CSV porque no existen rutas con AVISO o CRITICO./No CSV was generated because no WARNING or CRITICAL paths exist.}"
+        value="${value//ADVERTENCIA:/WARNING:}"
+        value="${value//Algunas carpetas no pudieron enumerarse./Some folders could not be enumerated.}"
+        value="${value//El resultado podría no cubrir el 100 % del contenido./The result may not cover 100% of the content.}"
+        value="${value//Análisis completado./Analysis completed.}"
+        value="${value//Analizadas:/Analyzed:}"
+        value="${value//Avisos:/Warnings:}"
+        value="${value//Criticas:/Critical:}"
+        value="${value//Shortcut / ubicación anidada/Nested shortcut / location}"
+    fi
+
+    print -r -- "$value"
+}
+
+echo() {
+    command echo "$(localize "$*")"
+}
+
+select_language() {
+    command printf "\nSelect language / Seleccione idioma:\n1. English\n2. Español\n"
+    while true; do
+        command printf "Choice / Opción: "
+        command read -r languageChoice
+        case "$languageChoice" in
+            1) LANGUAGE="en"; return 0 ;;
+            2) LANGUAGE="es"; return 0 ;;
+            *) command printf "Please choose 1 or 2 / Elija 1 o 2.\n" ;;
+        esac
+    done
+}
+
+select_language
+
+
+# ============================================================
 # INTERFAZ
 # ============================================================
 
@@ -89,9 +159,12 @@ banner() {
 
 section() {
 
+    local title
+    title="$(localize "$1")"
+
     echo ""
     echo "${C_CYAN}--------------------------------------------------------------------${C_RESET}"
-    echo "${C_CYAN} $1${C_RESET}"
+    echo "${C_CYAN} $title${C_RESET}"
     echo "${C_CYAN}--------------------------------------------------------------------${C_RESET}"
 
 }
@@ -102,6 +175,7 @@ status_line() {
     local label="$1"
     local value="$2"
     local color="$3"
+    label="$(localize "$label")"
 
     printf " %-30s: %s%s%s\n" \
         "$label" \
@@ -454,7 +528,7 @@ echo "  A            Analizar todas"
 echo "  M            Introducir ruta manual"
 echo ""
 
-printf " Selección: "
+printf "%s" "$(localize ' Selección: ')"
 IFS= read -r selection
 
 
@@ -488,7 +562,7 @@ elif [[ "$selection" == [Mm] ]]; then
 
     echo ""
 
-    printf " Ruta a analizar: "
+    printf "%s" "$(localize ' Ruta a analizar: ')"
     IFS= read -r manualPath
 
 
@@ -1008,9 +1082,12 @@ for (( rootIndex=1; rootIndex<=${#scanRoots[@]}; rootIndex++ )); do
 
         if (( totalScanned % 250 == 0 )); then
 
-            printf "\r Analizadas: %-10d | Avisos: %-6d | Criticas: %-6d" \
+            printf "\r %s %-10d | %s %-6d | %s %-6d" \
+                "$(localize 'Analizadas:')" \
                 "$totalScanned" \
+                "$(localize 'Avisos:')" \
                 "$warningCount" \
+                "$(localize 'Criticas:')" \
                 "$criticalCount"
 
         fi

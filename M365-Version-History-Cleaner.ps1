@@ -62,6 +62,55 @@ $script:ReportsPath = Join-Path $script:AppRoot "Reportes"
 $script:PnPConnection = $null
 $script:ThrottleEvents = [System.Collections.Generic.List[object]]::new()
 
+# =============================================================================
+# LANGUAGE
+# =============================================================================
+
+$script:Language = 'es'
+$script:UiTranslations = @(
+    @{ From = 'Inicio'; To = 'Home' }; @{ From = 'Finalizado'; To = 'Finished' }; @{ From = 'Error inesperado'; To = 'Unexpected error' }
+    @{ From = 'Detalles técnicos:'; To = 'Technical details:' }; @{ From = 'Configuración'; To = 'Settings' }; @{ From = 'Salir'; To = 'Exit' }
+    @{ From = 'Cancelar'; To = 'Cancel' }; @{ From = 'Volver'; To = 'Back' }; @{ From = 'Diagnóstico'; To = 'Diagnostics' }
+    @{ From = 'Autenticación'; To = 'Authentication' }; @{ From = 'Selecciona una opción'; To = 'Select an option' }
+    @{ From = 'Número'; To = 'Number' }; @{ From = 'Bibliotecas'; To = 'Libraries' }; @{ From = 'Biblioteca'; To = 'Library' }
+    @{ From = 'Sitio'; To = 'Site' }; @{ From = 'Modo SIMULACIÓN'; To = 'SIMULATION mode' }; @{ From = 'SIMULACIÓN'; To = 'SIMULATION' }
+    @{ From = 'REAL'; To = 'LIVE' }; @{ From = 'Presione ENTER para cerrar'; To = 'Press ENTER to close' }
+    @{ From = 'Enter para continuar'; To = 'Press Enter to continue' }; @{ From = 'No disponible'; To = 'Not available' }
+    @{ From = 'Analizando'; To = 'Analyzing' }; @{ From = 'Revalidando y eliminando versiones'; To = 'Revalidating and removing versions' }
+    @{ From = 'Versiones históricas'; To = 'Historical versions' }; @{ From = 'Archivos afectados'; To = 'Affected files' }
+    @{ From = 'Errores'; To = 'Errors' }; @{ From = 'Duración'; To = 'Duration' }; @{ From = 'Eliminadas'; To = 'Removed' }
+    @{ From = 'Omitidas por revalidación'; To = 'Skipped during revalidation' }; @{ From = 'Eventos de throttling'; To = 'Throttling events' }
+    @{ From = 'Escriba ELIMINAR para continuar.'; To = 'Type DELETE to continue.' }; @{ From = 'Confirmación'; To = 'Confirmation' }
+    @{ From = 'Sesión finalizada.'; To = 'Session finished.' }
+)
+function Get-LocalizedText {
+    param([AllowNull()][object]$Text)
+    if ($null -eq $Text) { return '' }; $result = [string]$Text
+    if ($script:Language -eq 'en') { foreach ($translation in $script:UiTranslations) { $result = $result.Replace($translation.From, $translation.To) } }
+    return $result
+}
+function Write-Host {
+    [CmdletBinding()] param([Parameter(Position=0,ValueFromRemainingArguments=$true)][object[]]$Object,[ConsoleColor]$ForegroundColor,[ConsoleColor]$BackgroundColor,[switch]$NoNewline)
+    $text = if ($null -eq $Object) { '' } else { ($Object | ForEach-Object { [string]$_ }) -join ' ' }
+    $parameters = @{ Object = (Get-LocalizedText $text) }
+    if ($PSBoundParameters.ContainsKey('ForegroundColor')) { $parameters.ForegroundColor = $ForegroundColor }; if ($PSBoundParameters.ContainsKey('BackgroundColor')) { $parameters.BackgroundColor = $BackgroundColor }; if ($NoNewline) { $parameters.NoNewline = $true }
+    Microsoft.PowerShell.Utility\Write-Host @parameters
+}
+function Read-Host {
+    param([Parameter(Position=0)][string]$Prompt,[switch]$AsSecureString)
+    $localizedPrompt = Get-LocalizedText $Prompt
+    if ($AsSecureString) { return Microsoft.PowerShell.Utility\Read-Host -Prompt $localizedPrompt -AsSecureString }
+    return Microsoft.PowerShell.Utility\Read-Host -Prompt $localizedPrompt
+}
+function Initialize-AppLanguage {
+    while ($true) {
+        Microsoft.PowerShell.Utility\Write-Host ''; Microsoft.PowerShell.Utility\Write-Host 'Select language / Seleccione idioma:'; Microsoft.PowerShell.Utility\Write-Host '1. English'; Microsoft.PowerShell.Utility\Write-Host '2. Español'
+        $choice = (Microsoft.PowerShell.Utility\Read-Host 'Choice / Opción').Trim()
+        if ($choice -eq '1') { $script:Language = 'en'; return }; if ($choice -eq '2') { $script:Language = 'es'; return }
+        Microsoft.PowerShell.Utility\Write-Host 'Please choose 1 or 2 / Elija 1 o 2.'
+    }
+}
+
 
 # ============================================================
 # INTERFAZ
@@ -2555,6 +2604,7 @@ function Show-AppMainMenu {
 # ============================================================
 
 try {
+    Initialize-AppLanguage
     try {
         $Host.UI.RawUI.WindowTitle = "$script:AppName $script:AppVersion"
     }

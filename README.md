@@ -22,6 +22,8 @@ A collection of interactive tools for troubleshooting, analyzing, and maintainin
 
 ## Usage
 
+Each script asks for the display language before starting. Select English or Spanish; the choice applies to the current run.
+
 On Windows, open PowerShell 7.4+ in this folder and run the desired script:
 
 ```powershell

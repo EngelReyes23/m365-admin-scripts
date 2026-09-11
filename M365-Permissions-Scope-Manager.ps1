@@ -51,6 +51,53 @@ $script:Target = $null
 $script:Ansi = $false
 
 # -----------------------------------------------------------------------------
+# LANGUAGE
+# -----------------------------------------------------------------------------
+
+$script:Language = 'es'
+$script:UiTranslations = @(
+    @{ From = 'Contexto'; To = 'Context' }; @{ From = 'Inicio'; To = 'Home' }; @{ From = 'Finalizado'; To = 'Finished' }
+    @{ From = 'Error inesperado'; To = 'Unexpected error' }; @{ From = 'Detalles técnicos:'; To = 'Technical details:' }
+    @{ From = 'Configuración'; To = 'Settings' }; @{ From = 'Salir'; To = 'Exit' }; @{ From = 'Volver'; To = 'Back' }
+    @{ From = 'Cancelar'; To = 'Cancel' }; @{ From = 'Diagnóstico'; To = 'Diagnostics' }; @{ From = 'autenticación'; To = 'authentication' }
+    @{ From = 'Seleccionar / cambiar sitio'; To = 'Select / change site' }; @{ From = 'Cambiar bibliotecas del sitio actual'; To = 'Change libraries for the current site' }
+    @{ From = 'Analizar Unique Permission Scopes'; To = 'Analyze Unique Permission Scopes' }; @{ From = 'Restablecer herencia'; To = 'Reset inheritance' }
+    @{ From = 'Gestionar Site Collection Admin'; To = 'Manage Site Collection Admin' }; @{ From = 'Seleccionar'; To = 'Select' }
+    @{ From = 'Sitio'; To = 'Site' }; @{ From = 'Bibliotecas'; To = 'Libraries' }; @{ From = 'Biblioteca'; To = 'Library' }
+    @{ From = 'SIMULACIÓN'; To = 'SIMULATION' }; @{ From = 'REAL'; To = 'LIVE' }; @{ From = 'Modo'; To = 'Mode' }
+    @{ From = 'Enter para continuar'; To = 'Press Enter to continue' }; @{ From = 'Escribe RESET para continuar'; To = 'Type RESET to continue' }
+    @{ From = 'Procesando'; To = 'Processing' }; @{ From = 'Leyendo elementos'; To = 'Reading items' }
+    @{ From = 'Correctos'; To = 'Successful' }; @{ From = 'Errores'; To = 'Errors' }; @{ From = 'Reporte'; To = 'Report' }
+)
+function Get-LocalizedText {
+    param([AllowNull()][object]$Text)
+    if ($null -eq $Text) { return '' }; $result = [string]$Text
+    if ($script:Language -eq 'en') { foreach ($translation in $script:UiTranslations) { $result = $result.Replace($translation.From, $translation.To) } }
+    return $result
+}
+function Write-Host {
+    [CmdletBinding()] param([Parameter(Position=0,ValueFromRemainingArguments=$true)][object[]]$Object,[ConsoleColor]$ForegroundColor,[ConsoleColor]$BackgroundColor,[switch]$NoNewline)
+    $text = if ($null -eq $Object) { '' } else { ($Object | ForEach-Object { [string]$_ }) -join ' ' }
+    $parameters = @{ Object = (Get-LocalizedText $text) }
+    if ($PSBoundParameters.ContainsKey('ForegroundColor')) { $parameters.ForegroundColor = $ForegroundColor }; if ($PSBoundParameters.ContainsKey('BackgroundColor')) { $parameters.BackgroundColor = $BackgroundColor }; if ($NoNewline) { $parameters.NoNewline = $true }
+    Microsoft.PowerShell.Utility\Write-Host @parameters
+}
+function Read-Host {
+    param([Parameter(Position=0)][string]$Prompt,[switch]$AsSecureString)
+    $localizedPrompt = Get-LocalizedText $Prompt
+    if ($AsSecureString) { return Microsoft.PowerShell.Utility\Read-Host -Prompt $localizedPrompt -AsSecureString }
+    return Microsoft.PowerShell.Utility\Read-Host -Prompt $localizedPrompt
+}
+function Initialize-AppLanguage {
+    while ($true) {
+        Microsoft.PowerShell.Utility\Write-Host ''; Microsoft.PowerShell.Utility\Write-Host 'Select language / Seleccione idioma:'; Microsoft.PowerShell.Utility\Write-Host '1. English'; Microsoft.PowerShell.Utility\Write-Host '2. Español'
+        $choice = (Microsoft.PowerShell.Utility\Read-Host 'Choice / Opción').Trim()
+        if ($choice -eq '1') { $script:Language = 'en'; return }; if ($choice -eq '2') { $script:Language = 'es'; return }
+        Microsoft.PowerShell.Utility\Write-Host 'Please choose 1 or 2 / Elija 1 o 2.'
+    }
+}
+
+# -----------------------------------------------------------------------------
 # TUI
 # -----------------------------------------------------------------------------
 
@@ -2187,6 +2234,7 @@ function Show-MainMenu {
 # Entry point
 # -----------------------------------------------------------------------------
 
+Initialize-AppLanguage
 Initialize-Terminal
 
 if (-not (Test-Path -LiteralPath $script:ConfigRoot)) {

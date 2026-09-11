@@ -37,6 +37,113 @@
 
 Clear-Host
 
+# ============================================================
+# IDIOMA
+# ============================================================
+
+$script:Language = 'es'
+$script:UiTranslations = @(
+    @{ From = 'Diagnóstico de rutas largas para troubleshooting de sincronización.'; To = 'Long-path diagnostics for synchronization troubleshooting.' }
+    @{ From = 'Buscando ubicaciones sincronizadas...'; To = 'Searching for synchronized locations...' }
+    @{ From = 'No se detectaron ubicaciones automáticamente.'; To = 'No locations were detected automatically.' }
+    @{ From = 'Puede introducir una ruta manual.'; To = 'You can enter a path manually.' }
+    @{ From = 'Ubicaciones detectadas'; To = 'Detected locations' }
+    @{ From = 'Analizar todas'; To = 'Analyze all' }
+    @{ From = 'Introducir ruta manual'; To = 'Enter a path manually' }
+    @{ From = 'Ruta a analizar'; To = 'Path to analyze' }
+    @{ From = 'No existen ubicaciones detectadas.'; To = 'No detected locations exist.' }
+    @{ From = 'La ruta indicada no existe.'; To = 'The specified path does not exist.' }
+    @{ From = 'Esta ubicación corresponde a contenido auxiliar y no será analizada.'; To = 'This location contains auxiliary content and will not be analyzed.' }
+    @{ From = 'Use M para introducir una ruta manual.'; To = 'Use M to enter a path manually.' }
+    @{ From = 'Selección no válida'; To = 'Invalid selection' }
+    @{ From = 'Número fuera de rango'; To = 'Number out of range' }
+    @{ From = 'Umbrales activos:'; To = 'Active thresholds:' }
+    @{ From = 'Ruta de usuario más larga:'; To = 'Longest user path:' }
+    @{ From = 'No se encontraron rutas cercanas o superiores a los límites.'; To = 'No paths near or over the limits were found.' }
+    @{ From = 'Se encontraron rutas cercanas a los límites.'; To = 'Paths near the limits were found.' }
+    @{ From = 'Se encontraron rutas que deberían corregirse.'; To = 'Paths that should be corrected were found.' }
+    @{ From = 'No se generó CSV porque no existen rutas con AVISO o CRITICO.'; To = 'No CSV was generated because no WARNING or CRITICAL paths exist.' }
+    @{ From = 'Análisis completado.'; To = 'Analysis completed.' }
+    @{ From = 'Algunas carpetas no pudieron enumerarse.'; To = 'Some folders could not be enumerated.' }
+    @{ From = 'El resultado podría no cubrir el 100 % del contenido.'; To = 'The result may not cover 100% of the content.' }
+    @{ From = 'CSV generado:'; To = 'CSV generated:' }
+    @{ From = 'ADVERTENCIA:'; To = 'WARNING:' }
+    @{ From = 'RESULTADO:'; To = 'RESULT:' }
+    @{ From = 'REQUIERE REVISION'; To = 'NEEDS REVIEW' }
+    @{ From = 'CRITICO'; To = 'CRITICAL' }
+    @{ From = 'AVISO'; To = 'WARNING' }
+    @{ From = 'caracteres'; To = 'characters' }
+    @{ From = 'bytes UTF-8'; To = 'UTF-8 bytes' }
+    @{ From = 'Inicio'; To = 'Home' }
+    @{ From = 'Finalizado'; To = 'Finished' }
+    @{ From = 'Error inesperado'; To = 'Unexpected error' }
+    @{ From = 'Detalles técnicos:'; To = 'Technical details:' }
+    @{ From = 'Selecciona una opción'; To = 'Select an option' }
+    @{ From = 'Selección'; To = 'Selection' }
+    @{ From = 'Número'; To = 'Number' }
+    @{ From = 'Cancelar'; To = 'Cancel' }
+    @{ From = 'Volver'; To = 'Back' }
+    @{ From = 'Configuración'; To = 'Settings' }
+    @{ From = 'Salir'; To = 'Exit' }
+    @{ From = 'Diagnóstico'; To = 'Diagnostics' }
+    @{ From = 'Autenticación'; To = 'Authentication' }
+    @{ From = 'Bibliotecas'; To = 'Libraries' }
+    @{ From = 'Biblioteca'; To = 'Library' }
+    @{ From = 'Sitio'; To = 'Site' }
+    @{ From = 'SIMULACIÓN'; To = 'SIMULATION' }
+    @{ From = 'REAL'; To = 'LIVE' }
+    @{ From = 'Enter para continuar'; To = 'Press Enter to continue' }
+    @{ From = 'Presione ENTER para cerrar'; To = 'Press ENTER to close' }
+)
+
+function Get-LocalizedText {
+    param([AllowNull()][object]$Text)
+    if ($null -eq $Text) { return '' }
+    $result = [string]$Text
+    if ($script:Language -eq 'en') {
+        foreach ($translation in $script:UiTranslations) { $result = $result.Replace($translation.From, $translation.To) }
+    }
+    return $result
+}
+
+function Write-Host {
+    [CmdletBinding()]
+    param(
+        [Parameter(Position = 0, ValueFromRemainingArguments = $true)][object[]]$Object,
+        [ConsoleColor]$ForegroundColor,
+        [ConsoleColor]$BackgroundColor,
+        [switch]$NoNewline
+    )
+    $text = if ($null -eq $Object) { '' } else { ($Object | ForEach-Object { [string]$_ }) -join ' ' }
+    $parameters = @{ Object = (Get-LocalizedText $text) }
+    if ($PSBoundParameters.ContainsKey('ForegroundColor')) { $parameters.ForegroundColor = $ForegroundColor }
+    if ($PSBoundParameters.ContainsKey('BackgroundColor')) { $parameters.BackgroundColor = $BackgroundColor }
+    if ($NoNewline) { $parameters.NoNewline = $true }
+    Microsoft.PowerShell.Utility\Write-Host @parameters
+}
+
+function Read-Host {
+    param([Parameter(Position = 0)][string]$Prompt, [switch]$AsSecureString)
+    $localizedPrompt = Get-LocalizedText $Prompt
+    if ($AsSecureString) { return Microsoft.PowerShell.Utility\Read-Host -Prompt $localizedPrompt -AsSecureString }
+    return Microsoft.PowerShell.Utility\Read-Host -Prompt $localizedPrompt
+}
+
+function Initialize-AppLanguage {
+    while ($true) {
+        Microsoft.PowerShell.Utility\Write-Host ''
+        Microsoft.PowerShell.Utility\Write-Host 'Select language / Seleccione idioma:'
+        Microsoft.PowerShell.Utility\Write-Host '1. English'
+        Microsoft.PowerShell.Utility\Write-Host '2. Español'
+        $choice = (Microsoft.PowerShell.Utility\Read-Host 'Choice / Opción').Trim()
+        if ($choice -eq '1') { $script:Language = 'en'; return }
+        if ($choice -eq '2') { $script:Language = 'es'; return }
+        Microsoft.PowerShell.Utility\Write-Host 'Please choose 1 or 2 / Elija 1 o 2.'
+    }
+}
+
+Initialize-AppLanguage
+
 
 # ============================================================
 # CONFIGURACIÓN
