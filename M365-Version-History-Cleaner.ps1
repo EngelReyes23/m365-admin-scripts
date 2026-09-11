@@ -87,6 +87,32 @@ function Get-LocalizedText {
     param([AllowNull()][object]$Text)
     if ($null -eq $Text) { return '' }; $result = [string]$Text
     if ($script:Language -eq 'en') {
+        $phrases = @(
+            @{ From = 'Selecciona una opción'; To = 'Select an option' }; @{ From = 'Nueva limpieza'; To = 'New cleanup' }
+            @{ From = 'No seleccionado'; To = 'Not selected' }; @{ From = 'No configurado'; To = 'Not configured' }; @{ From = 'No instalado'; To = 'Not installed' }
+            @{ From = 'Destino'; To = 'Target' }; @{ From = 'CONFIGURADA'; To = 'CONFIGURED' }; @{ From = 'NO CONFIGURADA'; To = 'NOT CONFIGURED' }
+            @{ From = 'Activado'; To = 'Enabled' }; @{ From = 'Desactivado'; To = 'Disabled' }; @{ From = 'Sí'; To = 'Yes' }; @{ From = 'SÍ'; To = 'YES' }
+            @{ From = 'Limpieza segura del historial de versiones'; To = 'Safe version-history cleanup' }
+            @{ From = 'SharePoint Online o OneDrive for Business'; To = 'SharePoint Online or OneDrive for Business' }
+            @{ From = 'Buscar sitio en el tenant'; To = 'Search for a site in the tenant' }; @{ From = 'Introducir URL directamente'; To = 'Enter URL directly' }
+            @{ From = 'Usar último sitio'; To = 'Use last site' }; @{ From = 'Usar último OneDrive'; To = 'Use last OneDrive' }
+            @{ From = 'Para un sitio ya conocido'; To = 'For a known site' }; @{ From = 'Para un OneDrive ya conocido'; To = 'For a known OneDrive' }
+            @{ From = 'Detecta automáticamente SPO u OneDrive por la URL'; To = 'Automatically detects SPO or OneDrive from the URL' }
+            @{ From = 'Selecciona el origen que quieres analizar.'; To = 'Select the source you want to analyze.' }
+            @{ From = 'Conservar N históricas + versión actual'; To = 'Keep N historical versions + current version' }
+            @{ From = 'Conservar N versiones totales'; To = 'Keep N total versions' }
+            @{ From = 'Versión actual: conservar'; To = 'Current version: keep' }; @{ From = 'versiones históricas: conservar'; To = 'historical versions: keep' }
+            @{ From = 'Las versiones históricas más antiguas serán elegibles para limpieza.'; To = 'The oldest historical versions will be eligible for cleanup.' }
+            @{ From = 'Se revalidará cada versión antes de eliminarla.'; To = 'Each version will be revalidated before removal.' }
+            @{ From = 'Si el historial cambió después del análisis, la versión se omitirá si deja de ser elegible.'; To = 'If the history changed after analysis, the version will be skipped if it is no longer eligible.' }
+            @{ From = 'Las versiones se enviarán a la Papelera de reciclaje.'; To = 'Versions will be sent to the recycle bin.' }
+            @{ From = 'Escriba ELIMINAR para continuar.'; To = 'Type DELETE to continue.' }; @{ From = 'Confirmación'; To = 'Confirmation' }
+            @{ From = 'No se ha modificado ningún archivo.'; To = 'No files were modified.' }
+            @{ From = 'La estimación no incluye'; To = 'The estimate does not include' }; @{ From = 'versión(es) sin tamaño disponible.'; To = 'version(s) without an available size.' }
+            @{ From = 'Cada versión será revalidada contra el historial actual.'; To = 'Each version will be revalidated against the current history.' }
+            @{ From = 'Configuración de throttling guardada.'; To = 'Throttling settings saved.' }
+        )
+        foreach ($translation in $phrases) { $result = $result.Replace($translation.From, $translation.To) }
         foreach ($translation in $script:UiTranslations) { $result = $result.Replace($translation.From, $translation.To) }
         $common = @(
             @{ From = 'Selecciona'; To = 'Select' }; @{ From = 'Seleccione'; To = 'Select' }; @{ From = 'Introducir'; To = 'Enter' }; @{ From = 'Introduzca'; To = 'Enter' }

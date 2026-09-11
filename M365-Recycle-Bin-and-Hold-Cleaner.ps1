@@ -81,6 +81,33 @@ function Get-LocalizedText {
     param([AllowNull()][object]$Text)
     if ($null -eq $Text) { return '' }; $result = [string]$Text
     if ($script:Language -eq 'en') {
+        $phrases = @(
+            @{ From = 'Selecciona una opción'; To = 'Select an option' }; @{ From = 'Seleccionar destino'; To = 'Select target' }
+            @{ From = 'No seleccionado'; To = 'Not selected' }; @{ From = 'No configurado'; To = 'Not configured' }; @{ From = 'No instalado'; To = 'Not installed' }
+            @{ From = 'Destino'; To = 'Target' }; @{ From = 'CONFIGURADA'; To = 'CONFIGURED' }; @{ From = 'NO CONFIGURADA'; To = 'NOT CONFIGURED' }
+            @{ From = 'Activado'; To = 'Enabled' }; @{ From = 'Desactivado'; To = 'Disabled' }; @{ From = 'Sí'; To = 'Yes' }; @{ From = 'SÍ'; To = 'YES' }
+            @{ From = 'Primero selecciona un sitio SharePoint o OneDrive.'; To = 'First select a SharePoint or OneDrive site.' }
+            @{ From = 'Mueve los elementos al segundo nivel; no los elimina permanentemente.'; To = 'Moves items to the second stage; does not permanently delete them.' }
+            @{ From = 'Elimina permanentemente elementos del segundo nivel.'; To = 'Permanently deletes items from the second stage.' }
+            @{ From = 'Primero mueve el primer nivel al segundo y después elimina del segundo; el límite se aplica por nivel.'; To = 'First moves the first stage to the second, then deletes from the second; the limit applies per stage.' }
+            @{ From = 'Detecta dinámicamente la biblioteca; no modifica políticas de retención.'; To = 'Dynamically detects the library; does not modify retention policies.' }
+            @{ From = 'Simulación es el modo seguro.'; To = 'Simulation is the safe mode.' }; @{ From = 'Cambiar a modo REAL'; To = 'Switch to LIVE mode' }
+            @{ From = 'Cambiar a modo SIMULACIÓN'; To = 'Switch to SIMULATION mode' }; @{ From = 'Operación cancelada.'; To = 'Operation canceled.' }
+            @{ From = 'Confirmación'; To = 'Confirmation' }; @{ From = 'ELIMINAR'; To = 'DELETE' }; @{ From = 'ELIMINAR PHL'; To = 'DELETE PHL' }
+            @{ From = 'Los elementos del primer nivel se moverán al segundo nivel; no se eliminarán permanentemente.'; To = 'First-stage items will be moved to the second stage; they will not be permanently deleted.' }
+            @{ From = 'Los elementos del segundo nivel se eliminarán permanentemente.'; To = 'Second-stage items will be permanently deleted.' }
+            @{ From = 'No hay elementos en este nivel dentro del límite solicitado.'; To = 'There are no items in this stage within the requested limit.' }
+            @{ From = 'La operación terminó con errores. Revisa el reporte.'; To = 'The operation finished with errors. Review the report.' }
+            @{ From = 'Simulación completada. No se movió ningún elemento.'; To = 'Simulation completed. No items were moved.' }
+            @{ From = 'Simulación completada. No se eliminó ningún elemento.'; To = 'Simulation completed. No items were deleted.' }
+            @{ From = 'Los elementos fueron movidos al segundo nivel de la papelera.'; To = 'Items were moved to the second recycle-bin stage.' }
+            @{ From = 'Los elementos del segundo nivel fueron eliminados permanentemente.'; To = 'Second-stage items were permanently deleted.' }
+            @{ From = 'No se encontró Preservation Hold Library en este sitio.'; To = 'Preservation Hold Library was not found on this site.' }
+            @{ From = 'Puede no existir, estar vacía/no provisionada o no ser accesible con la identidad actual.'; To = 'It may not exist, be empty/not provisioned, or be inaccessible to the current identity.' }
+            @{ From = 'Eliminar contenido de Preservation Hold Library puede verse bloqueado por políticas de retención.'; To = 'Deleting Preservation Hold Library content may be blocked by retention policies.' }
+            @{ From = 'La herramienta no deshabilita ni modifica políticas de cumplimiento o retención.'; To = 'The tool does not disable or modify compliance or retention policies.' }
+        )
+        foreach ($translation in $phrases) { $result = $result.Replace($translation.From, $translation.To) }
         foreach ($translation in $script:UiTranslations) { $result = $result.Replace($translation.From, $translation.To) }
         $common = @(
             @{ From = 'Selecciona'; To = 'Select' }; @{ From = 'Seleccione'; To = 'Select' }; @{ From = 'Introducir'; To = 'Enter' }; @{ From = 'Introduzca'; To = 'Enter' }

@@ -93,6 +93,30 @@ function Get-LocalizedText {
     param([AllowNull()][object]$Text)
     if ($null -eq $Text) { return '' }; $result = [string]$Text
     if ($script:Language -eq 'en') {
+        $phrases = @(
+            @{ From = 'Selecciona una opción'; To = 'Select an option' }; @{ From = 'Seleccionar / validar usuario afectado'; To = 'Select / validate affected user' }
+            @{ From = 'No seleccionado'; To = 'Not selected' }; @{ From = 'No configurado'; To = 'Not configured' }; @{ From = 'No instalado'; To = 'Not installed' }
+            @{ From = 'Destino'; To = 'Target' }; @{ From = 'CONFIGURADA'; To = 'CONFIGURED' }; @{ From = 'NO CONFIGURADA'; To = 'NOT CONFIGURED' }
+            @{ From = 'Activado'; To = 'Enabled' }; @{ From = 'Desactivado'; To = 'Disabled' }; @{ From = 'Sí'; To = 'Yes' }; @{ From = 'SÍ'; To = 'YES' }
+            @{ From = 'Ejecutar reparación tenant'; To = 'Run tenant repair' }; @{ From = 'Cambiar a modo REAL'; To = 'Switch to LIVE mode' }
+            @{ From = 'Cambiar a SIMULACIÓN'; To = 'Switch to SIMULATION' }; @{ From = 'Aplicación Entra / autenticación PnP'; To = 'Entra application / PnP authentication' }
+            @{ From = 'Sitios SPO protegidos'; To = 'Protected SPO sites' }; @{ From = 'Recuperar / retirar grants temporales'; To = 'Recover / remove temporary grants' }
+            @{ From = 'Escribe REPARAR para continuar'; To = 'Type REPAIR to continue' }; @{ From = '¿Iniciar el análisis?'; To = 'Start the analysis?' }
+            @{ From = 'MODO REAL: se eliminarán únicamente mismatches con SID actual válido y comparación inequívoca.'; To = 'LIVE MODE: only mismatches with a valid current SID and unambiguous comparison will be removed.' }
+            @{ From = 'SIMULACIÓN no elimina UserInfoList; los grants administrativos sí son reales.'; To = 'SIMULATION does not remove UserInfoList entries; administrative grants are still real.' }
+            @{ From = 'Selecciona primero el usuario afectado.'; To = 'Select the affected user first.' }
+            @{ From = 'Identidad actual confirmada.'; To = 'Current identity confirmed.' }; @{ From = 'Validando la identidad ACTUAL del usuario...'; To = 'Validating the user CURRENT identity...' }
+            @{ From = 'No hay una sesión pendiente de limpieza.'; To = 'There is no pending cleanup session.' }
+            @{ From = 'Recuperación finalizada.'; To = 'Recovery finished.' }; @{ From = 'Operación cancelada.'; To = 'Operation canceled.' }
+            @{ From = 'No se encontraron sitios.'; To = 'No sites were found.' }; @{ From = 'No hay sitios protegidos configurados.'; To = 'No protected sites are configured.' }
+            @{ From = 'Sitio agregado a la lista protegida.'; To = 'Site added to the protected list.' }; @{ From = 'Sitio retirado de la lista protegida.'; To = 'Site removed from the protected list.' }
+            @{ From = 'No se recomienda procesar hosts raíz ni colecciones de sistema.'; To = 'Processing root hosts or system collections is not recommended.' }
+            @{ From = 'Esta espera se aplica UNA sola vez después de completar todos los grants.'; To = 'This wait is applied ONCE after all grants are completed.' }
+            @{ From = 'Los sitios que todavía devuelvan 401/403 se reintentan individualmente.'; To = 'Sites that still return 401/403 are retried individually.' }
+            @{ From = 'Validando la identidad ACTUAL del usuario...'; To = 'Validating the user CURRENT identity...' }
+            @{ From = 'El SID actual está vacío. Se bloquea la ejecución para impedir falsos positivos.'; To = 'The current SID is empty. Execution is blocked to prevent false positives.' }
+        )
+        foreach ($translation in $phrases) { $result = $result.Replace($translation.From, $translation.To) }
         foreach ($translation in $script:UiTranslations) { $result = $result.Replace($translation.From, $translation.To) }
         $common = @(
             @{ From = 'Selecciona'; To = 'Select' }; @{ From = 'Seleccione'; To = 'Select' }; @{ From = 'Introducir'; To = 'Enter' }; @{ From = 'Introduzca'; To = 'Enter' }

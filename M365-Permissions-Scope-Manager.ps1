@@ -73,6 +73,39 @@ function Get-LocalizedText {
     param([AllowNull()][object]$Text)
     if ($null -eq $Text) { return '' }; $result = [string]$Text
     if ($script:Language -eq 'en') {
+        $phrases = @(
+            @{ From = 'Selecciona una opción'; To = 'Select an option' }
+            @{ From = 'No seleccionado'; To = 'Not selected' }; @{ From = 'No configurado'; To = 'Not configured' }; @{ From = 'No instalado'; To = 'Not installed' }
+            @{ From = 'Destino'; To = 'Target' }; @{ From = 'Actuales'; To = 'Current' }; @{ From = 'Seleccionadas'; To = 'Selected' }
+            @{ From = 'CONFIGURADA'; To = 'CONFIGURED' }; @{ From = 'NO CONFIGURADA'; To = 'NOT CONFIGURED' }; @{ From = 'Activado'; To = 'Enabled' }; @{ From = 'Desactivado'; To = 'Disabled' }
+            @{ From = 'Sí'; To = 'Yes' }; @{ From = 'SÍ'; To = 'YES' }
+            @{ From = 'SharePoint u OneDrive; al elegirlo se seleccionan sus bibliotecas.'; To = 'SharePoint or OneDrive; its libraries are selected when chosen.' }
+            @{ From = 'Disponible después de seleccionar un sitio.'; To = 'Available after selecting a site.' }
+            @{ From = 'Solo lectura · muestra recomendado 5,000 y máximo 50,000 por biblioteca · genera CSV.'; To = 'Read-only · shows the recommended 5,000 and maximum 50,000 per library · generates a CSV.' }
+            @{ From = 'Respeta Dry-run y procesa las bibliotecas seleccionadas.'; To = 'Respects dry-run mode and processes the selected libraries.' }
+            @{ From = 'El modo simulación es el valor seguro.'; To = 'Simulation mode is the safe option.' }
+            @{ From = 'Cambiar a modo REAL'; To = 'Switch to LIVE mode' }; @{ From = 'Cambiar a modo SIMULACIÓN'; To = 'Switch to SIMULATION mode' }
+            @{ From = 'El modo REAL puede'; To = 'LIVE mode can' }; @{ From = 'Modo REAL:'; To = 'LIVE mode:' }; @{ From = 'Modo SIMULACIÓN'; To = 'SIMULATION mode' }
+            @{ From = 'Escribe RESET para continuar'; To = 'Type RESET to continue' }; @{ From = 'Operación cancelada.'; To = 'Operation canceled.' }
+            @{ From = 'Primero selecciona un sitio SharePoint o OneDrive.'; To = 'First select a SharePoint or OneDrive site.' }
+            @{ From = 'Primero selecciona un destino y al menos una biblioteca.'; To = 'First select a target and at least one library.' }
+            @{ From = 'No se encontraron bibliotecas de documentos'; To = 'No document libraries were found' }
+            @{ From = 'No se pudieron actualizar las bibliotecas:'; To = 'The libraries could not be updated:' }
+            @{ From = 'La selección de bibliotecas fue actualizada sin cambiar de sitio.'; To = 'The library selection was updated without changing the site.' }
+            @{ From = 'La operación terminó con errores; revisa el CSV.'; To = 'The operation finished with errors; review the CSV.' }
+            @{ From = 'Simulación completada sin modificar permisos.'; To = 'Simulation completed without modifying permissions.' }
+            @{ From = 'Restablecimiento completado.'; To = 'Reset completed.' }
+            @{ From = 'Dry-run activo: se detectarán los cambios, pero no se modificará ningún permiso.'; To = 'Dry-run is active: changes will be detected, but no permissions will be modified.' }
+            @{ From = 'Modo REAL: se eliminarán asignaciones de permisos únicas y los objetos volverán a heredar.'; To = 'LIVE mode: unique permission assignments will be removed and objects will inherit again.' }
+            @{ From = 'Seleccionar destino'; To = 'Select target' }; @{ From = 'Cambiar bibliotecas'; To = 'Change libraries' }
+            @{ From = 'Registrar una nueva aplicación Entra'; To = 'Register a new Entra application' }
+            @{ From = 'Usar una aplicación existente'; To = 'Use an existing application' }
+            @{ From = 'Validar aplicación configurada'; To = 'Validate configured application' }
+            @{ From = 'Gestionar aplicación Entra / Client ID'; To = 'Manage Entra application / Client ID' }
+            @{ From = 'Probar conexión al centro de administración'; To = 'Test connection to the admin center' }
+            @{ From = 'Limpiar login persistido de PnP'; To = 'Clear persisted PnP login' }
+        )
+        foreach ($translation in $phrases) { $result = $result.Replace($translation.From, $translation.To) }
         foreach ($translation in $script:UiTranslations) { $result = $result.Replace($translation.From, $translation.To) }
         $common = @(
             @{ From = 'Selecciona'; To = 'Select' }; @{ From = 'Seleccione'; To = 'Select' }; @{ From = 'Introducir'; To = 'Enter' }; @{ From = 'Introduzca'; To = 'Enter' }
