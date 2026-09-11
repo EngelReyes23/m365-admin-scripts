@@ -102,6 +102,24 @@ function Get-LocalizedText {
     $result = [string]$Text
     if ($script:Language -eq 'en') {
         foreach ($translation in $script:UiTranslations) { $result = $result.Replace($translation.From, $translation.To) }
+        $common = @(
+            @{ From = 'Raices físicas a recorrer'; To = 'Physical roots to scan' }; @{ From = 'LISTO PARA ANALIZAR'; To = 'READY TO ANALYZE' }
+            @{ From = 'SELECCIONAR UBICACIONES'; To = 'SELECT LOCATIONS' }; @{ From = 'RUTAS QUE REQUIEREN ATENCION'; To = 'PATHS REQUIRING ATTENTION' }
+            @{ From = 'Selecciona'; To = 'Select' }; @{ From = 'Seleccione'; To = 'Select' }; @{ From = 'Introducir'; To = 'Enter' }
+            @{ From = 'Introduzca'; To = 'Enter' }; @{ From = 'Ubicación'; To = 'Location' }; @{ From = 'ubicación'; To = 'location' }
+            @{ From = 'Ruta'; To = 'Path' }; @{ From = 'rutas'; To = 'paths' }; @{ From = 'Rutas'; To = 'Paths' }
+            @{ From = 'Estado'; To = 'Status' }; @{ From = 'Motivo'; To = 'Reason' }; @{ From = 'Tipo'; To = 'Type' }
+            @{ From = 'Nombre'; To = 'Name' }; @{ From = 'Longitud'; To = 'Length' }; @{ From = 'analizadas'; To = 'analyzed' }
+            @{ From = 'analizar'; To = 'analyze' }; @{ From = 'Analizar'; To = 'Analyze' }; @{ From = 'automáticamente'; To = 'automatically' }
+            @{ From = 'desde'; To = 'from' }; @{ From = 'sobre'; To = 'over' }; @{ From = 'cerca de'; To = 'near' }
+            @{ From = 'individual'; To = 'individual' }; @{ From = 'Contenido'; To = 'Content' }; @{ From = 'auxiliar'; To = 'auxiliary' }
+            @{ From = 'No se'; To = 'No ' }; @{ From = 'se encontraron'; To = 'were found' }; @{ From = 'se generó'; To = 'was generated' }
+            @{ From = 'podría no cubrir'; To = 'may not cover' }; @{ From = 'La ruta indicada'; To = 'The specified path' }
+            @{ From = 'no existe'; To = 'does not exist' }; @{ From = 'no será analizada'; To = 'will not be analyzed' }
+            @{ From = 'selección'; To = 'selection' }; @{ From = 'Número'; To = 'Number' }; @{ From = 'Ejemplo'; To = 'Example' }
+            @{ From = 'Varias'; To = 'Multiple' }; @{ From = 'Críticas'; To = 'Critical' }; @{ From = 'crítico'; To = 'critical' }
+        )
+        foreach ($translation in $common) { $result = $result.Replace($translation.From, $translation.To) }
     }
     return $result
 }
@@ -127,6 +145,17 @@ function Read-Host {
     $localizedPrompt = Get-LocalizedText $Prompt
     if ($AsSecureString) { return Microsoft.PowerShell.Utility\Read-Host -Prompt $localizedPrompt -AsSecureString }
     return Microsoft.PowerShell.Utility\Read-Host -Prompt $localizedPrompt
+}
+
+function Write-Progress {
+    [CmdletBinding()] param([int]$Id = 0,[string]$Activity,[string]$Status,[int]$PercentComplete,[int]$SecondsRemaining,[switch]$Completed)
+    $parameters = @{ Id = $Id }
+    if ($PSBoundParameters.ContainsKey('Activity')) { $parameters.Activity = Get-LocalizedText $Activity }
+    if ($PSBoundParameters.ContainsKey('Status')) { $parameters.Status = Get-LocalizedText $Status }
+    if ($PSBoundParameters.ContainsKey('PercentComplete')) { $parameters.PercentComplete = $PercentComplete }
+    if ($PSBoundParameters.ContainsKey('SecondsRemaining')) { $parameters.SecondsRemaining = $SecondsRemaining }
+    if ($Completed) { $parameters.Completed = $true }
+    Microsoft.PowerShell.Utility\Write-Progress @parameters
 }
 
 function Initialize-AppLanguage {

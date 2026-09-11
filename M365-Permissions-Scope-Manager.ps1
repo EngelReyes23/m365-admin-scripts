@@ -72,7 +72,23 @@ $script:UiTranslations = @(
 function Get-LocalizedText {
     param([AllowNull()][object]$Text)
     if ($null -eq $Text) { return '' }; $result = [string]$Text
-    if ($script:Language -eq 'en') { foreach ($translation in $script:UiTranslations) { $result = $result.Replace($translation.From, $translation.To) } }
+    if ($script:Language -eq 'en') {
+        foreach ($translation in $script:UiTranslations) { $result = $result.Replace($translation.From, $translation.To) }
+        $common = @(
+            @{ From = 'Selecciona'; To = 'Select' }; @{ From = 'Seleccione'; To = 'Select' }; @{ From = 'Introducir'; To = 'Enter' }; @{ From = 'Introduzca'; To = 'Enter' }
+            @{ From = 'Buscar'; To = 'Search' }; @{ From = 'Usar'; To = 'Use' }; @{ From = 'Cambiar'; To = 'Change' }; @{ From = 'Guardar'; To = 'Save' }
+            @{ From = 'Validar'; To = 'Validate' }; @{ From = 'Registrar'; To = 'Register' }; @{ From = 'Obtener'; To = 'Get' }; @{ From = 'Restablecer'; To = 'Reset' }
+            @{ From = 'Analizar'; To = 'Analyze' }; @{ From = 'Análisis'; To = 'Analysis' }; @{ From = 'Procesando'; To = 'Processing' }; @{ From = 'Procesados'; To = 'Processed' }
+            @{ From = 'Aplicación'; To = 'Application' }; @{ From = 'Conexión'; To = 'Connection' }; @{ From = 'establecida'; To = 'established' }
+            @{ From = 'Sitios'; To = 'Sites' }; @{ From = 'Sitio'; To = 'Site' }; @{ From = 'Bibliotecas'; To = 'Libraries' }; @{ From = 'Biblioteca'; To = 'Library' }
+            @{ From = 'Permisos'; To = 'Permissions' }; @{ From = 'herencia'; To = 'inheritance' }; @{ From = 'Herencia'; To = 'Inheritance' }
+            @{ From = 'Estado'; To = 'Status' }; @{ From = 'Resultado'; To = 'Result' }; @{ From = 'Resumen'; To = 'Summary' }; @{ From = 'Reporte'; To = 'Report' }
+            @{ From = 'Error'; To = 'Error' }; @{ From = 'Errores'; To = 'Errors' }; @{ From = 'Correctos'; To = 'Successful' }; @{ From = 'Límite'; To = 'Limit' }
+            @{ From = 'Máximo'; To = 'Maximum' }; @{ From = 'Recomendado'; To = 'Recommended' }; @{ From = 'Operación cancelada'; To = 'Operation canceled' }
+            @{ From = 'No hay'; To = 'There are no' }; @{ From = 'No se encontraron'; To = 'No ... were found' }; @{ From = 'No se pudo'; To = 'Could not' }
+        )
+        foreach ($translation in $common) { $result = $result.Replace($translation.From, $translation.To) }
+    }
     return $result
 }
 function Write-Host {
@@ -87,6 +103,16 @@ function Read-Host {
     $localizedPrompt = Get-LocalizedText $Prompt
     if ($AsSecureString) { return Microsoft.PowerShell.Utility\Read-Host -Prompt $localizedPrompt -AsSecureString }
     return Microsoft.PowerShell.Utility\Read-Host -Prompt $localizedPrompt
+}
+function Write-Progress {
+    [CmdletBinding()] param([int]$Id = 0,[string]$Activity,[string]$Status,[int]$PercentComplete,[int]$SecondsRemaining,[switch]$Completed)
+    $parameters = @{ Id = $Id }
+    if ($PSBoundParameters.ContainsKey('Activity')) { $parameters.Activity = Get-LocalizedText $Activity }
+    if ($PSBoundParameters.ContainsKey('Status')) { $parameters.Status = Get-LocalizedText $Status }
+    if ($PSBoundParameters.ContainsKey('PercentComplete')) { $parameters.PercentComplete = $PercentComplete }
+    if ($PSBoundParameters.ContainsKey('SecondsRemaining')) { $parameters.SecondsRemaining = $SecondsRemaining }
+    if ($Completed) { $parameters.Completed = $true }
+    Microsoft.PowerShell.Utility\Write-Progress @parameters
 }
 function Initialize-AppLanguage {
     while ($true) {
