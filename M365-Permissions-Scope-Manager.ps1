@@ -1,4 +1,4 @@
-#requires -Version 7.4
+﻿#requires -Version 7.4
 <#
 .SYNOPSIS
     M365 Permissions Scope Manager
@@ -43,7 +43,13 @@ else {
 }
 
 $script:ConfigRoot = $toolHome
-$script:ConfigPath = Join-Path $script:ConfigRoot 'settings.json'
+$script:LegacyConfigPath = Join-Path $script:ConfigRoot 'settings.json'
+$script:ConfigPath = if ([string]::IsNullOrWhiteSpace($env:M365_PNP_TOOLKIT_HOME)) {
+    $script:LegacyConfigPath
+}
+else {
+    Join-Path $script:ConfigRoot (($script:AppName -replace ' ', '-') + '.settings.json')
+}
 $script:DefaultReportFolder = Join-Path $script:ConfigRoot 'reports'
 
 $script:Settings = $null
@@ -73,6 +79,254 @@ $script:UiTranslations = @(
     @{ From = 'Procesando'; To = 'Processing' }; @{ From = 'Leyendo elementos'; To = 'Reading items' }
     @{ From = 'Correctos'; To = 'Successful' }; @{ From = 'Errores'; To = 'Errors' }; @{ From = 'Reporte'; To = 'Report' }
 )
+# BEGIN M365 TOOLKIT CORE
+# Canonical embedded source; repository maintenance scripts synchronize this block.
+# No initialization, external modules or tenant operations at import time.
+function Get-LocalizedString {
+    param([Parameter(Mandatory)][string]$Key, [object[]]$Values = @())
+    $language = if ($script:Language -eq 'en') { 'en' } else { 'es' }
+    if (-not $script:ToolStrings[$language].ContainsKey($Key)) { throw "Unknown tool localization key: $Key" }
+    return $script:ToolStrings[$language][$Key] -f $Values
+}
+
+function Get-ToolkitString {
+    param([Parameter(Mandatory)][string]$Key, [object[]]$Arguments = @())
+    $catalog = @{
+        en = @{
+            Invalid = 'Invalid selection.'; Select = 'Select an option'; Back = 'Back'; Cancel = 'Cancel'
+            PendingAdmin = 'Remove the pending temporary administrator before changing the target.'
+            Continue = 'Press Enter to continue'; YesNo = 'Answer Y or N.'
+            ConfirmPhrase = 'Type {0} to continue (Enter to cancel)'; Repair = 'REPAIR'; Delete = 'DELETE'; Move = 'MOVE'; DeletePHL = 'DELETE PHL'
+            Runtime = 'PowerShell 7.4+ (Core) is required. Run this tool using pwsh.'
+            Missing = 'PnP.PowerShell {0}+ is required. Installation uses CurrentUser; administrator elevation is not required.'
+            Install = 'Install the compatible PnP.PowerShell version now?'
+            Update = 'Check/install a PnP.PowerShell update for CurrentUser now?'
+            Register = 'Register a new Entra application now? Administrator consent may be required.'
+            Ready = 'PnP.PowerShell ready: {0}'; ModuleError = 'PnP.PowerShell installation/import failed: {0}'
+            ModuleAbsent = 'The compatible module was not found after installation.'
+        }
+        es = @{
+            Invalid = 'Selección no válida.'; Select = 'Selecciona una opción'; Back = 'Volver'; Cancel = 'Cancelar'
+            PendingAdmin = 'Retira el administrador temporal pendiente antes de cambiar de destino.'
+            Continue = 'Presiona Enter para continuar'; YesNo = 'Responde S o N.'
+            ConfirmPhrase = 'Escribe {0} para continuar (Enter para cancelar)'; Repair = 'REPARAR'; Delete = 'ELIMINAR'; Move = 'MOVER'; DeletePHL = 'ELIMINAR PHL'
+            Runtime = 'Se requiere PowerShell 7.4+ (Core). Ejecuta esta herramienta con pwsh.'
+            Missing = 'Se requiere PnP.PowerShell {0}+. Se instalará para CurrentUser; no requiere elevación de administrador.'
+            Install = '¿Instalar ahora la versión compatible de PnP.PowerShell?'
+            Update = '¿Buscar/instalar ahora una actualización de PnP.PowerShell para CurrentUser?'
+            Register = '¿Registrar ahora una aplicación Entra nueva? Puede requerir consentimiento administrativo.'
+            Ready = 'PnP.PowerShell listo: {0}'; ModuleError = 'Falló la instalación/importación de PnP.PowerShell: {0}'
+            ModuleAbsent = 'No se encontró el módulo compatible después de instalarlo.'
+        }
+    }
+    $language = if ($script:Language -eq 'en') { 'en' } else { 'es' }
+    if (-not $catalog[$language].ContainsKey($Key)) { throw "Unknown localization key: $Key" }
+    return $catalog[$language][$Key] -f $Arguments
+}
+
+function Write-ToolkitText {
+    param([AllowNull()][AllowEmptyString()][string]$Text, [string]$Style = 'Normal', [switch]$NoNewline)
+    $colors = @{ Normal='Gray'; Muted='DarkGray'; Primary='Cyan'; Info='Cyan'; Success='Green'; Warning='Yellow'; Danger='Red'; Accent='Magenta' }
+    $color = if ($colors.ContainsKey($Style)) { $colors[$Style] } else { 'Gray' }
+    # Qualified cmdlet avoids the legacy translation wrappers changing paths/data.
+    Microsoft.PowerShell.Utility\Write-Host -Object $Text -ForegroundColor $color -NoNewline:$NoNewline
+}
+
+function Get-ToolkitWidth {
+    $width = 72
+    try { if ($Host.UI.RawUI.WindowSize.Width -gt 2) { $width = [Math]::Min(84, $Host.UI.RawUI.WindowSize.Width - 2) } } catch { }
+    return [Math]::Max(1, $width)
+}
+
+function Write-ToolkitHeader {
+    param([string]$Name, [string]$Version, [string]$Section)
+    try { if (-not [Console]::IsOutputRedirected) { Clear-Host } } catch { }
+    $width = Get-ToolkitWidth
+    Write-ToolkitText ('=' * $width) Accent
+    Write-ToolkitText "$Name  v$Version" Primary
+    if ($Section) { Write-ToolkitText "[$Section]" Muted }
+    Write-ToolkitText ('-' * $width) Muted
+    Write-ToolkitText ''
+}
+
+function Write-ToolkitField {
+    param([string]$Name, [AllowNull()]$Value, [string]$Style = 'Normal')
+    $display = if ($null -eq $Value -or [string]::IsNullOrWhiteSpace([string]$Value)) { '-' } else { [string]$Value }
+    if ($Name.Length -gt 24) {
+        Write-ToolkitText ("  {0}" -f $Name) Muted
+        Write-ToolkitText (' ' * 27) Muted -NoNewline
+    }
+    else { Write-ToolkitText ('  {0,-24} ' -f $Name) Muted -NoNewline }
+    Write-ToolkitText $display $Style
+}
+
+function Write-ToolkitStatus {
+    param([string]$Level, [string]$Message)
+    $style = switch ($Level) { 'Ok' {'Success'}; 'Info' {'Info'}; 'Warn' {'Warning'}; default {'Danger'} }
+    $label = switch ($Level) { 'Ok' {'OK'}; 'Info' {'INFO'}; 'Warn' {'WARNING'}; default {'ERROR'} }
+    Write-ToolkitText "  [$label] $Message" $style
+}
+
+function Read-ToolkitYesNo {
+    param([string]$Prompt, [bool]$Default = $false)
+    $yes = if ($script:Language -eq 'en') { 'Y' } else { 'S' }
+    $hint = if ($Default) { "$yes/n" } else { "$($yes.ToLowerInvariant())/N" }
+    while ($true) {
+        $answer = Read-ToolkitInput "  $Prompt [$hint]"
+        if (-not $answer) { return $Default }
+        if ($answer -match '^(s|si|sí|y|yes)$') { return $true }
+        if ($answer -match '^(n|no)$') { return $false }
+        Write-ToolkitStatus Error (Get-ToolkitString YesNo)
+    }
+}
+
+function Initialize-ToolkitLanguage {
+    param([string]$Default = 'en', [string]$Name, [string]$Version)
+    $script:Language = if ($Default -in @('en','es')) { $Default } else { 'en' }
+    Write-ToolkitHeader $Name $Version 'Language / Idioma'
+    Write-ToolkitText '  [1] English' Primary
+    Write-ToolkitText ''
+    Write-ToolkitText '  [2] Español' Primary
+    Write-ToolkitText ''
+    $defaultKey = if ($script:Language -eq 'en') { '1' } else { '2' }
+    while ($true) {
+        $choice = Read-ToolkitInput "  Language / Idioma [$defaultKey]"
+        if (-not $choice) { return }
+        if ($choice -eq '1') { $script:Language = 'en'; return }
+        if ($choice -eq '2') { $script:Language = 'es'; return }
+        Write-ToolkitStatus Error (Get-ToolkitString Invalid)
+    }
+}
+
+function Test-ToolkitClientId {
+    param([AllowNull()][string]$ClientId)
+    $parsed = [guid]::Empty
+    return [guid]::TryParseExact($ClientId, 'D', [ref]$parsed) -and $parsed -ne [guid]::Empty
+}
+
+function Read-ToolkitInput {
+    param([string]$Prompt)
+    return (Microsoft.PowerShell.Utility\Read-Host $Prompt).Trim()
+}
+
+function Get-ToolkitRegistrationClientId {
+    param([AllowNull()]$Result)
+    foreach ($item in @($Result)) {
+        if ($null -eq $item) { continue }
+        if (($item -is [string] -or $item -is [guid]) -and (Test-ToolkitClientId ([string]$item))) { return [string]$item }
+        foreach ($name in @('ClientId','AppId','ApplicationId')) {
+            $value = if ($item -is [Collections.IDictionary]) { $item[$name] } elseif ($item.PSObject.Properties[$name]) { $item.$name } else { $null }
+            if (Test-ToolkitClientId ([string]$value)) { return [string]$value }
+        }
+    }
+    return ''
+}
+
+function Confirm-ToolkitAction {
+    param([ValidateSet('Repair','Delete','Move','DeletePHL')][string]$Action)
+    $phrase = Get-ToolkitString $Action
+    $answer = Read-ToolkitInput ('  ' + (Get-ToolkitString ConfirmPhrase @($phrase)))
+    return $answer -ceq $phrase
+}
+
+function Read-ToolkitLegacyMenu {
+    param([array]$Items, [ValidateSet('Key','Object','Indexed','Legacy')][string]$Mode,
+        [string]$Title, [string[]]$Description = @(), [scriptblock]$RenderBody,
+        [string]$Prompt, [switch]$AllowBack, [string]$ZeroLabel = 'Volver')
+    if ($Title) {
+        $name = if (Get-Variable AppName -Scope Script -ErrorAction SilentlyContinue) { $script:AppName } else { 'OneDrive / SharePoint Path Analyzer' }
+        $version = if (Get-Variable AppVersion -Scope Script -ErrorAction SilentlyContinue) { $script:AppVersion } else { '2.0' }
+        Write-ToolkitHeader $name $version (Get-LocalizedText $Title)
+    }
+    foreach ($line in $Description) { Write-ToolkitText (Get-LocalizedText $line) Muted }
+    if ($Description.Count) { Write-ToolkitText '' }
+    if ($RenderBody) { & $RenderBody; Write-ToolkitText '' }
+    $map = @{}
+    $index = 0
+    foreach ($item in $Items) {
+        $value = if ($item -is [Collections.IDictionary]) { $item['Value'] } elseif ($item.PSObject.Properties['Value']) { $item.Value } else { '' }
+        if ($Mode -in @('Key','Object')) { $key = [string]$item.Key }
+        elseif ($Mode -eq 'Indexed' -and $value -in @('Back','Exit')) { $key = '0' }
+        else { $index++; $key = [string]$index }
+        if ($key -notmatch '^\d+$' -or $map.ContainsKey($key)) { throw (Get-ToolkitString Invalid) }
+        $hintName = if ($Mode -in @('Key','Object')) { 'Description' } else { 'Hint' }
+        $hint = if ($item -is [Collections.IDictionary]) { [string]$item[$hintName] } elseif ($item.PSObject.Properties[$hintName]) { [string]$item.$hintName } else { '' }
+        $map[$key] = if ($Mode -eq 'Object') { [pscustomobject]@{Key=$key;Label=[string]$item.Label;Description=$hint;Value=[string]$value} } else { $item }
+        Write-ToolkitText ('  [{0}] {1}' -f $key,(Get-LocalizedText ([string]$item.Label))) Primary
+        if ($hint) { Write-ToolkitText ('      {0}' -f (Get-LocalizedText $hint)) Muted }
+        Write-ToolkitText ''
+    }
+    if (($AllowBack -or $Mode -eq 'Legacy') -and -not $map.ContainsKey('0')) {
+        $map['0'] = if ($Mode -eq 'Object') { [pscustomobject]@{Key='0';Label=$ZeroLabel;Description='';Value='Back'} } else { $null }
+        Write-ToolkitText ('  [0] {0}' -f (Get-LocalizedText $ZeroLabel)) Muted
+        Write-ToolkitText ''
+    }
+    $caption = if ($Prompt) { Get-LocalizedText $Prompt } else { Get-ToolkitString Select }
+    while ($true) {
+        $choice = Read-ToolkitInput ('  ' + $caption)
+        if ($map.ContainsKey($choice)) {
+            if ($Mode -eq 'Key') { return $choice }
+            return $map[$choice]
+        }
+        Write-ToolkitStatus Error (Get-ToolkitString Invalid)
+    }
+}
+
+function Get-ToolkitSiteEndpoint {
+    param([AllowNull()][string]$Url)
+    $uri = $null
+    if (-not [uri]::TryCreate($Url, [UriKind]::Absolute, [ref]$uri) -or $uri.Scheme -ne 'https' -or $uri.UserInfo -or -not $uri.IsDefaultPort) { return 'Invalid' }
+    if ($uri.DnsSafeHost -notmatch '^[a-z0-9][a-z0-9-]*\.sharepoint\.(com|us|cn)$') { return 'Invalid' }
+    if ($uri.DnsSafeHost -match '-admin\.sharepoint\.') { return 'Admin' }
+    if ($uri.DnsSafeHost -match '-my\.sharepoint\.') {
+        if ($uri.AbsolutePath -match '^/personal/[^/]+(?:/|$)') { return 'OneDrive' }
+        return 'OneDriveSystem'
+    }
+    return 'SharePoint'
+}
+
+function Get-ToolkitCompatiblePnP {
+    param([version]$MinimumVersion = '3.2.0')
+    Get-Module -Name PnP.PowerShell -ListAvailable -ErrorAction Stop |
+        Where-Object { $_.Version -ge $MinimumVersion -and ($null -eq $_.PowerShellVersion -or $_.PowerShellVersion -le $PSVersionTable.PSVersion) } |
+        Sort-Object Version -Descending | Select-Object -First 1
+}
+
+function Initialize-ToolkitPnP {
+    param([version]$MinimumVersion = '3.2.0', [switch]$Update)
+    if ($PSVersionTable.PSEdition -ne 'Core' -or $PSVersionTable.PSVersion -lt [version]'7.4') {
+        Write-ToolkitStatus Error (Get-ToolkitString Runtime)
+        return $false
+    }
+    try {
+        $module = Get-ToolkitCompatiblePnP $MinimumVersion
+        if ($null -eq $module -or $Update) {
+            Write-ToolkitStatus Warn (Get-ToolkitString Missing @($MinimumVersion))
+            $prompt = if ($Update) { Get-ToolkitString Update } else { Get-ToolkitString Install }
+            if (-not (Read-ToolkitYesNo $prompt)) { return $false }
+            # Pin the suite's tested minimum instead of silently upgrading the runtime requirement.
+            if ($Update) {
+                Install-Module -Name PnP.PowerShell -MinimumVersion $MinimumVersion -Scope CurrentUser -Force -AllowClobber -ErrorAction Stop
+            }
+            else {
+                Install-Module -Name PnP.PowerShell -RequiredVersion $MinimumVersion -Scope CurrentUser -Force -AllowClobber -ErrorAction Stop
+            }
+            $module = Get-ToolkitCompatiblePnP $MinimumVersion
+            if ($null -eq $module) { throw (Get-ToolkitString ModuleAbsent) }
+        }
+        Import-Module -Name $module.Path -ErrorAction Stop
+        $loaded = Get-Module -Name PnP.PowerShell | Where-Object { $_.Version -eq $module.Version } | Select-Object -First 1
+        if ($null -eq $loaded) { throw (Get-ToolkitString ModuleAbsent) }
+        Write-ToolkitStatus Ok (Get-ToolkitString Ready @($loaded.Version))
+        return $true
+    }
+    catch {
+        Write-ToolkitStatus Error (Get-ToolkitString ModuleError @($_.Exception.Message))
+        return $false
+    }
+}
+
+# END M365 TOOLKIT CORE
 function Get-LocalizedText {
     param([AllowNull()][object]$Text)
     if ($null -eq $Text) { return '' }; $result = [string]$Text
@@ -304,23 +558,8 @@ function Write-Progress {
     Microsoft.PowerShell.Utility\Write-Progress @parameters
 }
 function Initialize-AppLanguage {
-    Clear-Host
-    Write-Host ''
-    Write-Styled $script:AppName Primary
-    Write-Styled "v$script:AppVersion" Muted
-    Write-Styled ('─' * 72) Muted
-    Write-Host ''
-
-    while ($true) {
-        Write-Styled 'Select language / Seleccione idioma' Primary
-        Write-Styled '  1  English' Accent
-        Write-Styled '  2  Español' Accent
-        Write-Host ''
-
-        $choice = (Microsoft.PowerShell.Utility\Read-Host 'Choice / Opción').Trim()
-        if ($choice -eq '1') { $script:Language = 'en'; return }; if ($choice -eq '2') { $script:Language = 'es'; return }
-        Write-Styled 'Please choose 1 or 2 / Elija 1 o 2.' Warning
-    }
+    param([string]$Default = 'en')
+    Initialize-ToolkitLanguage -Default $Default -Name $script:AppName -Version $script:AppVersion
 }
 
 # -----------------------------------------------------------------------------
@@ -369,54 +608,18 @@ function Write-Styled {
         [ValidateSet('Normal','Muted','Primary','Success','Warning','Danger','Accent')][string]$Style = 'Normal',
         [switch]$NoNewline
     )
-
-    $Text = Get-LocalizedText $Text
-
-    $prefix = ''
-    $suffix = ''
-    $fallback = 'Gray'
-
-    switch ($Style) {
-        'Normal'  { $prefix = ''; $fallback = 'Gray' }
-        'Muted'   { $prefix = Get-Ansi Dim; $fallback = 'DarkGray' }
-        'Primary' { $prefix = (Get-Ansi Bold) + (Get-Ansi Cyan); $fallback = 'Cyan' }
-        'Success' { $prefix = Get-Ansi Green; $fallback = 'Green' }
-        'Warning' { $prefix = Get-Ansi Yellow; $fallback = 'Yellow' }
-        'Danger'  { $prefix = Get-Ansi Red; $fallback = 'Red' }
-        'Accent'  { $prefix = Get-Ansi Magenta; $fallback = 'Magenta' }
-    }
-
-    if ($script:Ansi) {
-        $suffix = Get-Ansi Reset
-        if ($NoNewline) { Write-Host "$prefix$Text$suffix" -NoNewline }
-        else { Write-Host "$prefix$Text$suffix" }
-    }
-    else {
-        if ($NoNewline) { Write-Host $Text -ForegroundColor $fallback -NoNewline }
-        else { Write-Host $Text -ForegroundColor $fallback }
-    }
+    Write-ToolkitText (Get-LocalizedText $Text) $Style -NoNewline:$NoNewline
 }
 
 function Write-AppHeader {
     param([string]$Context = '')
-
-    $width = 72
-    try {
-        $width = [Math]::Min(76, [Math]::Max(28, $Host.UI.RawUI.WindowSize.Width - 2))
-    }
-    catch { $width = 72 }
-
-    Clear-Host
-    Write-Styled ('═' * $width) Accent
-    Write-Styled "$script:AppName  v$script:AppVersion" Primary
-    if ($Context) { Write-Styled "[$Context]" Muted }
-    Write-Styled ('─' * $width) Muted
+    Write-ToolkitHeader $script:AppName $script:AppVersion (Get-LocalizedText $Context)
 }
 
 function Write-Section {
     param([Parameter(Mandatory)][string]$Title)
-    Write-Host ''
-    Write-Styled $Title Primary
+    Write-ToolkitText ''
+    Write-ToolkitText (Get-LocalizedText $Title) Primary
 }
 
 function Write-Status {
@@ -424,13 +627,7 @@ function Write-Status {
         [ValidateSet('Info','Ok','Warn','Error')][string]$Level,
         [Parameter(Mandatory)][string]$Message
     )
-
-    switch ($Level) {
-        'Info'  { Write-Styled "● $Message" Primary }
-        'Ok'    { Write-Styled "✓ $Message" Success }
-        'Warn'  { Write-Styled "! $Message" Warning }
-        'Error' { Write-Styled "× $Message" Danger }
-    }
+    Write-ToolkitStatus $Level (Get-LocalizedText $Message)
 }
 
 function Write-Field {
@@ -440,15 +637,11 @@ function Write-Field {
         [ValidateSet('Normal','Muted','Primary','Success','Warning','Danger','Accent')]
         [string]$Style = 'Normal'
     )
-
-    if ($null -eq $Value -or [string]::IsNullOrWhiteSpace([string]$Value)) { $Value = '—' }
-    Write-Styled ('{0,-18}' -f $Name) Muted -NoNewline
-    Write-Styled ([string]$Value) $Style
+    Write-ToolkitField (Get-LocalizedText $Name) $Value $Style
 }
 
 function Pause-Tui {
-    Write-Host ''
-    [void](Read-Host 'Enter para continuar')
+    [void](Read-ToolkitInput ('  ' + (Get-ToolkitString Continue)))
 }
 
 function Get-ScopeStatus {
@@ -514,85 +707,7 @@ function Read-MenuChoice {
         [switch]$AllowBack,
         [scriptblock]$RenderBody
     )
-
-    $normalizedItems = @(
-        foreach ($item in $Items) {
-            $key = ''
-            $label = ''
-            $description = ''
-
-            if ($item -is [System.Collections.IDictionary]) {
-                if ($item.Contains('Key'))         { $key = [string]$item['Key'] }
-                if ($item.Contains('Label'))       { $label = [string]$item['Label'] }
-                if ($item.Contains('Description')) { $description = [string]$item['Description'] }
-            }
-            else {
-                $keyProperty = $item.PSObject.Properties['Key']
-                $labelProperty = $item.PSObject.Properties['Label']
-                $descriptionProperty = $item.PSObject.Properties['Description']
-
-                if ($null -ne $keyProperty)         { $key = [string]$keyProperty.Value }
-                if ($null -ne $labelProperty)       { $label = [string]$labelProperty.Value }
-                if ($null -ne $descriptionProperty) { $description = [string]$descriptionProperty.Value }
-            }
-
-            if ([string]::IsNullOrWhiteSpace($key)) {
-                throw 'Cada elemento de menú debe contener una propiedad Key.'
-            }
-
-            if ([string]::IsNullOrWhiteSpace($label)) {
-                throw "El elemento de menú '$key' debe contener una propiedad Label."
-            }
-
-            [pscustomobject]@{
-                Key = $key
-                Label = $label
-                Description = $description
-            }
-        }
-    )
-
-    if ($null -ne $RenderBody) {
-        & $RenderBody
-        Write-Host ''
-    }
-
-    foreach ($item in $normalizedItems) {
-        $numberStyle = if ($item.Key -eq '0') { 'Muted' } else { 'Primary' }
-        Write-Styled ("{0,3}" -f $item.Key) $numberStyle -NoNewline
-        Write-Host "  $($item.Label)"
-
-        if (-not [string]::IsNullOrWhiteSpace($item.Description)) {
-            Write-Styled ("     $($item.Description)") Muted
-        }
-        else {
-            Write-Styled '     Sin descripción adicional.' Muted
-        }
-
-        Write-Host ''
-    }
-
-    $valid = @($normalizedItems | ForEach-Object { [string]$_.Key })
-
-    if ($AllowBack -and -not ($valid -contains '0')) {
-        Write-Styled '  0' Muted -NoNewline
-        Write-Host '  Volver'
-        Write-Styled '     Regresa al menú anterior.' Muted
-        $valid += '0'
-    }
-
-    Write-Styled ('─' * 32) Muted
-
-    while ($true) {
-        Write-Host ''
-        $choice = (Read-Host $Prompt).Trim()
-
-        if ($valid -contains $choice) {
-            return $choice
-        }
-
-        Write-Status Error 'Opción inválida.'
-    }
+    return Read-ToolkitLegacyMenu -Items $Items -Mode Key -Prompt $Prompt -AllowBack:$AllowBack -RenderBody $RenderBody
 }
 
 function Read-TextValue {
@@ -627,15 +742,7 @@ function Read-TextValue {
 
 function Read-YesNo {
     param([Parameter(Mandatory)][string]$Prompt, [bool]$Default = $false)
-
-    $hint = if ($Default) { 'S/n' } else { 's/N' }
-    while ($true) {
-        $answer = (Read-Host "$Prompt [$hint]").Trim()
-        if ([string]::IsNullOrWhiteSpace($answer)) { return $Default }
-        if ($answer -match '^(s|si|sí|y|yes)$') { return $true }
-        if ($answer -match '^(n|no)$') { return $false }
-        Write-Status Error 'Responde S o N.'
-    }
+    return Read-ToolkitYesNo (Get-LocalizedText $Prompt) $Default
 }
 
 function Select-SingleByNumber {
@@ -843,16 +950,19 @@ function Merge-Settings {
 }
 
 function Load-Settings {
-    if (-not (Test-Path -LiteralPath $script:ConfigPath)) { return New-DefaultSettings }
+    $readPath = if (Test-Path -LiteralPath $script:ConfigPath) { $script:ConfigPath } else { $script:LegacyConfigPath }
+
+    if (-not (Test-Path -LiteralPath $readPath)) { return New-DefaultSettings }
 
     try {
-        $loaded = Get-Content -LiteralPath $script:ConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json
+        $loaded = Get-Content -LiteralPath $readPath -Raw -Encoding UTF8 | ConvertFrom-Json
         return Merge-Settings $loaded
     }
     catch {
         Write-Status Warn "No se pudo leer settings.json: $($_.Exception.Message)"
         return New-DefaultSettings
     }
+
 }
 
 function Save-Settings {
@@ -979,39 +1089,7 @@ function Get-InstalledPnPModule {
 
 function Ensure-PnPModule {
     param([switch]$OfferInstall)
-
-    if (-not (Test-PowerShellVersion)) { return $false }
-
-    $pnp = Get-InstalledPnPModule
-    if ($pnp -and [version]$pnp.Version -ge $script:MinimumPnPVersion) {
-        Import-Module PnP.PowerShell -MinimumVersion $script:MinimumPnPVersion -ErrorAction Stop
-        return $true
-    }
-
-    if (-not $OfferInstall) {
-        if (-not $pnp) { Write-Status Error 'PnP.PowerShell no está instalado.' }
-        else { Write-Status Error "PnP.PowerShell $($pnp.Version) es menor que $script:MinimumPnPVersion." }
-        return $false
-    }
-
-    Write-Status Warn 'PnP.PowerShell debe instalarse o actualizarse.'
-    if (-not (Read-YesNo '¿Instalar/actualizar ahora?' $true)) { return $false }
-
-    try {
-        if ($pnp) {
-            Install-Module PnP.PowerShell -Scope CurrentUser -Force -AllowClobber -MinimumVersion $script:MinimumPnPVersion
-        }
-        else {
-            Install-Module PnP.PowerShell -Scope CurrentUser -Force -AllowClobber -MinimumVersion $script:MinimumPnPVersion
-        }
-        Import-Module PnP.PowerShell -MinimumVersion $script:MinimumPnPVersion -Force
-        Write-Status Ok "PnP.PowerShell listo: $((Get-Module PnP.PowerShell).Version)"
-        return $true
-    }
-    catch {
-        Write-Status Error "No se pudo instalar/importar PnP.PowerShell: $($_.Exception.Message)"
-        return $false
-    }
+    return Initialize-ToolkitPnP -MinimumVersion '3.2.0'
 }
 
 function Ensure-TenantConfigured {
@@ -1041,18 +1119,7 @@ function Test-ClientIdFormat {
         [AllowNull()]
         [string]$ClientId
     )
-
-    if ([string]::IsNullOrWhiteSpace($ClientId)) {
-        return $false
-    }
-
-    return $ClientId -match (
-        '^[0-9A-Fa-f]{8}-' +
-        '[0-9A-Fa-f]{4}-' +
-        '[0-9A-Fa-f]{4}-' +
-        '[0-9A-Fa-f]{4}-' +
-        '[0-9A-Fa-f]{12}$'
-    )
+    return Test-ToolkitClientId $ClientId
 }
 
 function Connect-M365SiteWithClientId {
@@ -1219,34 +1286,14 @@ function Register-NewPnPApp {
     ) Muted
 
     try {
+        if (-not (Read-ToolkitYesNo (Get-ToolkitString Register))) { return $false }
         $result = Register-PnPEntraIDAppForInteractiveLogin `
             -ApplicationName $appName `
             -Tenant $script:Settings.Tenant `
             -SharePointDelegatePermissions 'AllSites.FullControl' `
             -ErrorAction Stop
 
-        $candidate = $null
-
-        if ($null -ne $result) {
-            foreach ($resultItem in ($result | ForEach-Object { $_ })) {
-                foreach ($name in @('ClientId','AppId','ApplicationId','Id')) {
-                    $property = $resultItem.PSObject.Properties[$name]
-
-                    if ($null -ne $property -and $property.Value) {
-                        $possible = [string]$property.Value
-
-                        if (Test-ClientIdFormat -ClientId $possible) {
-                            $candidate = $possible
-                            break
-                        }
-                    }
-                }
-
-                if (Test-ClientIdFormat -ClientId $candidate) {
-                    break
-                }
-            }
-        }
+        $candidate = Get-ToolkitRegistrationClientId -Result $result
 
         if (-not (Test-ClientIdFormat -ClientId $candidate)) {
             Write-Status Warn 'PnP no devolvió el Client ID de forma utilizable.'
@@ -1567,12 +1614,11 @@ function Get-TenantSites {
     $sites = @(Get-PnPTenantSite -IncludeOneDriveSites -Detailed -Connection $adminConnection -ErrorAction Stop)
 
     if ($Kind -eq 'OneDrive') {
-        return @($sites | Where-Object { $_.Url -match '-my\.sharepoint\.com/personal/' } | Sort-Object Owner, Url)
+        return @($sites | Where-Object { (Get-ToolkitSiteEndpoint ([string]$_.Url)) -eq 'OneDrive' } | Sort-Object Owner, Url)
     }
 
     return @($sites | Where-Object {
-        $_.Url -notmatch '-my\.sharepoint\.com/personal/' -and
-        $_.Url -notmatch '-admin\.sharepoint\.com/?$'
+        (Get-ToolkitSiteEndpoint ([string]$_.Url)) -eq 'SharePoint'
     } | Sort-Object Title, Url)
 }
 
@@ -1699,6 +1745,11 @@ function Resolve-Libraries {
 }
 
 function Select-Target {
+    if ($null -ne $script:TemporarySiteAdmin) {
+        Write-Status Warn (Get-ToolkitString PendingAdmin)
+        Pause-Tui
+        return
+    }
     Write-AppHeader 'Seleccionar destino'
 
     if (-not (Ensure-PnPModule -OfferInstall)) { Pause-Tui; return }
@@ -1746,7 +1797,7 @@ function Select-Target {
     if (-not $site) { return }
 
     $siteUrl = [string]$site.Url
-    if ([string]::IsNullOrWhiteSpace($siteUrl)) {
+    if ([string]::IsNullOrWhiteSpace($siteUrl) -or (Get-ToolkitSiteEndpoint $siteUrl) -ne $kind) {
         Write-Status Error 'El sitio seleccionado no tiene una URL válida.'
         Pause-Tui
         return
