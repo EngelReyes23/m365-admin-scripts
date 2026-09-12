@@ -1,12 +1,27 @@
-# Archivos generados por Windows
+# OS-generated files
 desktop.ini
+.DS_Store
 
-# Configuración y reportes locales
+# Local configuration and reports
 *.csv
 reports/
 Reportes/
 .m365-*/
+config.local.json
+*.local.json
 
-# Archivos temporales
+# Environment files and local secrets
+.env
+.env.*
+!.env.example
+secrets.json
+*.token
+*.pfx
+*.p12
+*.pem
+*.key
+*.clixml
+
+# Temporary files and logs
 *.tmp
 *.log
